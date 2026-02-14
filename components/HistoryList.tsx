@@ -26,6 +26,7 @@ interface UserWord {
 interface HistoryListProps {
     history: UserWord[];
 }
+// test auto deploy
 
 const getPOSColor = (pos: string) => {
     const p = pos.toLowerCase();
