@@ -69,10 +69,6 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
         );
     }
 
-    const handleNextStep = () => {
-        if (step === 'STUDY') setStep('REVEAL');
-        else if (step === 'REVEAL') setStep('SCORE');
-    };
 
     const handleSubmit = async () => {
         setLoading(true);
