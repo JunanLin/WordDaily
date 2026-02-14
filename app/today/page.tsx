@@ -28,13 +28,13 @@ export default async function TodayPage() {
     return (
         <div className="space-y-6 pb-20">
             <div className="space-y-1">
-                <h2 className="text-2xl font-bold font-outfit">Today's List</h2>
+                <h2 className="text-2xl font-bold font-outfit">Today&apos;s List</h2>
                 <p className="text-white/40 text-sm">Words you added today</p>
             </div>
 
             <div className="space-y-3">
                 {words && words.length > 0 ? (
-                    words.map((uw: any) => (
+                    words.map((uw) => (
                         <div key={uw.id} className="card py-4 px-5 flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <h4 className="text-lg font-bold">{uw.words.lemma}</h4>

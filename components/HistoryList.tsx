@@ -2,24 +2,39 @@
 
 import { useState } from 'react';
 import { format, parseISO, isSameDay } from 'date-fns';
-import { ChevronRight, Trash2, Calendar, BookOpen, Plus, X } from 'lucide-react';
+import { ChevronRight, Trash2, Calendar, Plus, X } from 'lucide-react';
 import { deleteUserWord } from '@/lib/actions/delete-word';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 
+interface UserWord {
+    id: string;
+    created_at: string;
+    next_review_at: string;
+    words: {
+        lemma: string;
+        phonetic?: string;
+        word_meanings: Array<{
+            part_of_speech: string;
+            chinese_translation: string;
+            english_definition: string;
+            example_sentence?: string;
+        }>;
+    };
+}
+
 interface HistoryListProps {
-    history: any[];
+    history: UserWord[];
 }
 
 export default function HistoryList({ history }: HistoryListProps) {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [selectedWord, setSelectedWord] = useState<any | null>(null);
+    const [selectedWord, setSelectedWord] = useState<UserWord | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const router = useRouter();
 
     // Group history by date
-    const groupedHistory = history.reduce((acc: any, item) => {
+    const groupedHistory = history.reduce((acc: Record<string, UserWord[]>, item) => {
         const date = format(parseISO(item.created_at), 'yyyy-MM-dd');
         if (!acc[date]) acc[date] = [];
         acc[date].push(item);
@@ -100,7 +115,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                     </div>
 
                     <div className="space-y-3">
-                        {groupedHistory[selectedDate].map((uw: any) => (
+                        {groupedHistory[selectedDate].map((uw) => (
                             <div
                                 key={uw.id}
                                 onClick={() => setSelectedWord(uw)}
@@ -152,7 +167,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                                 </div>
 
                                 <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 scrollbar-none">
-                                    {selectedWord.words.word_meanings.map((m: any, i: number) => (
+                                    {selectedWord.words.word_meanings.map((m, i) => (
                                         <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[10px] font-bold uppercase py-0.5 px-1.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
@@ -165,7 +180,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                                             </p>
                                             {m.example_sentence && (
                                                 <p className="text-xs text-indigo-400/60 italic border-l-2 border-indigo-400/20 pl-2">
-                                                    "{m.example_sentence}"
+                                                    &quot;{m.example_sentence}&quot;
                                                 </p>
                                             )}
                                         </div>

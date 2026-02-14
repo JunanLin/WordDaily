@@ -25,10 +25,8 @@ export async function submitReview(userWordId: string, score: number, direction:
         userWord.interval_days
     )
 
-    // 3. Update memory score (rolling average or last score?)
+    // 3. Update memory score
     // User says memory_score is in priority formula. 
-    // Let's use a simple rolling average or just the latest if simple.
-    const newMemoryScore = (userWord.memory_score + score) / (userWord.times_seen > 1 ? 2 : 1)
 
     // 4. Update user_words
     const { error: updateError } = await supabase

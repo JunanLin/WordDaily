@@ -32,7 +32,7 @@ export async function ingestWord(rawWord: string) {
     }
 
     // 1. Check if word already exists in public.words
-    let { data: wordRecord, error: wordFetchError } = await supabase
+    let { data: wordRecord } = await supabase
         .from('words')
         .select('id')
         .eq('lemma', lemma)

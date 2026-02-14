@@ -24,8 +24,8 @@ export default function AddWordPage() {
             setWord('');
             // Optional: redirect to dashboard after a delay
             setTimeout(() => router.push('/'), 2000);
-        } catch (error: any) {
-            setResult({ success: false, message: error.message || 'Something went wrong' });
+        } catch (error: unknown) {
+            setResult({ success: false, message: (error as Error).message || 'Something went wrong' });
         } finally {
             setLoading(false);
         }
@@ -78,7 +78,7 @@ export default function AddWordPage() {
                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-white/30 mb-2">Pro Tip</h4>
                     <p className="text-sm text-white/50 leading-relaxed">
-                        Words are lemmatized automatically. For example, adding "developing" will store "develop".
+                        Words are lemmatized automatically. For example, adding &quot;developing&quot; will store &quot;develop&quot;.
                     </p>
                 </div>
             </div>

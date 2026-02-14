@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { Settings as SettingsIcon, LogOut, Moon, Bell, Target } from 'lucide-react';
+import { LogOut, Moon, Bell, Target } from 'lucide-react';
 
 export default async function SettingsPage() {
     const supabase = createClient();

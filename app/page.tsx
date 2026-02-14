@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { BookOpen, PlusCircle, CheckCircle2, AlertCircle } from 'lucide-react';
-import { endOfDay, startOfDay, format } from 'date-fns';
+import { endOfDay, startOfDay } from 'date-fns';
 
 export default async function Dashboard() {
   const supabase = createClient();
@@ -96,9 +96,9 @@ export default async function Dashboard() {
       {/* Daily Quote or Tip (Optional extra) */}
       <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5">
         <p className="text-sm italic text-white/60">
-          "The limit of my language means the limit of my world."
+          &quot;The limit of my language means the limit of my world.&quot;
         </p>
-        <p className="text-xs mt-2 text-white/40">— Ludwig Wittgenstein</p>
+        <p className="text-xs mt-2 text-white/40">&mdash; Ludwig Wittgenstein</p>
       </div>
     </div>
   );

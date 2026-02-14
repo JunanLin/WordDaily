@@ -1,15 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, ChevronRight, CheckCircle2, Star, Loader2 } from 'lucide-react';
+import { Volume2, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
 import { submitReview } from '@/lib/actions/review';
 import confetti from 'canvas-confetti';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
+interface WordMeaning {
+    part_of_speech: string;
+    chinese_translation: string;
+    english_definition: string;
+    example_sentence?: string;
+}
+
+interface ReviewWord {
+    id: string;
+    words: {
+        lemma: string;
+        phonetic?: string;
+        audio_url?: string;
+        word_meanings: WordMeaning[];
+    };
+}
+
 interface ReviewSessionClientProps {
-    words: any[];
+    words: ReviewWord[];
 }
 
 export default function ReviewSessionClient({ words }: ReviewSessionClientProps) {
@@ -31,7 +48,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                     <CheckCircle2 size={48} />
                 </div>
                 <h2 className="text-3xl font-bold font-outfit">Session Complete!</h2>
-                <p className="text-white/40">You've mastered all your words for now.</p>
+                <p className="text-white/40">You&apos;ve mastered all your words for now.</p>
                 <button
                     onClick={() => router.push('/')}
                     className="btn-primary mt-4"
@@ -140,7 +157,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                         <div className="h-px bg-white/5 w-1/4 mx-auto" />
                                     </div>
                                     <div className="space-y-4">
-                                        {currentWord.words.word_meanings.map((m: any, i: number) => (
+                                        {currentWord.words.word_meanings.map((m, i) => (
                                             <div key={i} className="space-y-2">
                                                 <div className="flex items-center justify-center gap-2">
                                                     <span className="text-[10px] font-bold uppercase py-0.5 px-1.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -190,8 +207,8 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                     />
                                 </div>
 
-                                {score <= 3 && <p className="text-xs text-red-400/60">We'll show you this word again very soon.</p>}
-                                {score >= 8 && <p className="text-xs text-green-400/60">Great! We'll push it further into the future.</p>}
+                                {score <= 3 && <p className="text-xs text-red-400/60">We&apos;ll show you this word again very soon.</p>}
+                                {score >= 8 && <p className="text-xs text-green-400/60">Great! We&apos;ll push it further into the future.</p>}
                             </div>
                         )}
                     </div>
@@ -251,10 +268,10 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                         <div className="h-px bg-white/10 flex-1" />
                     </div>
                     <div className="space-y-3 max-h-[150px] overflow-y-auto pr-2 scrollbar-none">
-                        {currentWord.words.word_meanings.map((m: any, i: number) => m.example_sentence && (
+                        {currentWord.words.word_meanings.map((m, i) => m.example_sentence && (
                             <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5">
                                 <p className="text-xs text-white/60 leading-relaxed italic">
-                                    "{m.example_sentence}"
+                                    &quot;{m.example_sentence}&quot;
                                 </p>
                             </div>
                         ))}

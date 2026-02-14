@@ -1,4 +1,4 @@
-// Use require for better compatibility with CommonJS packages in Next.js Server Actions
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const lemmatizer = require('wink-lemmatizer');
 
 /**

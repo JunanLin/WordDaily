@@ -63,7 +63,7 @@ export async function translateToChinese(text: string): Promise<string | null> {
                 const data = await response.json();
                 if (data.translatedText) return data.translatedText;
             }
-        } catch (error) {
+        } catch {
             // silent fail, move to next instance
         }
     }
