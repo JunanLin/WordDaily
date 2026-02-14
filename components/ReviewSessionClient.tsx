@@ -1,0 +1,266 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Volume2, ChevronRight, CheckCircle2, Star, Loader2 } from 'lucide-react';
+import { submitReview } from '@/lib/actions/review';
+import confetti from 'canvas-confetti';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
+
+interface ReviewSessionClientProps {
+    words: any[];
+}
+
+export default function ReviewSessionClient({ words }: ReviewSessionClientProps) {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [step, setStep] = useState<'STUDY' | 'REVEAL' | 'SCORE'>('STUDY');
+    const [score, setScore] = useState(10);
+    const [loading, setLoading] = useState(false);
+    const [finished, setFinished] = useState(false);
+    const router = useRouter();
+
+    const currentWord = words[currentIndex];
+    const total = words.length;
+
+    // Safety check for empty session or finished session
+    if (words.length === 0 || finished || !currentWord) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] space-y-4 text-center">
+                <div className="bg-indigo-500/20 p-6 rounded-full text-indigo-400 mb-4 animate-bounce">
+                    <CheckCircle2 size={48} />
+                </div>
+                <h2 className="text-3xl font-bold font-outfit">Session Complete!</h2>
+                <p className="text-white/40">You've mastered all your words for now.</p>
+                <button
+                    onClick={() => router.push('/')}
+                    className="btn-primary mt-4"
+                >
+                    Back to Dashboard
+                </button>
+            </div>
+        );
+    }
+
+    const handleNextStep = () => {
+        if (step === 'STUDY') setStep('REVEAL');
+        else if (step === 'REVEAL') setStep('SCORE');
+    };
+
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            await submitReview(currentWord.id, score, 'EN_TO_CN');
+
+            if (currentIndex + 1 < total) {
+                setCurrentIndex(currentIndex + 1);
+                setStep('STUDY');
+                setScore(10);
+            } else {
+                setFinished(true);
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                setTimeout(() => router.push('/'), 2500);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const playAudio = () => {
+        if (currentWord.words.audio_url) {
+            console.log(`[Audio] Playing: ${currentWord.words.audio_url}`);
+            const audio = new Audio(currentWord.words.audio_url);
+            audio.play().catch(e => {
+                console.error('[Audio] Playback failed:', e);
+                alert('Audio playback failed. The source file might be missing or blocked by your browser.');
+            });
+        } else {
+            console.warn('[Audio] No audio URL found for this word.');
+            alert('No pronunciation audio available for this word.');
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-full min-h-[70vh] items-center justify-center space-y-8">
+            {/* Progress */}
+            <div className="w-full flex justify-between items-center text-xs font-bold text-white/30 uppercase tracking-widest px-2">
+                <span>Session Progress</span>
+                <span>{currentIndex + 1} / {total}</span>
+            </div>
+
+            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <motion.div
+                    className="h-full bg-indigo-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${((currentIndex + 1) / total) * 100}%` }}
+                />
+            </div>
+
+            {/* Card Section */}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={`${currentIndex}-${step}`}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full"
+                >
+                    <div className="card w-full min-h-[350px] flex flex-col items-center justify-center text-center p-8 space-y-6 relative overflow-hidden ring-1 ring-white/10 shadow-2xl">
+                        {/* Background Decorative Element */}
+                        <div className="absolute -top-10 -right-10 opacity-5 blur-2xl">
+                            <div className="w-40 h-40 bg-indigo-500 rounded-full" />
+                        </div>
+
+                        {step === 'STUDY' && (
+                            <div className="space-y-8">
+                                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em]">English Origin</span>
+                                <div className="space-y-4">
+                                    <h2 className="text-6xl font-black font-outfit tracking-tight">{currentWord.words.lemma}</h2>
+                                    <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.words.phonetic || '/.../'}</p>
+                                </div>
+                                <button onClick={playAudio} className="p-5 bg-indigo-500/10 rounded-full hover:bg-indigo-500/20 text-indigo-400 transition-all active:scale-95">
+                                    <Volume2 size={32} />
+                                </button>
+                            </div>
+                        )}
+
+                        {step === 'REVEAL' && (
+                            <div className="space-y-8 w-full">
+                                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em]">Meaning & Usage</span>
+                                <div className="space-y-6">
+                                    <div className="space-y-3">
+                                        <h2 className="text-3xl font-bold font-outfit">{currentWord.words.lemma}</h2>
+                                        <div className="h-px bg-white/5 w-1/4 mx-auto" />
+                                    </div>
+                                    <div className="space-y-4">
+                                        {currentWord.words.word_meanings.map((m: any, i: number) => (
+                                            <div key={i} className="space-y-2">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <span className="text-[10px] font-bold uppercase py-0.5 px-1.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                                        {m.part_of_speech}
+                                                    </span>
+                                                    <p className="text-2xl font-medium text-white/90">{m.chinese_translation}</p>
+                                                </div>
+                                                <p className="text-sm text-white/40 italic px-4 leading-tight">{m.english_definition}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 'SCORE' && (
+                            <div className="space-y-8 w-full">
+                                <span className="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em]">Self Assessment</span>
+                                <div className="space-y-2">
+                                    <h3 className="text-4xl font-black font-outfit">{currentWord.words.lemma}</h3>
+                                    <div className="text-white/40 text-sm">How easy was this word to recall?</div>
+                                </div>
+
+                                <div className="space-y-6 pt-6 bg-white/5 p-6 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-end">
+                                        <div className="text-left">
+                                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Forgotten</div>
+                                            <span className={cn("text-xl font-bold transition-colors", score < 4 ? "text-red-400" : "text-white/10")}>0</span>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Score</div>
+                                            <span className="text-4xl font-black text-white">{score}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Perfect</div>
+                                            <span className={cn("text-xl font-bold transition-colors", score === 10 ? "text-green-400" : "text-white/10")}>10</span>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="10"
+                                        step="1"
+                                        value={score}
+                                        onChange={(e) => setScore(parseInt(e.target.value))}
+                                        className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
+                                    />
+                                </div>
+
+                                {score <= 3 && <p className="text-xs text-red-400/60">We'll show you this word again very soon.</p>}
+                                {score >= 8 && <p className="text-xs text-green-400/60">Great! We'll push it further into the future.</p>}
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
+            </AnimatePresence>
+
+            {/* Actions */}
+            <div className="w-full pt-4 space-y-4">
+                {step === 'STUDY' && (
+                    <button
+                        onClick={() => setStep('REVEAL')}
+                        className="btn-primary w-full py-6 flex items-center justify-center gap-2 group"
+                    >
+                        Show Translation
+                        <span className="group-hover:translate-x-1 transition-transform">
+                            <ChevronRight size={20} />
+                        </span>
+                    </button>
+                )}
+                {step === 'REVEAL' && (
+                    <button
+                        onClick={() => setStep('SCORE')}
+                        className="btn-primary w-full py-6 flex items-center justify-center gap-2 group bg-gradient-to-r from-purple-600 to-indigo-600"
+                    >
+                        Rate Assessment
+                        <CheckCircle2 size={20} className="group-hover:scale-110 transition-transform" />
+                    </button>
+                )}
+                {step === 'SCORE' && (
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="btn-primary w-full py-6 flex items-center justify-center gap-2 group bg-gradient-to-r from-indigo-600 to-emerald-600 border-none"
+                    >
+                        {loading ? <Loader2 className="animate-spin" size={24} /> : (
+                            <>
+                                Next Word
+                                <span className="group-hover:translate-x-1 transition-transform">
+                                    <ChevronRight size={24} />
+                                </span>
+                            </>
+                        )}
+                    </button>
+                )}
+            </div>
+
+            {/* Examples Preview in Scores/Reveal Steps */}
+            {step !== 'STUDY' && (
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full space-y-3"
+                >
+                    <div className="flex items-center gap-2 px-1">
+                        <div className="h-px bg-white/10 flex-1" />
+                        <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Context</span>
+                        <div className="h-px bg-white/10 flex-1" />
+                    </div>
+                    <div className="space-y-3 max-h-[150px] overflow-y-auto pr-2 scrollbar-none">
+                        {currentWord.words.word_meanings.map((m: any, i: number) => m.example_sentence && (
+                            <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5">
+                                <p className="text-xs text-white/60 leading-relaxed italic">
+                                    "{m.example_sentence}"
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
+        </div>
+    );
+}
