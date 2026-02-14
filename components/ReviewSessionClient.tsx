@@ -29,12 +29,22 @@ interface ReviewSessionClientProps {
     words: ReviewWord[];
 }
 
+const getPOSColor = (pos: string) => {
+    const p = pos.toLowerCase();
+    if (p.includes('noun')) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+    if (p.includes('verb')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+    if (p.includes('adj')) return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+    if (p.includes('adv')) return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+    return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+};
+
 export default function ReviewSessionClient({ words }: ReviewSessionClientProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [step, setStep] = useState<'STUDY' | 'REVEAL' | 'SCORE'>('STUDY');
     const [score, setScore] = useState(10);
     const [loading, setLoading] = useState(false);
     const [finished, setFinished] = useState(false);
+    const [isMeaningsExpanded, setIsMeaningsExpanded] = useState(false);
     const router = useRouter();
 
     const currentWord = words[currentIndex];
@@ -73,6 +83,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                 setCurrentIndex(currentIndex + 1);
                 setStep('STUDY');
                 setScore(10);
+                setIsMeaningsExpanded(false);
             } else {
                 setFinished(true);
                 confetti({
@@ -156,18 +167,26 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                         <h2 className="text-3xl font-bold font-outfit">{currentWord.words.lemma}</h2>
                                         <div className="h-px bg-white/5 w-1/4 mx-auto" />
                                     </div>
-                                    <div className="space-y-4">
-                                        {currentWord.words.word_meanings.map((m, i) => (
-                                            <div key={i} className="space-y-2">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <span className="text-[10px] font-bold uppercase py-0.5 px-1.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                    <div className="space-y-4 w-full text-left max-h-[400px] overflow-y-auto pr-2 scrollbar-none">
+                                        {(isMeaningsExpanded ? currentWord.words.word_meanings : currentWord.words.word_meanings.slice(0, 3)).map((m, i) => (
+                                            <div key={i} className="space-y-1 p-3 rounded-xl bg-white/5 border border-white/5">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border", getPOSColor(m.part_of_speech))}>
                                                         {m.part_of_speech}
                                                     </span>
-                                                    <p className="text-2xl font-medium text-white/90">{m.chinese_translation}</p>
+                                                    <p className="text-xl font-bold text-white/90">{m.chinese_translation}</p>
                                                 </div>
-                                                <p className="text-sm text-white/40 italic px-4 leading-tight">{m.english_definition}</p>
+                                                <p className="text-xs text-white/40 italic leading-tight pl-1">{m.english_definition}</p>
                                             </div>
                                         ))}
+                                        {currentWord.words.word_meanings.length > 3 && (
+                                            <button
+                                                onClick={() => setIsMeaningsExpanded(!isMeaningsExpanded)}
+                                                className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-indigo-400/60 hover:text-indigo-400 transition-colors"
+                                            >
+                                                {isMeaningsExpanded ? 'Show Less' : `+ ${currentWord.words.word_meanings.length - 3} More Meanings`}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -258,23 +277,28 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
             {/* Examples Preview in Scores/Reveal Steps */}
             {step !== 'STUDY' && (
                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full space-y-3"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="w-full space-y-4 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 shadow-inner"
                 >
-                    <div className="flex items-center gap-2 px-1">
-                        <div className="h-px bg-white/10 flex-1" />
-                        <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Context</span>
-                        <div className="h-px bg-white/10 flex-1" />
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
+                            <Volume2 size={16} />
+                        </div>
+                        <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-[0.2em]">Contextual Usage</span>
                     </div>
-                    <div className="space-y-3 max-h-[150px] overflow-y-auto pr-2 scrollbar-none">
-                        {currentWord.words.word_meanings.map((m, i) => m.example_sentence && (
-                            <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5">
-                                <p className="text-xs text-white/60 leading-relaxed italic">
-                                    &quot;{m.example_sentence}&quot;
-                                </p>
-                            </div>
-                        ))}
+                    <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-none">
+                        {currentWord.words.word_meanings.some(m => m.example_sentence) ? (
+                            currentWord.words.word_meanings.map((m, i) => m.example_sentence && (
+                                <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.08] transition-colors">
+                                    <p className="text-sm text-white/80 leading-relaxed italic">
+                                        &quot;{m.example_sentence}&quot;
+                                    </p>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-xs text-white/20 italic text-center py-4">No example sentences available for this word.</p>
+                        )}
                     </div>
                 </motion.div>
             )}

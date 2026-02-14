@@ -27,6 +27,17 @@ interface HistoryListProps {
     history: UserWord[];
 }
 
+const getPOSColor = (pos: string) => {
+    const p = pos.toLowerCase();
+    if (p.includes('noun')) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+    if (p.includes('verb')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+    if (p.includes('adj')) return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+    if (p.includes('adv')) return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+    return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+};
+
+import { cn } from '@/lib/utils';
+
 export default function HistoryList({ history }: HistoryListProps) {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedWord, setSelectedWord] = useState<UserWord | null>(null);
@@ -166,22 +177,25 @@ export default function HistoryList({ history }: HistoryListProps) {
                                     </button>
                                 </div>
 
-                                <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 scrollbar-none">
+                                <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar-none">
                                     {selectedWord.words.word_meanings.map((m, i) => (
                                         <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-bold uppercase py-0.5 px-1.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                                <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border", getPOSColor(m.part_of_speech))}>
                                                     {m.part_of_speech}
                                                 </span>
                                                 <p className="font-bold text-lg">{m.chinese_translation}</p>
                                             </div>
-                                            <p className="text-sm text-white/60 leading-relaxed">
+                                            <p className="text-sm text-white/60 leading-relaxed italic">
                                                 {m.english_definition}
                                             </p>
                                             {m.example_sentence && (
-                                                <p className="text-xs text-indigo-400/60 italic border-l-2 border-indigo-400/20 pl-2">
-                                                    &quot;{m.example_sentence}&quot;
-                                                </p>
+                                                <div className="mt-3 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                                                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Example</p>
+                                                    <p className="text-xs text-white/80 leading-relaxed italic">
+                                                        &quot;{m.example_sentence}&quot;
+                                                    </p>
+                                                </div>
                                             )}
                                         </div>
                                     ))}
