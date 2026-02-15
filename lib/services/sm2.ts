@@ -1,10 +1,6 @@
-import { addDays, differenceInDays } from 'date-fns';
+import { differenceInDays } from 'date-fns';
 
-export interface SM2Result {
-    nextReviewAt: Date;
-    easeFactor: number;
-    intervalDays: number;
-}
+
 
 /**
  * Calculates SM-2 spaced repetition values.
@@ -13,34 +9,80 @@ export interface SM2Result {
  * @param currentIntervalDays Current interval in days.
  * @returns Updated SM-2 values.
  */
-export function calculateSM2(
-    score: number,
-    currentEaseFactor: number,
-    currentIntervalDays: number
-): SM2Result {
-    let intervalDays: number;
-    let easeFactor: number;
+/**
+ * Converts a 0-10 score to a 0-5 quality rating for SM-2.
+ */
+export function scoreToQuality(score: number): number {
+    if (score <= 3) return 0;   // forgot
+    if (score <= 6) return 3;   // hard
+    if (score <= 8) return 4;   // good
+    return 5;                   // easy
+}
 
-    if (score < 4) {
-        intervalDays = 1;
-        // According to user request, ease factor logic still applies or reset?
-        // User request: "ease_factor = ease_factor + (0.1 - (10 - score) * 0.02)"
-        easeFactor = currentEaseFactor + (0.1 - (10 - score) * 0.02);
+export interface SM2Result {
+    repetition_count: number;
+    interval_days: number;
+    ease_factor: number;
+    nextReviewAt: Date;
+    lastReviewedAt: Date;
+}
+
+/**
+ * Updates spaced repetition values based on user performance.
+ * @param word Current word state (repetition_count, interval_days, ease_factor).
+ * @param score User score (0-10).
+ */
+export function updateSpacedRepetition(
+    word: { repetition_count: number, interval_days: number, ease_factor: number, add_count?: number },
+    score: number
+): SM2Result {
+    const quality = scoreToQuality(score);
+    let { repetition_count, interval_days, ease_factor } = word;
+
+    // Default values if missing
+    repetition_count = repetition_count || 0;
+    interval_days = interval_days || 0;
+    ease_factor = ease_factor || 2.5;
+
+    if (quality < 3) {
+        // Forgot → reset learning
+        repetition_count = 0;
+        interval_days = 1;
     } else {
-        // If it's the first time (intervalDays = 0), start with 1 day?
-        // User request: "interval_days = interval_days * ease_factor"
-        // We'll normalize starting point to 1 if it was 0
-        const baseInterval = currentIntervalDays === 0 ? 1 : currentIntervalDays;
-        intervalDays = Math.round(baseInterval * currentEaseFactor);
-        easeFactor = currentEaseFactor + (0.1 - (10 - score) * 0.02);
+        if (repetition_count === 0) {
+            interval_days = 1;
+        } else if (repetition_count === 1) {
+            interval_days = 3;
+        } else {
+            interval_days = Math.round(interval_days * ease_factor);
+        }
+
+        repetition_count += 1;
     }
 
-    easeFactor = Math.max(1.3, easeFactor);
+    // Update ease factor: EF' = EF + (0.1 - (5-q)*(0.08+(5-q)*0.02))
+    // q = quality (0-5)
+    // Formula from SM-2 description provided
+    ease_factor = ease_factor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+
+    if (ease_factor < 1.3) ease_factor = 1.3;
+
+    // Bonus: prioritize frequently-added words
+    // interval_days = interval_days / log(2 + word.add_count)
+    if (word.add_count && word.add_count > 1) {
+        interval_days = Math.round(interval_days / Math.log(2 + word.add_count));
+        if (interval_days < 1) interval_days = 1;
+    }
+
+    const nextReviewAt = new Date();
+    nextReviewAt.setDate(nextReviewAt.getDate() + interval_days);
 
     return {
-        nextReviewAt: addDays(new Date(), intervalDays),
-        easeFactor,
-        intervalDays,
+        repetition_count,
+        interval_days,
+        ease_factor,
+        nextReviewAt,
+        lastReviewedAt: new Date()
     };
 }
 

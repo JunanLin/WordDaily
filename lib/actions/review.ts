@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { calculateSM2 } from '@/lib/services/sm2'
+import { updateSpacedRepetition } from '@/lib/services/sm2'
 import { revalidatePath } from 'next/cache'
 
 export async function submitReview(userWordId: string, score: number, direction: 'EN_TO_CN' | 'CN_TO_EN') {
@@ -19,10 +19,20 @@ export async function submitReview(userWordId: string, score: number, direction:
     if (fetchError || !userWord) throw new Error('Word not found')
 
     // 2. Calculate new SM-2 values
-    const { nextReviewAt, easeFactor, intervalDays } = calculateSM2(
-        score,
-        userWord.ease_factor,
-        userWord.interval_days
+    const {
+        repetition_count,
+        interval_days,
+        ease_factor,
+        nextReviewAt,
+        lastReviewedAt
+    } = updateSpacedRepetition(
+        {
+            repetition_count: userWord.repetition_count,
+            interval_days: userWord.interval_days,
+            ease_factor: userWord.ease_factor,
+            add_count: userWord.times_seen // Using times_seen as proxy for add_count
+        },
+        score
     )
 
     // 3. Update memory score
@@ -33,10 +43,12 @@ export async function submitReview(userWordId: string, score: number, direction:
         .from('user_words')
         .update({
             next_review_at: nextReviewAt.toISOString(),
-            last_reviewed_at: new Date().toISOString(),
-            ease_factor: easeFactor,
-            interval_days: intervalDays,
-            memory_score: score // Storing the last score as requested for priority formula
+            last_reviewed_at: lastReviewedAt.toISOString(),
+            ease_factor,
+            interval_days,
+            repetition_count,
+            times_seen: userWord.times_seen + 1, // Increment times_seen
+            memory_score: score
         })
         .eq('id', userWordId)
 

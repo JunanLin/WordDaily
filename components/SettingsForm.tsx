@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Target, Bell, Clock, Globe, Save, Loader2 } from 'lucide-react';
 import { updateUserSettings, savePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
