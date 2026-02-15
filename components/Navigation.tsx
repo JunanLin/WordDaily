@@ -5,16 +5,19 @@ import { usePathname } from 'next/navigation';
 import { Home, PlusCircle, BookOpen, History, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const navItems = [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: '/add', icon: PlusCircle, label: 'Add' },
-    { href: '/review', icon: BookOpen, label: 'Review' },
-    { href: '/history', icon: History, label: 'History' },
-    { href: '/settings', icon: Settings, label: 'Settings' },
-];
+import { useTranslations } from 'next-intl';
 
 export default function Navigation() {
     const pathname = usePathname();
+    const t = useTranslations('nav');
+
+    const navItems = [
+        { href: '/', icon: Home, label: t('dashboard') },
+        { href: '/add', icon: PlusCircle, label: t('addWord') },
+        { href: '/review', icon: BookOpen, label: t('review') },
+        { href: '/history', icon: History, label: t('history') },
+        { href: '/settings', icon: Settings, label: t('settings') },
+    ];
 
     return (
         <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass-panel py-3 px-6 z-50 shadow-2xl">

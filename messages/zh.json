@@ -1,0 +1,33 @@
+{
+    "nav": {
+        "dashboard": "主页",
+        "addWord": "添加单词",
+        "review": "复习",
+        "history": "历史",
+        "settings": "设置"
+    },
+    "settings": {
+        "title": "设置",
+        "learningGoal": "学习目标",
+        "learningGoalDesc": "设置每天想要学习的新单词数量。",
+        "notifications": "推送通知",
+        "notificationsDesc": "接收新单词学习和复习进度的提醒。",
+        "newWords": "新单词提醒",
+        "reviewSession": "复习提醒",
+        "timezone": "时区",
+        "language": "语言",
+        "save": "保存设置",
+        "success": "设置已更新！",
+        "error": "更新设置失败。",
+        "pushError": "启用通知失败，请检查浏览器权限。"
+    },
+    "buttons": {
+        "save": "保存",
+        "cancel": "取消",
+        "signOut": "登出"
+    },
+    "common": {
+        "loading": "加载中...",
+        "memberSince": "加入时间"
+    }
+}

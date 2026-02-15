@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Target, Bell, Clock, Globe, Save, Loader2 } from 'lucide-react';
 import { updateUserSettings, savePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
 import { subscribeToPush } from '@/lib/push-notifications';
 import { getModernTimezones } from '@/lib/timezones';
+import { useTranslations } from 'next-intl';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface SettingsFormProps {
     profile: {
@@ -18,6 +20,7 @@ interface SettingsFormProps {
 }
 
 export default function SettingsForm({ profile }: SettingsFormProps) {
+    const t = useTranslations('settings');
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const timezones = useMemo(() => getModernTimezones(), []);
@@ -30,6 +33,16 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
         timezone: profile.timezone || 'America/Toronto',
     });
 
+    // Auto-detect browser timezone if user hasn't set custom one (detecting default 'America/Toronto')
+    useEffect(() => {
+        if (profile.timezone === 'America/Toronto') {
+            const browserTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (browserTZ && browserTZ !== 'America/Toronto') {
+                setForm(prev => ({ ...prev, timezone: browserTZ }));
+            }
+        }
+    }, [profile.timezone]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -37,10 +50,10 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
 
         try {
             await updateUserSettings(form);
-            setStatus({ type: 'success', message: 'Settings updated successfully!' });
+            setStatus({ type: 'success', message: t('success') });
         } catch (error) {
             console.error(error);
-            setStatus({ type: 'error', message: 'Failed to update settings.' });
+            setStatus({ type: 'error', message: t('error') });
         } finally {
             setLoading(false);
         }
@@ -49,11 +62,25 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="card space-y-6">
+                {/* Language Section */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-emerald-400">
+                            <Globe size={20} />
+                            <span className="font-bold uppercase tracking-widest text-[10px]">{t('language')}</span>
+                        </div>
+                        <LanguageSwitcher />
+                    </div>
+                </div>
+
+                <div className="h-px bg-white/5" />
+
+                {/* Daily Goal */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-indigo-400">
                             <Target size={20} />
-                            <span className="font-bold uppercase tracking-widest text-[10px]">Learning Goal</span>
+                            <span className="font-bold uppercase tracking-widest text-[10px]">{t('learningGoal')}</span>
                         </div>
                         <input
                             type="number"
@@ -64,16 +91,17 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                             className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 w-20 text-right font-bold focus:ring-1 focus:ring-indigo-500 outline-none"
                         />
                     </div>
-                    <p className="text-xs text-white/30">Set how many new words you want to learn each day.</p>
+                    <p className="text-xs text-white/30">{t('learningGoalDesc')}</p>
                 </div>
 
                 <div className="h-px bg-white/5" />
 
+                {/* Notifications */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-pink-400">
                             <Bell size={20} />
-                            <span className="font-bold uppercase tracking-widest text-[10px]">Push Notifications</span>
+                            <span className="font-bold uppercase tracking-widest text-[10px]">{t('notifications')}</span>
                         </div>
                         <button
                             type="button"
@@ -98,7 +126,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         }
                                     } catch (err) {
                                         console.error('Push subscription failed:', err);
-                                        setStatus({ type: 'error', message: 'Failed to enable notifications. Please check browser permissions.' });
+                                        setStatus({ type: 'error', message: t('pushError') });
                                         setForm({ ...form, notifications_enabled: false });
                                     }
                                 }
@@ -121,7 +149,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-white/40">
                                         <Clock size={14} />
-                                        <label className="text-[10px] font-bold uppercase tracking-wider">New Words</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-wider">{t('newWords')}</label>
                                     </div>
                                     <input
                                         type="time"
@@ -133,7 +161,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-white/40">
                                         <Clock size={14} />
-                                        <label className="text-[10px] font-bold uppercase tracking-wider">Review Session</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-wider">{t('reviewSession')}</label>
                                     </div>
                                     <input
                                         type="time"
@@ -147,7 +175,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-white/40">
                                     <Globe size={14} />
-                                    <label className="text-[10px] font-bold uppercase tracking-wider">Timezone</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-wider">{t('timezone')}</label>
                                 </div>
                                 <select
                                     value={form.timezone}
@@ -163,7 +191,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                             </div>
                         </div>
                     )}
-                    <p className="text-xs text-white/30">Get reminded to learn new words and review your progress.</p>
+                    <p className="text-xs text-white/30">{t('notificationsDesc')}</p>
                 </div>
             </div>
 
@@ -184,7 +212,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                 {loading ? <Loader2 className="animate-spin" size={20} /> : (
                     <>
                         <Save size={20} className="group-hover:scale-110 transition-transform" />
-                        Save Settings
+                        {t('save')}
                     </>
                 )}
             </button>

@@ -25,27 +25,35 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={`${inter.variable} ${outfit.variable} font-inter antialiased`}>
-        <div className="flex flex-col min-height-screen max-w-md mx-auto relative px-4 pb-24 pt-8">
-          <header className="mb-8">
-            <h1 className="text-3xl font-outfit font-bold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-              WordDaily
-            </h1>
-          </header>
+        <NextIntlClientProvider messages={messages}>
+          <div className="flex flex-col min-height-screen max-w-md mx-auto relative px-4 pb-24 pt-8">
+            <header className="mb-8">
+              <h1 className="text-3xl font-outfit font-bold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
+                WordDaily
+              </h1>
+            </header>
 
-          <main className="flex-1 w-full">
-            {children}
-          </main>
+            <main className="flex-1 w-full">
+              {children}
+            </main>
 
-          <Navigation />
-        </div>
+            <Navigation />
+          </div>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -2,24 +2,17 @@ import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-    const response = await updateSession(request)
+    let response = await updateSession(request)
 
-    // Additional logic to redirect to login if not authenticated
-    // Note: getUser() should be called in updateSession to refresh the session
-    // but here we can check if it's a protected route
-    const { pathname } = request.nextUrl
+    // Locale detection
+    const hasLocale = request.cookies.has('NEXT_LOCALE');
+    if (!hasLocale) {
+        // Simple language detection from header
+        const acceptLanguage = request.headers.get('accept-language');
+        const detectedLocale = acceptLanguage?.includes('zh') ? 'zh' : 'en'; // Default to 'en'
 
-    if (pathname === '/login' || pathname.startsWith('/auth')) {
-        return response
-    }
-
-    // We'll let the individual server components handle the specific "no user" UI 
-    // for a smoother experience (like the Dashboard showing a splash screen),
-    // but for deep links like /add or /review, we should probably redirect.
-    if (pathname === '/add' || pathname === '/review' || pathname === '/settings' || pathname === '/history') {
-        // We'd need to check the user again here or in the server component.
-        // For simplicity and better UX, I'll keep the redirects in the server components 
-        // to avoid double fetching the user object in middleware.
+        // Apply locale cookie to the response
+        response.cookies.set('NEXT_LOCALE', detectedLocale);
     }
 
     return response

@@ -1,0 +1,33 @@
+{
+    "nav": {
+        "dashboard": "Dashboard",
+        "addWord": "Add Word",
+        "review": "Review",
+        "history": "History",
+        "settings": "Settings"
+    },
+    "settings": {
+        "title": "Settings",
+        "learningGoal": "Learning Goal",
+        "learningGoalDesc": "Set how many new words you want to learn each day.",
+        "notifications": "Push Notifications",
+        "notificationsDesc": "Get reminded to learn new words and review your progress.",
+        "newWords": "New Words",
+        "reviewSession": "Review Session",
+        "timezone": "Timezone",
+        "language": "Language",
+        "save": "Save Settings",
+        "success": "Settings updated successfully!",
+        "error": "Failed to update settings.",
+        "pushError": "Failed to enable notifications. Please check browser permissions."
+    },
+    "buttons": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "signOut": "Sign Out"
+    },
+    "common": {
+        "loading": "Loading...",
+        "memberSince": "Member since"
+    }
+}
