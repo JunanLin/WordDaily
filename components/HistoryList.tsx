@@ -1,11 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { format, parseISO, isSameDay } from 'date-fns';
-import { ChevronRight, Trash2, Calendar, Plus, X } from 'lucide-react';
+import {
+    format,
+    parseISO,
+    isSameDay,
+    startOfMonth,
+    endOfMonth,
+    eachDayOfInterval,
+    subMonths,
+    addMonths,
+    startOfWeek,
+    endOfWeek
+} from 'date-fns';
+import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft } from 'lucide-react';
 import { deleteUserWord } from '@/lib/actions/delete-word';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface UserWord {
     id: string;
@@ -36,14 +48,12 @@ const getPOSColor = (pos: string) => {
     return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
 };
 
-import { cn } from '@/lib/utils';
-
 export default function HistoryList({ history }: HistoryListProps) {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedWord, setSelectedWord] = useState<UserWord | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const [visibleDaysCount, setVisibleDaysCount] = useState(3);
-    const [calendarOpen, setCalendarOpen] = useState(false);
+    const [currentMonth, setCurrentMonth] = useState(new Date());
     const router = useRouter();
 
     // Group history by date
@@ -63,8 +73,6 @@ export default function HistoryList({ history }: HistoryListProps) {
         setIsDeleting(userWordId);
         try {
             await deleteUserWord(userWordId);
-            // The data will refresh via revalidatePath, but we can also hide it locally if needed
-            // For simplicity, we rely on server action refreshing the page
             router.refresh();
         } catch (error) {
             console.error('Delete failed:', error);
@@ -74,29 +82,89 @@ export default function HistoryList({ history }: HistoryListProps) {
         }
     };
 
+    // Calendar logic
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(monthStart);
+    const calendarStart = startOfWeek(monthStart);
+    const calendarEnd = endOfWeek(monthEnd);
+    const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+    const getHeatmapColor = (date: Date) => {
+        const dateStr = format(date, 'yyyy-MM-dd');
+        const count = groupedHistory[dateStr]?.length || 0;
+        if (count === 0) return 'bg-white/5 opacity-20';
+        if (count < 3) return 'bg-emerald-500/20 text-emerald-300';
+        if (count < 7) return 'bg-emerald-500/40 text-emerald-200';
+        return 'bg-emerald-500/70 text-white';
+    };
+
     return (
         <div className="space-y-4">
             {!selectedDate ? (
                 /* Main List - Grouped by Date */
                 <div className="space-y-6">
-                    {/* Calendar / Filter Section */}
-                    <div className="flex items-center justify-between px-2">
-                        <div className="space-y-0.5">
-                            <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">History</h3>
-                            <p className="text-xs text-white/20">Select a date to view list</p>
-                        </div>
-                        <div className="relative">
-                            <input
-                                type="date"
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                onChange={(e) => {
-                                    if (e.target.value) setSelectedDate(e.target.value);
-                                }}
-                            />
-                            <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-indigo-400 hover:bg-white/10 transition-colors pointer-events-none">
-                                <Calendar size={20} />
+                    {/* Month Picker & Calendar */}
+                    <div className="card space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xl font-bold font-outfit uppercase tracking-tight">
+                                {format(currentMonth, 'MMMM yyyy')}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                                    className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+                                <button
+                                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                                    className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
                             </div>
                         </div>
+
+                        {/* Calendar Grid */}
+                        <div className="grid grid-cols-7 gap-2">
+                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+                                <div key={day} className="text-[10px] font-black text-white/20 text-center uppercase py-1">
+                                    {day}
+                                </div>
+                            ))}
+                            {calendarDays.map((day, idx) => {
+                                const dateStr = format(day, 'yyyy-MM-dd');
+                                const hasWords = !!groupedHistory[dateStr];
+                                const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
+
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => hasWords && setSelectedDate(dateStr)}
+                                        disabled={!hasWords}
+                                        className={cn(
+                                            "aspect-square rounded-lg flex flex-col items-center justify-center text-xs font-bold transition-all relative group",
+                                            getHeatmapColor(day),
+                                            !isCurrentMonth && "opacity-0 pointer-events-none",
+                                            hasWords && "hover:ring-2 hover:ring-white/20 active:scale-90 cursor-pointer"
+                                        )}
+                                    >
+                                        {day.getDate()}
+                                        {hasWords && (
+                                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                                <span className="bg-black text-[8px] py-1 px-2 rounded-full border border-white/10 uppercase font-black">
+                                                    {groupedHistory[dateStr].length} Words
+                                                </span>
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="space-y-0.5 px-2">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">Recent Sessions</h3>
                     </div>
 
                     <div className="space-y-3">
@@ -108,7 +176,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
-                                        <Calendar size={20} />
+                                        <CalendarIcon size={20} />
                                     </div>
                                     <div className="text-left">
                                         <h4 className="font-bold text-lg">
@@ -141,7 +209,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                             onClick={() => setSelectedDate(null)}
                             className="text-indigo-400 text-sm font-bold flex items-center gap-1 hover:text-indigo-300 transition-colors"
                         >
-                            <ChevronRight size={16} className="rotate-180" /> Back to Groups
+                            <ChevronRight size={16} className="rotate-180" /> Back to History
                         </button>
                         <button
                             onClick={() => router.push('/add')}
@@ -152,35 +220,38 @@ export default function HistoryList({ history }: HistoryListProps) {
                     </div>
 
                     <div className="space-y-1 pb-2">
-                        <h3 className="text-3xl font-black font-outfit">
-                            {format(parseISO(selectedDate), 'MMM do')}
+                        <h3 className="text-3xl font-black font-outfit text-indigo-400">
+                            {format(parseISO(selectedDate), 'MMMM do')}
                         </h3>
-                        <p className="text-white/40 text-sm uppercase tracking-widest font-bold">List Details</p>
+                        <p className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-black">Vocabulary Archive</p>
                     </div>
 
                     <div className="space-y-3">
                         {groupedHistory[selectedDate] ? (
-                            groupedHistory[selectedDate].map((uw: any) => (
+                            groupedHistory[selectedDate].map((uw) => (
                                 <div
                                     key={uw.id}
                                     onClick={() => setSelectedWord(uw)}
                                     className="card group relative overflow-hidden py-4 px-5 flex items-center justify-between hover:bg-white/[0.07] transition-all cursor-pointer border-l-4 border-l-transparent hover:border-l-indigo-500"
                                 >
                                     <div className="flex flex-col">
-                                        <h4 className="text-xl font-bold font-outfit">{uw.words.lemma}</h4>
+                                        <h4 className="text-xl font-bold font-outfit leading-tight">{uw.words.lemma}</h4>
                                         <p className="text-sm text-white/40">{uw.words.word_meanings?.[0]?.chinese_translation}</p>
                                     </div>
-                                    <button
-                                        onClick={(e) => handleDelete(uw.id, e)}
-                                        disabled={isDeleting === uw.id}
-                                        className="p-2 text-white/10 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                                    >
-                                        {isDeleting === uw.id ? (
-                                            <div className="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                                        ) : (
-                                            <Trash2 size={18} />
-                                        )}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={(e) => handleDelete(uw.id, e)}
+                                            disabled={isDeleting === uw.id}
+                                            className="p-2 text-white/10 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                        >
+                                            {isDeleting === uw.id ? (
+                                                <div className="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <Trash2 size={18} />
+                                            )}
+                                        </button>
+                                        <ChevronRight size={18} className="text-white/10" />
+                                    </div>
                                 </div>
                             ))
                         ) : (

@@ -27,7 +27,13 @@ export async function updateUserSettings(data: {
     return { success: true };
 }
 
-export async function savePushSubscription(subscription: any) {
+export async function savePushSubscription(subscription: {
+    endpoint: string,
+    keys: {
+        p256dh: string,
+        auth: string
+    }
+}) {
     const supabase = createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
