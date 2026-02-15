@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.48.1",
     "canvas-confetti": "^1.9.4",
@@ -17,7 +18,7 @@
     "framer-motion": "^12.4.3",
     "lucide-react": "^0.475.0",
     "next": "^14.2.23",
-    "@ducanh2912/next-pwa": "^10.2.9",
+    "next-intl": "^4.8.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^3.0.1",
