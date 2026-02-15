@@ -42,6 +42,8 @@ export default function HistoryList({ history }: HistoryListProps) {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedWord, setSelectedWord] = useState<UserWord | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [visibleDaysCount, setVisibleDaysCount] = useState(3);
+    const [calendarOpen, setCalendarOpen] = useState(false);
     const router = useRouter();
 
     // Group history by date
@@ -76,29 +78,60 @@ export default function HistoryList({ history }: HistoryListProps) {
         <div className="space-y-4">
             {!selectedDate ? (
                 /* Main List - Grouped by Date */
-                <div className="space-y-3">
-                    {dates.map((date) => (
-                        <button
-                            key={date}
-                            onClick={() => setSelectedDate(date)}
-                            className="card w-full flex items-center justify-between py-5 px-6 group active:scale-[0.98] transition-all"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
-                                    <Calendar size={20} />
-                                </div>
-                                <div className="text-left">
-                                    <h4 className="font-bold text-lg">
-                                        {isSameDay(parseISO(date), new Date()) ? "Today's Words" : format(parseISO(date), 'MMMM do, yyyy')}
-                                    </h4>
-                                    <p className="text-xs text-white/30 font-bold uppercase tracking-widest pt-0.5">
-                                        {groupedHistory[date].length} Words Learned
-                                    </p>
-                                </div>
+                <div className="space-y-6">
+                    {/* Calendar / Filter Section */}
+                    <div className="flex items-center justify-between px-2">
+                        <div className="space-y-0.5">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">History</h3>
+                            <p className="text-xs text-white/20">Select a date to view list</p>
+                        </div>
+                        <div className="relative">
+                            <input
+                                type="date"
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                onChange={(e) => {
+                                    if (e.target.value) setSelectedDate(e.target.value);
+                                }}
+                            />
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-indigo-400 hover:bg-white/10 transition-colors pointer-events-none">
+                                <Calendar size={20} />
                             </div>
-                            <ChevronRight size={20} className="text-white/20 group-hover:text-white/60 transition-colors" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        {dates.slice(0, visibleDaysCount).map((date) => (
+                            <button
+                                key={date}
+                                onClick={() => setSelectedDate(date)}
+                                className="card w-full flex items-center justify-between py-5 px-6 group active:scale-[0.98] transition-all"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
+                                        <Calendar size={20} />
+                                    </div>
+                                    <div className="text-left">
+                                        <h4 className="font-bold text-lg">
+                                            {isSameDay(parseISO(date), new Date()) ? "Today's Words" : format(parseISO(date), 'MMMM do, yyyy')}
+                                        </h4>
+                                        <p className="text-xs text-white/30 font-bold uppercase tracking-widest pt-0.5">
+                                            {groupedHistory[date].length} Words Learned
+                                        </p>
+                                    </div>
+                                </div>
+                                <ChevronRight size={20} className="text-white/20 group-hover:text-white/60 transition-colors" />
+                            </button>
+                        ))}
+                    </div>
+
+                    {dates.length > visibleDaysCount && (
+                        <button
+                            onClick={() => setVisibleDaysCount(prev => prev + 10)}
+                            className="w-full py-4 text-xs font-bold uppercase tracking-[0.2em] text-white/30 hover:text-white/60 transition-colors bg-white/5 rounded-2xl border border-dashed border-white/10"
+                        >
+                            Show More ({dates.length - visibleDaysCount} remaining)
                         </button>
-                    ))}
+                    )}
                 </div>
             ) : (
                 /* Daily Detail View */
@@ -126,29 +159,41 @@ export default function HistoryList({ history }: HistoryListProps) {
                     </div>
 
                     <div className="space-y-3">
-                        {groupedHistory[selectedDate].map((uw) => (
-                            <div
-                                key={uw.id}
-                                onClick={() => setSelectedWord(uw)}
-                                className="card group relative overflow-hidden py-4 px-5 flex items-center justify-between hover:bg-white/[0.07] transition-all cursor-pointer border-l-4 border-l-transparent hover:border-l-indigo-500"
-                            >
-                                <div className="flex flex-col">
-                                    <h4 className="text-xl font-bold font-outfit">{uw.words.lemma}</h4>
-                                    <p className="text-sm text-white/40">{uw.words.word_meanings?.[0]?.chinese_translation}</p>
-                                </div>
-                                <button
-                                    onClick={(e) => handleDelete(uw.id, e)}
-                                    disabled={isDeleting === uw.id}
-                                    className="p-2 text-white/10 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                        {groupedHistory[selectedDate] ? (
+                            groupedHistory[selectedDate].map((uw: any) => (
+                                <div
+                                    key={uw.id}
+                                    onClick={() => setSelectedWord(uw)}
+                                    className="card group relative overflow-hidden py-4 px-5 flex items-center justify-between hover:bg-white/[0.07] transition-all cursor-pointer border-l-4 border-l-transparent hover:border-l-indigo-500"
                                 >
-                                    {isDeleting === uw.id ? (
-                                        <div className="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                                    ) : (
-                                        <Trash2 size={18} />
-                                    )}
+                                    <div className="flex flex-col">
+                                        <h4 className="text-xl font-bold font-outfit">{uw.words.lemma}</h4>
+                                        <p className="text-sm text-white/40">{uw.words.word_meanings?.[0]?.chinese_translation}</p>
+                                    </div>
+                                    <button
+                                        onClick={(e) => handleDelete(uw.id, e)}
+                                        disabled={isDeleting === uw.id}
+                                        className="p-2 text-white/10 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                    >
+                                        {isDeleting === uw.id ? (
+                                            <div className="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <Trash2 size={18} />
+                                        )}
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-12 bg-white/5 rounded-3xl border border-dashed border-white/10 text-center">
+                                <p className="text-white/40 text-sm">No words found for this date.</p>
+                                <button
+                                    onClick={() => router.push('/add')}
+                                    className="mt-4 text-indigo-400 text-xs font-bold uppercase tracking-widest hover:underline"
+                                >
+                                    + Add words for this day
                                 </button>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
             )}

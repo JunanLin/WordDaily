@@ -121,3 +121,13 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Allow logged-in users to contribute new words to the global dictionary
+create policy "Authenticated users can insert words" on public.words 
+  for insert with check (auth.role() = 'authenticated');
+
+create policy "Authenticated users can insert variants" on public.word_variants 
+  for insert with check (auth.role() = 'authenticated');
+
+create policy "Authenticated users can insert meanings" on public.word_meanings 
+  for insert with check (auth.role() = 'authenticated');
