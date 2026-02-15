@@ -19,6 +19,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
+interface WordMeaning {
+    part_of_speech: string;
+    chinese_translation: string;
+    english_definition: string;
+    example_sentence?: string;
+}
+
 interface UserWord {
     id: string;
     created_at: string;
@@ -26,12 +33,7 @@ interface UserWord {
     words: {
         lemma: string;
         phonetic?: string;
-        word_meanings: Array<{
-            part_of_speech: string;
-            chinese_translation: string;
-            english_definition: string;
-            example_sentence?: string;
-        }>;
+        word_meanings: WordMeaning[];
     };
 }
 

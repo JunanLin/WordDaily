@@ -84,7 +84,15 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         const sub = await subscribeToPush();
                                         if (sub) {
                                             const subJson = sub.toJSON();
-                                            await savePushSubscription(subJson);
+                                            if (subJson.endpoint && subJson.keys?.p256dh && subJson.keys?.auth) {
+                                                await savePushSubscription({
+                                                    endpoint: subJson.endpoint,
+                                                    keys: {
+                                                        p256dh: subJson.keys.p256dh,
+                                                        auth: subJson.keys.auth
+                                                    }
+                                                });
+                                            }
                                         }
                                     } catch (err) {
                                         console.error('Push subscription failed:', err);
