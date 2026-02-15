@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Globe } from "lucide-react";
+// import { Globe } from "lucide-react";
 
 export default function LanguageSwitcher() {
     const router = useRouter();
