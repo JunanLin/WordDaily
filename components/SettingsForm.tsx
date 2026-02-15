@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Target, Bell, Clock, Globe, Save, Loader2 } from 'lucide-react';
 import { updateUserSettings, savePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
 import { subscribeToPush } from '@/lib/push-notifications';
+import { getModernTimezones } from '@/lib/timezones';
 
 interface SettingsFormProps {
     profile: {
@@ -19,6 +20,7 @@ interface SettingsFormProps {
 export default function SettingsForm({ profile }: SettingsFormProps) {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    const timezones = useMemo(() => getModernTimezones(), []);
 
     const [form, setForm] = useState({
         daily_goal: profile.daily_goal,
@@ -152,12 +154,11 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                     onChange={(e) => setForm({ ...form, timezone: e.target.value })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium appearance-none"
                                 >
-                                    <option value="America/Toronto">Toronto (EST/EDT)</option>
-                                    <option value="America/New_York">New York (EST/EDT)</option>
-                                    <option value="Europe/London">London (GMT/BST)</option>
-                                    <option value="Asia/Shanghai">Shanghai (CST)</option>
-                                    <option value="Asia/Tokyo">Tokyo (JST)</option>
-                                    <option value="UTC">UTC</option>
+                                    {timezones.map((tz) => (
+                                        <option key={tz.value} value={tz.value} className="bg-slate-900">
+                                            {tz.label}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
