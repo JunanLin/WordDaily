@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import { LogOut, Moon, Bell, Target } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import SettingsForm from '@/components/SettingsForm';
 
 export default async function SettingsPage() {
     const supabase = createClient();
@@ -19,36 +20,12 @@ export default async function SettingsPage() {
                 <p className="text-white/40 text-sm">Personalize your experience</p>
             </div>
 
-            <div className="card space-y-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Target className="text-indigo-400" size={20} />
-                        <span className="font-medium">Daily Goal</span>
-                    </div>
-                    <span className="text-indigo-400 font-bold">{profile?.daily_goal || 20} words</span>
-                </div>
-
-                <div className="flex items-center justify-between opacity-50">
-                    <div className="flex items-center gap-3">
-                        <Moon className="text-purple-400" size={20} />
-                        <span className="font-medium">Dark Mode</span>
-                    </div>
-                    <div className="w-10 h-5 bg-indigo-500 rounded-full cursor-not-allowed" />
-                </div>
-
-                <div className="flex items-center justify-between opacity-50">
-                    <div className="flex items-center gap-3">
-                        <Bell className="text-pink-400" size={20} />
-                        <span className="font-medium">Notifications</span>
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-widest">Coming Soon</span>
-                </div>
-            </div>
+            <SettingsForm profile={profile} />
 
             <div className="card">
                 <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xl">
-                        {user.email?.[0].toUpperCase()}
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xl uppercase">
+                        {user.email?.[0]}
                     </div>
                     <div>
                         <p className="font-bold">{user.email}</p>
@@ -59,7 +36,7 @@ export default async function SettingsPage() {
                 </div>
 
                 <form action="/auth/signout" method="post">
-                    <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 border border-red-500/20 text-red-400 rounded-xl hover:bg-red-500/5 transition-colors">
+                    <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 border border-red-500/20 text-red-400 rounded-xl hover:bg-red-500/5 transition-colors text-sm font-bold uppercase tracking-widest">
                         <LogOut size={18} /> Sign Out
                     </button>
                 </form>

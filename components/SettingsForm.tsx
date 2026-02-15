@@ -1,0 +1,184 @@
+'use client';
+
+import { useState } from 'react';
+import { Target, Bell, Clock, Globe, Save, Loader2 } from 'lucide-react';
+import { updateUserSettings, savePushSubscription } from '@/lib/actions/user-settings';
+import { cn } from '@/lib/utils';
+import { subscribeToPush } from '@/lib/push-notifications';
+
+interface SettingsFormProps {
+    profile: {
+        daily_goal: number;
+        notifications_enabled: boolean;
+        day_reminder_time: string;
+        review_reminder_time: string;
+        timezone: string;
+    };
+}
+
+export default function SettingsForm({ profile }: SettingsFormProps) {
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+
+    const [form, setForm] = useState({
+        daily_goal: profile.daily_goal,
+        notifications_enabled: profile.notifications_enabled,
+        day_reminder_time: profile.day_reminder_time,
+        review_reminder_time: profile.review_reminder_time,
+        timezone: profile.timezone || 'America/Toronto',
+    });
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setStatus(null);
+
+        try {
+            await updateUserSettings(form);
+            setStatus({ type: 'success', message: 'Settings updated successfully!' });
+        } catch (error) {
+            console.error(error);
+            setStatus({ type: 'error', message: 'Failed to update settings.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="card space-y-6">
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-indigo-400">
+                            <Target size={20} />
+                            <span className="font-bold uppercase tracking-widest text-[10px]">Learning Goal</span>
+                        </div>
+                        <input
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={form.daily_goal}
+                            onChange={(e) => setForm({ ...form, daily_goal: parseInt(e.target.value) })}
+                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 w-20 text-right font-bold focus:ring-1 focus:ring-indigo-500 outline-none"
+                        />
+                    </div>
+                    <p className="text-xs text-white/30">Set how many new words you want to learn each day.</p>
+                </div>
+
+                <div className="h-px bg-white/5" />
+
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-pink-400">
+                            <Bell size={20} />
+                            <span className="font-bold uppercase tracking-widest text-[10px]">Push Notifications</span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                const newVal = !form.notifications_enabled;
+                                setForm({ ...form, notifications_enabled: newVal });
+
+                                if (newVal) {
+                                    try {
+                                        const sub = await subscribeToPush();
+                                        if (sub) {
+                                            const subJson = sub.toJSON();
+                                            await savePushSubscription(subJson);
+                                        }
+                                    } catch (err) {
+                                        console.error('Push subscription failed:', err);
+                                        setStatus({ type: 'error', message: 'Failed to enable notifications. Please check browser permissions.' });
+                                        setForm({ ...form, notifications_enabled: false });
+                                    }
+                                }
+                            }}
+                            className={cn(
+                                "w-11 h-6 rounded-full transition-colors relative",
+                                form.notifications_enabled ? "bg-emerald-500" : "bg-white/10"
+                            )}
+                        >
+                            <div className={cn(
+                                "w-4 h-4 bg-white rounded-full absolute top-1 transition-all",
+                                form.notifications_enabled ? "right-1" : "left-1"
+                            )} />
+                        </button>
+                    </div>
+
+                    {form.notifications_enabled && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-white/40">
+                                        <Clock size={14} />
+                                        <label className="text-[10px] font-bold uppercase tracking-wider">New Words</label>
+                                    </div>
+                                    <input
+                                        type="time"
+                                        value={form.day_reminder_time}
+                                        onChange={(e) => setForm({ ...form, day_reminder_time: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-white/40">
+                                        <Clock size={14} />
+                                        <label className="text-[10px] font-bold uppercase tracking-wider">Review Session</label>
+                                    </div>
+                                    <input
+                                        type="time"
+                                        value={form.review_reminder_time}
+                                        onChange={(e) => setForm({ ...form, review_reminder_time: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-white/40">
+                                    <Globe size={14} />
+                                    <label className="text-[10px] font-bold uppercase tracking-wider">Timezone</label>
+                                </div>
+                                <select
+                                    value={form.timezone}
+                                    onChange={(e) => setForm({ ...form, timezone: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium appearance-none"
+                                >
+                                    <option value="America/Toronto">Toronto (EST/EDT)</option>
+                                    <option value="America/New_York">New York (EST/EDT)</option>
+                                    <option value="Europe/London">London (GMT/BST)</option>
+                                    <option value="Asia/Shanghai">Shanghai (CST)</option>
+                                    <option value="Asia/Tokyo">Tokyo (JST)</option>
+                                    <option value="UTC">UTC</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
+                    <p className="text-xs text-white/30">Get reminded to learn new words and review your progress.</p>
+                </div>
+            </div>
+
+            {status && (
+                <div className={cn(
+                    "p-4 rounded-2xl text-sm font-medium animate-in fade-in duration-300",
+                    status.type === 'success' ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"
+                )}>
+                    {status.message}
+                </div>
+            )}
+
+            <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full py-4 flex items-center justify-center gap-2 group"
+            >
+                {loading ? <Loader2 className="animate-spin" size={20} /> : (
+                    <>
+                        <Save size={20} className="group-hover:scale-110 transition-transform" />
+                        Save Settings
+                    </>
+                )}
+            </button>
+        </form>
+    );
+}
