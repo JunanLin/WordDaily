@@ -52,7 +52,9 @@ export default async function SettingsPage() {
                     </div>
                     <div>
                         <p className="font-bold">{user.email}</p>
-                        <p className="text-xs text-white/40 italic">Member since Feb 2024</p>
+                        <p className="text-xs text-white/40 italic">
+                            Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </p>
                     </div>
                 </div>
 
