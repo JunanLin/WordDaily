@@ -1,12 +1,14 @@
 import { createClient } from '@/lib/supabase/server';
 import ReviewSessionClient from '@/components/ReviewSessionClient';
 import { calculatePriority } from '@/lib/services/sm2';
+import { getTranslations } from 'next-intl/server';
 
 export default async function ReviewPage() {
     const supabase = createClient();
+    const t = await getTranslations('review');
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return <div>Unauthorized</div>;
+    if (!user) return <div>{t('unauthorized')}</div>;
 
     // Fetch words due for review
     // Joins with words and meanings
@@ -32,7 +34,7 @@ export default async function ReviewPage() {
 
     if (error) {
         console.error('Error fetching review words:', error);
-        return <div>Error loading review session</div>;
+        return <div>{t('errorLoading')}</div>;
     }
 
     // Calculate priority and sort
@@ -49,8 +51,8 @@ export default async function ReviewPage() {
                 <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center text-green-500">
                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                 </div>
-                <h2 className="text-2xl font-bold">All caught up!</h2>
-                <p className="text-white/40">No words due for review right now.</p>
+                <h2 className="text-2xl font-bold">{t('allCaughtUp')}</h2>
+                <p className="text-white/40">{t('noWordsDue')}</p>
             </div>
         );
     }

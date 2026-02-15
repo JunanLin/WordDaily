@@ -13,11 +13,13 @@ import {
     startOfWeek,
     endOfWeek
 } from 'date-fns';
+import { zhCN, enUS } from 'date-fns/locale';
 import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft } from 'lucide-react';
 import { deleteUserWord } from '@/lib/actions/delete-word';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface WordMeaning {
     part_of_speech: string;
@@ -51,6 +53,10 @@ const getPOSColor = (pos: string) => {
 };
 
 export default function HistoryList({ history }: HistoryListProps) {
+    const t = useTranslations('history');
+    const locale = useLocale();
+    const dateLocale = locale === 'zh' ? zhCN : enUS;
+
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedWord, setSelectedWord] = useState<UserWord | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -70,7 +76,7 @@ export default function HistoryList({ history }: HistoryListProps) {
 
     const handleDelete = async (userWordId: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!confirm('Are you sure you want to delete this word from your list?')) return;
+        if (!confirm(t('deleteConfirm'))) return;
 
         setIsDeleting(userWordId);
         try {
@@ -78,7 +84,7 @@ export default function HistoryList({ history }: HistoryListProps) {
             router.refresh();
         } catch (error) {
             console.error('Delete failed:', error);
-            alert('Failed to delete word');
+            alert(t('deleteFailed'));
         } finally {
             setIsDeleting(null);
         }
@@ -87,9 +93,14 @@ export default function HistoryList({ history }: HistoryListProps) {
     // Calendar logic
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
-    const calendarStart = startOfWeek(monthStart);
-    const calendarEnd = endOfWeek(monthEnd);
+    const calendarStart = startOfWeek(monthStart, { locale: dateLocale });
+    const calendarEnd = endOfWeek(monthEnd, { locale: dateLocale });
     const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+    // Weekdays header
+    const weekdays = locale === 'zh'
+        ? ['日', '一', '二', '三', '四', '五', '六']
+        : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     const getHeatmapColor = (date: Date) => {
         const dateStr = format(date, 'yyyy-MM-dd');
@@ -109,7 +120,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                     <div className="card space-y-6">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold font-outfit uppercase tracking-tight">
-                                {format(currentMonth, 'MMMM yyyy')}
+                                {format(currentMonth, 'MMMM yyyy', { locale: dateLocale })}
                             </h3>
                             <div className="flex items-center gap-2">
                                 <button
@@ -129,7 +140,7 @@ export default function HistoryList({ history }: HistoryListProps) {
 
                         {/* Calendar Grid */}
                         <div className="grid grid-cols-7 gap-2">
-                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+                            {weekdays.map((day) => (
                                 <div key={day} className="text-[10px] font-black text-white/20 text-center uppercase py-1">
                                     {day}
                                 </div>
@@ -151,11 +162,11 @@ export default function HistoryList({ history }: HistoryListProps) {
                                             hasWords && "hover:ring-2 hover:ring-white/20 active:scale-90 cursor-pointer"
                                         )}
                                     >
-                                        {day.getDate()}
+                                        {format(day, 'd')}
                                         {hasWords && (
                                             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                                                 <span className="bg-black text-[8px] py-1 px-2 rounded-full border border-white/10 uppercase font-black">
-                                                    {groupedHistory[dateStr].length} Words
+                                                    {t('wordsCount', { count: groupedHistory[dateStr].length })}
                                                 </span>
                                             </div>
                                         )}
@@ -166,7 +177,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                     </div>
 
                     <div className="space-y-0.5 px-2">
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">Recent Sessions</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">{t('recentSessions')}</h3>
                     </div>
 
                     <div className="space-y-3">
@@ -182,10 +193,10 @@ export default function HistoryList({ history }: HistoryListProps) {
                                     </div>
                                     <div className="text-left">
                                         <h4 className="font-bold text-lg">
-                                            {isSameDay(parseISO(date), new Date()) ? "Today's Words" : format(parseISO(date), 'MMMM do, yyyy')}
+                                            {isSameDay(parseISO(date), new Date()) ? t('todaysWords') : format(parseISO(date), 'PP', { locale: dateLocale })}
                                         </h4>
                                         <p className="text-xs text-white/30 font-bold uppercase tracking-widest pt-0.5">
-                                            {groupedHistory[date].length} Words Learned
+                                            {t('wordsCount', { count: groupedHistory[date].length })}
                                         </p>
                                     </div>
                                 </div>
@@ -199,7 +210,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                             onClick={() => setVisibleDaysCount(prev => prev + 10)}
                             className="w-full py-4 text-xs font-bold uppercase tracking-[0.2em] text-white/30 hover:text-white/60 transition-colors bg-white/5 rounded-2xl border border-dashed border-white/10"
                         >
-                            Show More ({dates.length - visibleDaysCount} remaining)
+                            {t('showMore', { count: dates.length - visibleDaysCount })}
                         </button>
                     )}
                 </div>
@@ -211,21 +222,21 @@ export default function HistoryList({ history }: HistoryListProps) {
                             onClick={() => setSelectedDate(null)}
                             className="text-indigo-400 text-sm font-bold flex items-center gap-1 hover:text-indigo-300 transition-colors"
                         >
-                            <ChevronRight size={16} className="rotate-180" /> Back to History
+                            <ChevronRight size={16} className="rotate-180" /> {t('backToHistory')}
                         </button>
                         <button
                             onClick={() => router.push('/add')}
                             className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2 text-xs font-bold hover:bg-white/10 transition-colors"
                         >
-                            <Plus size={14} /> Add Word
+                            <Plus size={14} /> {t('addWordsDate')}
                         </button>
                     </div>
 
                     <div className="space-y-1 pb-2">
                         <h3 className="text-3xl font-black font-outfit text-indigo-400">
-                            {format(parseISO(selectedDate), 'MMMM do')}
+                            {format(parseISO(selectedDate), 'MMMM do', { locale: dateLocale })}
                         </h3>
-                        <p className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-black">Vocabulary Archive</p>
+                        <p className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-black">{t('vocabularyArchive')}</p>
                     </div>
 
                     <div className="space-y-3">
@@ -258,12 +269,12 @@ export default function HistoryList({ history }: HistoryListProps) {
                             ))
                         ) : (
                             <div className="py-12 bg-white/5 rounded-3xl border border-dashed border-white/10 text-center">
-                                <p className="text-white/40 text-sm">No words found for this date.</p>
+                                <p className="text-white/40 text-sm">{t('noWordsDate')}</p>
                                 <button
                                     onClick={() => router.push('/add')}
                                     className="mt-4 text-indigo-400 text-xs font-bold uppercase tracking-widest hover:underline"
                                 >
-                                    + Add words for this day
+                                    {t('addWordsDate')}
                                 </button>
                             </div>
                         )}
@@ -309,7 +320,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                                             </p>
                                             {m.example_sentence && (
                                                 <div className="mt-3 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
-                                                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Example</p>
+                                                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">{t('example')}</p>
                                                     <p className="text-xs text-white/80 leading-relaxed italic">
                                                         &quot;{m.example_sentence}&quot;
                                                     </p>
@@ -323,7 +334,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                                     onClick={() => setSelectedWord(null)}
                                     className="btn-primary w-full py-4 text-sm font-bold tracking-widest uppercase"
                                 >
-                                    Close Detail
+                                    {t('closeDetail')}
                                 </button>
                             </div>
                         </motion.div>

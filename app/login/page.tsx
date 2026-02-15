@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
+    const t = useTranslations('auth');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
@@ -25,7 +27,7 @@ export default function LoginPage() {
 
         if (authError) {
             if (authError.message.includes('Email not confirmed')) {
-                setError('Please check your email to confirm your account first. (You can also disable this requirement in the Supabase Dashboard under Auth Settings)');
+                setError(t('checkEmail'));
             } else {
                 setError(authError.message);
             }
@@ -40,9 +42,9 @@ export default function LoginPage() {
         <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8">
             <div className="text-center space-y-2">
                 <h2 className="text-4xl font-bold font-outfit bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                    {isSignUp ? 'Join WordDaily' : 'Welcome Back'}
+                    {isSignUp ? t('join') : t('welcomeBack')}
                 </h2>
-                <p className="text-white/40">Master one word at a time.</p>
+                <p className="text-white/40">{t('subtitle')}</p>
             </div>
 
             <form onSubmit={handleAuth} className="w-full space-y-4">
@@ -51,7 +53,7 @@ export default function LoginPage() {
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
                         <input
                             type="email"
-                            placeholder="Email address"
+                            placeholder={t('emailPlaceholder')}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/30"
@@ -62,7 +64,7 @@ export default function LoginPage() {
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
                         <input
                             type="password"
-                            placeholder="Password"
+                            placeholder={t('passwordPlaceholder')}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/30"
@@ -82,7 +84,7 @@ export default function LoginPage() {
                     disabled={loading}
                     className="btn-primary w-full flex items-center justify-center gap-2 py-4"
                 >
-                    {loading ? <Loader2 className="animate-spin" size={20} /> : (isSignUp ? 'Create Account' : 'Sign In')}
+                    {loading ? <Loader2 className="animate-spin" size={20} /> : (isSignUp ? t('createAccount') : t('signIn'))}
                     {!loading && <ArrowRight size={20} />}
                 </button>
             </form>
@@ -91,12 +93,12 @@ export default function LoginPage() {
                 onClick={() => setIsSignUp(!isSignUp)}
                 className="text-white/40 hover:text-white/60 text-sm transition-colors"
             >
-                {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                {isSignUp ? t('haveAccount') : t('noAccount')}
             </button>
 
             <div className="pt-8 text-center">
                 <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest">
-                    Secured by Supabase Auth
+                    {t('securedBy')}
                 </p>
             </div>
         </div>

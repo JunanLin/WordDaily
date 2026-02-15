@@ -7,7 +7,9 @@ import { submitReview } from '@/lib/actions/review';
 import confetti from 'canvas-confetti';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
+// ... interfaces ...
 interface WordMeaning {
     part_of_speech: string;
     chinese_translation: string;
@@ -39,6 +41,7 @@ const getPOSColor = (pos: string) => {
 };
 
 export default function ReviewSessionClient({ words }: ReviewSessionClientProps) {
+    const t = useTranslations('review');
     const [currentIndex, setCurrentIndex] = useState(0);
     const [step, setStep] = useState<'STUDY' | 'REVEAL' | 'SCORE'>('STUDY');
     const [score, setScore] = useState(10);
@@ -57,13 +60,13 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                 <div className="bg-indigo-500/20 p-6 rounded-full text-indigo-400 mb-4 animate-bounce">
                     <CheckCircle2 size={48} />
                 </div>
-                <h2 className="text-3xl font-bold font-outfit">Session Complete!</h2>
-                <p className="text-white/40">You&apos;ve mastered all your words for now.</p>
+                <h2 className="text-3xl font-bold font-outfit">{t('sessionComplete')}</h2>
+                <p className="text-white/40">{t('mastered')}</p>
                 <button
                     onClick={() => router.push('/')}
                     className="btn-primary mt-4"
                 >
-                    Back to Dashboard
+                    {t('backToDashboard')}
                 </button>
             </div>
         );
@@ -114,7 +117,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
         <div className="flex flex-col h-full min-h-[70vh] items-center justify-center space-y-8">
             {/* Progress */}
             <div className="w-full flex justify-between items-center text-xs font-bold text-white/30 uppercase tracking-widest px-2">
-                <span>Session Progress</span>
+                <span>{t('sessionProgress')}</span>
                 <span>{currentIndex + 1} / {total}</span>
             </div>
 
@@ -144,7 +147,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
 
                         {step === 'STUDY' && (
                             <div className="space-y-8">
-                                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em]">English Origin</span>
+                                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em]">{t('englishOrigin')}</span>
                                 <div className="space-y-4">
                                     <h2 className="text-6xl font-black font-outfit tracking-tight">{currentWord.words.lemma}</h2>
                                     <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.words.phonetic || '/.../'}</p>
@@ -157,7 +160,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
 
                         {step === 'REVEAL' && (
                             <div className="space-y-8 w-full">
-                                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em]">Meaning & Usage</span>
+                                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em]">{t('meaningUsage')}</span>
                                 <div className="space-y-6">
                                     <div className="space-y-3">
                                         <h2 className="text-3xl font-bold font-outfit">{currentWord.words.lemma}</h2>
@@ -180,7 +183,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                                 onClick={() => setIsMeaningsExpanded(!isMeaningsExpanded)}
                                                 className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-indigo-400/60 hover:text-indigo-400 transition-colors"
                                             >
-                                                {isMeaningsExpanded ? 'Show Less' : `+ ${currentWord.words.word_meanings.length - 3} More Meanings`}
+                                                {isMeaningsExpanded ? t('showLess') : t('moreMeanings', { count: currentWord.words.word_meanings.length - 3 })}
                                             </button>
                                         )}
                                     </div>
@@ -190,24 +193,24 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
 
                         {step === 'SCORE' && (
                             <div className="space-y-8 w-full">
-                                <span className="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em]">Self Assessment</span>
+                                <span className="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em]">{t('selfAssessment')}</span>
                                 <div className="space-y-2">
                                     <h3 className="text-4xl font-black font-outfit">{currentWord.words.lemma}</h3>
-                                    <div className="text-white/40 text-sm">How easy was this word to recall?</div>
+                                    <div className="text-white/40 text-sm">{t('howEasy')}</div>
                                 </div>
 
                                 <div className="space-y-6 pt-6 bg-white/5 p-6 rounded-2xl border border-white/5">
                                     <div className="flex justify-between items-end">
                                         <div className="text-left">
-                                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Forgotten</div>
+                                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">{t('forgotten')}</div>
                                             <span className={cn("text-xl font-bold transition-colors", score < 4 ? "text-red-400" : "text-white/10")}>0</span>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Score</div>
+                                            <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">{t('score')}</div>
                                             <span className="text-4xl font-black text-white">{score}</span>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Perfect</div>
+                                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">{t('perfect')}</div>
                                             <span className={cn("text-xl font-bold transition-colors", score === 10 ? "text-green-400" : "text-white/10")}>10</span>
                                         </div>
                                     </div>
@@ -222,8 +225,8 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                     />
                                 </div>
 
-                                {score <= 3 && <p className="text-xs text-red-400/60">We&apos;ll show you this word again very soon.</p>}
-                                {score >= 8 && <p className="text-xs text-green-400/60">Great! We&apos;ll push it further into the future.</p>}
+                                {score <= 3 && <p className="text-xs text-red-400/60">{t('nextReviewSoon')}</p>}
+                                {score >= 8 && <p className="text-xs text-green-400/60">{t('nextReviewLater')}</p>}
                             </div>
                         )}
                     </div>
@@ -237,7 +240,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                         onClick={() => setStep('REVEAL')}
                         className="btn-primary w-full py-6 flex items-center justify-center gap-2 group"
                     >
-                        Show Translation
+                        {t('showTranslation')}
                         <span className="group-hover:translate-x-1 transition-transform">
                             <ChevronRight size={20} />
                         </span>
@@ -248,7 +251,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                         onClick={() => setStep('SCORE')}
                         className="btn-primary w-full py-6 flex items-center justify-center gap-2 group bg-gradient-to-r from-purple-600 to-indigo-600"
                     >
-                        Rate Assessment
+                        {t('rateAssessment')}
                         <CheckCircle2 size={20} className="group-hover:scale-110 transition-transform" />
                     </button>
                 )}
@@ -260,7 +263,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                     >
                         {loading ? <Loader2 className="animate-spin" size={24} /> : (
                             <>
-                                Next Word
+                                {t('nextWord')}
                                 <span className="group-hover:translate-x-1 transition-transform">
                                     <ChevronRight size={24} />
                                 </span>
@@ -281,7 +284,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                         <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
                             <Volume2 size={16} />
                         </div>
-                        <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-[0.2em]">Contextual Usage</span>
+                        <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-[0.2em]">{t('contextualUsage')}</span>
                     </div>
                     <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-none">
                         {currentWord.words.word_meanings.some(m => m.example_sentence) ? (
@@ -293,7 +296,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                 </div>
                             ))
                         ) : (
-                            <p className="text-xs text-white/20 italic text-center py-4">No example sentences available for this word.</p>
+                            <p className="text-xs text-white/20 italic text-center py-4">{t('noExamples')}</p>
                         )}
                     </div>
                 </motion.div>

@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { ingestWord } from '@/lib/actions/word-ingestion';
 import { Loader2, Plus, CheckCircle2, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function AddWordPage() {
+    const t = useTranslations('add');
     const [word, setWord] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -20,12 +22,12 @@ export default function AddWordPage() {
 
         try {
             const res = await ingestWord(word.trim());
-            setResult({ success: true, message: `"${res.lemma}" added successfully!` });
+            setResult({ success: true, message: t('success', { word: res.lemma }) });
             setWord('');
             // Optional: redirect to dashboard after a delay
             setTimeout(() => router.push('/'), 2000);
         } catch (error: unknown) {
-            setResult({ success: false, message: (error as Error).message || 'Something went wrong' });
+            setResult({ success: false, message: (error as Error).message || t('error') });
         } finally {
             setLoading(false);
         }
@@ -34,8 +36,8 @@ export default function AddWordPage() {
     return (
         <div className="space-y-8 h-[70vh] flex flex-col justify-center">
             <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold font-outfit">New Word</h2>
-                <p className="text-white/40">Expand your vocabulary today</p>
+                <h2 className="text-3xl font-bold font-outfit">{t('title')}</h2>
+                <p className="text-white/40">{t('subtitle')}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -45,7 +47,7 @@ export default function AddWordPage() {
                         value={word}
                         onChange={(e) => setWord(e.target.value)}
                         disabled={loading}
-                        placeholder="Enter an English word..."
+                        placeholder={t('placeholder')}
                         className="w-full bg-white/5 border border-white/10 rounded-2xl py-6 px-6 text-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/20"
                         autoFocus
                     />
@@ -61,7 +63,7 @@ export default function AddWordPage() {
                     ) : (
                         <Plus size={20} />
                     )}
-                    {loading ? 'Processing...' : 'Add Word'}
+                    {loading ? t('processing') : t('button')}
                 </button>
             </form>
 
@@ -76,9 +78,9 @@ export default function AddWordPage() {
             {/* Quick Tips */}
             <div className="mt-auto pt-8">
                 <div className="p-4 rounded-xl bg-white/5 border border-white/5">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-white/30 mb-2">Pro Tip</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-white/30 mb-2">{t('proTipTitle')}</h4>
                     <p className="text-sm text-white/50 leading-relaxed">
-                        Words are lemmatized automatically. For example, adding &quot;developing&quot; will store &quot;develop&quot;.
+                        {t('proTipDesc')}
                     </p>
                 </div>
             </div>

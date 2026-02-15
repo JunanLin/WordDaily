@@ -1,5 +1,6 @@
 ---
-trigger: always_on
+trigger: model_decision
+description: when trying to run npm commands
 ---
 
-Use conda activate worddaily before running any commands.
+Run "conda activate worddaily" before running any commands.
