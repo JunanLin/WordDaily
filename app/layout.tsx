@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import TimezoneUpdater from "@/components/TimezoneUpdater";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -28,11 +29,26 @@ export const viewport: Viewport = {
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 
+import { createClient } from '@/lib/supabase/server';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let userProfile = null;
+  if (user) {
+    const { data } = await supabase
+      .from('users')
+      .select('timezone')
+      .eq('id', user.id)
+      .single();
+    userProfile = data;
+  }
+
   const locale = await getLocale();
   const messages = await getMessages();
 
@@ -51,7 +67,12 @@ export default async function RootLayout({
               {children}
             </main>
 
-            <Navigation />
+            {user && (
+              <>
+                <Navigation />
+                <TimezoneUpdater initialTimezone={userProfile?.timezone || null} />
+              </>
+            )}
           </div>
         </NextIntlClientProvider>
       </body>

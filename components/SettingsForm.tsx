@@ -30,18 +30,8 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
         notifications_enabled: profile.notifications_enabled,
         day_reminder_time: profile.day_reminder_time,
         review_reminder_time: profile.review_reminder_time,
-        timezone: profile.timezone || 'America/Toronto',
+        timezone: profile.timezone || 'UTC',
     });
-
-    // Auto-detect browser timezone if user hasn't set custom one (detecting default 'America/Toronto')
-    useEffect(() => {
-        if (profile.timezone === 'America/Toronto') {
-            const browserTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            if (browserTZ && browserTZ !== 'America/Toronto') {
-                setForm(prev => ({ ...prev, timezone: browserTZ }));
-            }
-        }
-    }, [profile.timezone]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

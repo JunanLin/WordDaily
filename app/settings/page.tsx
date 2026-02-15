@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
-import { LogOut } from 'lucide-react';
+import { LogOut, BookOpenCheck } from 'lucide-react';
 import SettingsForm from '@/components/SettingsForm';
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 
 export default async function SettingsPage() {
     const supabase = createClient();
@@ -23,6 +24,22 @@ export default async function SettingsPage() {
             </div>
 
             <SettingsForm profile={profile} />
+
+            {/* Tutorial Link */}
+            <Link href="/tutorial" className="card block">
+                <div className="flex items-center justify-between py-4 px-6 group">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
+                            <BookOpenCheck size={20} />
+                        </div>
+                        <div>
+                            <p className="font-bold">{t('settings.tutorial')}</p>
+                            <p className="text-xs text-white/40">Review the app tutorial</p>
+                        </div>
+                    </div>
+                    <div className="text-white/20 group-hover:text-white/40 transition-colors">→</div>
+                </div>
+            </Link>
 
             <div className="card">
                 <div className="flex items-center gap-4 mb-6">

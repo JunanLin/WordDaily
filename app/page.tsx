@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { BookOpen, PlusCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 import { endOfDay, startOfDay } from 'date-fns';
 import { getTranslations } from 'next-intl/server';
+import { redirect } from 'next/navigation';
 
 export default async function Dashboard() {
   const supabase = createClient();
@@ -20,12 +21,17 @@ export default async function Dashboard() {
     );
   }
 
-  // Fetch user profile (daily_goal)
+  // Fetch user profile (daily_goal and tutorial_completed)
   const { data: profile } = await supabase
     .from('users')
-    .select('daily_goal')
+    .select('daily_goal, tutorial_completed')
     .eq('id', user.id)
     .single();
+
+  // Redirect to tutorial if user hasn't completed it
+  if (profile && !profile.tutorial_completed) {
+    redirect('/tutorial');
+  }
 
   const dailyGoal = profile?.daily_goal || 20;
 

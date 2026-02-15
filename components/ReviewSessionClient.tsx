@@ -226,6 +226,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                 </div>
 
                                 {score <= 3 && <p className="text-xs text-red-400/60">{t('nextReviewSoon')}</p>}
+                                {score >= 4 && score <= 7 && <p className="text-xs text-yellow-400/60">{t('nextReviewNormal')}</p>}
                                 {score >= 8 && <p className="text-xs text-green-400/60">{t('nextReviewLater')}</p>}
                             </div>
                         )}

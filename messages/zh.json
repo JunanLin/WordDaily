@@ -17,7 +17,7 @@
         "dueReview": "待复习",
         "newWord": "新单词",
         "quote": "\"语言的边界就是世界的边界。\"",
-        "author": "Ludwig Wittgenstein"
+        "author": "路德维希·维特根斯坦"
     },
     "add": {
         "title": "新单词",
@@ -55,6 +55,7 @@
         "errorLoading": "加载复习会话失败",
         "unauthorized": "未授权",
         "nextReviewSoon": "我们会尽快再次为您展示这个单词。",
+        "nextReviewNormal": "我们会过几天再次为您展示这个单词。",
         "nextReviewLater": "太棒了！我们已将此单词的复习时间推后。"
     },
     "history": {
@@ -100,7 +101,8 @@
         "save": "保存设置",
         "success": "设置已更新！",
         "error": "更新设置失败。",
-        "pushError": "启用通知失败，请检查浏览器权限。"
+        "pushError": "启用通知失败，请检查浏览器权限。",
+        "tutorial": "使用教程"
     },
     "buttons": {
         "save": "保存",
@@ -110,5 +112,19 @@
     "common": {
         "loading": "加载中...",
         "memberSince": "加入时间"
+    },
+    "tutorial": {
+        "title": "欢迎使用 WordDaily！",
+        "subtitle": "学习如何掌握词汇",
+        "step1Title": "添加单词",
+        "step1Desc": "首先添加您想学习的英语单词。我们的 AI 会自动获取定义、翻译和例句。",
+        "step2Title": "定期复习",
+        "step2Desc": "使用间隔重复法在最佳时间复习单词。为每个单词评分,以调整未来的复习计划。",
+        "step3Title": "追踪进度",
+        "step3Desc": "监控您的每日学习目标并查看词汇归档。见证您的词汇量随时间增长！",
+        "step4Title": "保持一致",
+        "step4Desc": "启用通知以获取每日提醒。坚持是建立强大词汇基础的关键。",
+        "getStarted": "开始使用",
+        "skipTutorial": "跳过教程"
     }
 }

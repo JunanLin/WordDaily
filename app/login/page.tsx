@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
     const t = useTranslations('auth');
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
@@ -45,6 +46,22 @@ export default function LoginPage() {
                     {isSignUp ? t('join') : t('welcomeBack')}
                 </h2>
                 <p className="text-white/40">{t('subtitle')}</p>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex w-full bg-white/5 p-1 rounded-2xl border border-white/5">
+                <button
+                    onClick={() => setIsSignUp(false)}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${!isSignUp ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white/60'}`}
+                >
+                    {t('signIn')}
+                </button>
+                <button
+                    onClick={() => setIsSignUp(true)}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${isSignUp ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white/60'}`}
+                >
+                    {t('createAccount')}
+                </button>
             </div>
 
             <form onSubmit={handleAuth} className="w-full space-y-4">
@@ -88,13 +105,6 @@ export default function LoginPage() {
                     {!loading && <ArrowRight size={20} />}
                 </button>
             </form>
-
-            <button
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-white/40 hover:text-white/60 text-sm transition-colors"
-            >
-                {isSignUp ? t('haveAccount') : t('noAccount')}
-            </button>
 
             <div className="pt-8 text-center">
                 <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest">

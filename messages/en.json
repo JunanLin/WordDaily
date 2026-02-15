@@ -55,6 +55,7 @@
         "errorLoading": "Error loading review session",
         "unauthorized": "Unauthorized",
         "nextReviewSoon": "We'll show you this word again very soon.",
+        "nextReviewNormal": "We'll show you this word again in a few days.",
         "nextReviewLater": "Great! We'll push it further into the future."
     },
     "history": {
@@ -100,7 +101,8 @@
         "save": "Save Settings",
         "success": "Settings updated successfully!",
         "error": "Failed to update settings.",
-        "pushError": "Failed to enable notifications. Please check browser permissions."
+        "pushError": "Failed to enable notifications. Please check browser permissions.",
+        "tutorial": "How to Use"
     },
     "buttons": {
         "save": "Save",
@@ -110,5 +112,19 @@
     "common": {
         "loading": "Loading...",
         "memberSince": "Member since"
+    },
+    "tutorial": {
+        "title": "Welcome to WordDaily!",
+        "subtitle": "Learn how to master your vocabulary",
+        "step1Title": "Add Words",
+        "step1Desc": "Start by adding English words you want to learn. Our AI will automatically fetch definitions, translations, and example sentences.",
+        "step2Title": "Review Regularly",
+        "step2Desc": "Use spaced repetition to review words at optimal intervals. Rate how well you remember each word to adjust future review schedules.",
+        "step3Title": "Track Progress",
+        "step3Desc": "Monitor your daily learning goals and review your vocabulary archive. Watch your word collection grow over time!",
+        "step4Title": "Stay Consistent",
+        "step4Desc": "Enable notifications to get daily reminders. Consistency is key to building a strong vocabulary foundation.",
+        "getStarted": "Get Started",
+        "skipTutorial": "Skip Tutorial"
     }
 }
