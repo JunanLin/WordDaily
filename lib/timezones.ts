@@ -30,7 +30,7 @@ export function getModernTimezones() {
             const offset = getOffsetMinutes(tz);
             if (!map.has(offset)) map.set(offset, []);
             map.get(offset)!.push(tz);
-        } catch (e) {
+        } catch {
             // Ignore invalid zones
         }
     });
