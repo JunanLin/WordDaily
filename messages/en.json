@@ -25,10 +25,11 @@
         "placeholder": "Enter an English word...",
         "button": "Add Word",
         "processing": "Processing...",
+        "lemmatizeLabel": "Auto-convert to root form",
         "success": "\"{word}\" added successfully!",
         "error": "Something went wrong",
         "proTipTitle": "Pro Tip",
-        "proTipDesc": "Words are lemmatized automatically. For example, adding \"developing\" will store \"develop\"."
+        "proTipDesc": "When enabled, words are lemmatized automatically. For example, adding \"developing\" will store \"develop\"."
     },
     "review": {
         "title": "Review",

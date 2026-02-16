@@ -25,10 +25,11 @@
         "placeholder": "输入英语单词...",
         "button": "添加单词",
         "processing": "处理中...",
+        "lemmatizeLabel": "自动还原为原形",
         "success": "\"{word}\" 添加成功！",
         "error": "出错了",
         "proTipTitle": "小贴士",
-        "proTipDesc": "单词会自动还原为原形。例如，添加 'developing' 将会保存 'develop'。"
+        "proTipDesc": "启用后，单词会自动还原为原形。例如，添加 'developing' 将会保存 'develop'。"
     },
     "review": {
         "title": "复习",

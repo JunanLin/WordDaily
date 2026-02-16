@@ -6,8 +6,8 @@ const FALLBACK_INSTANCES = [
 ];
 
 export async function translateToChinese(text: string): Promise<string | null> {
-    const configUrl = process.env.LIBRE_TRANSLATE_URL;
-    const apiKey = process.env.LIBRE_TRANSLATE_API_KEY;
+    const configUrl = process.env.TRANSLATE_URL;
+    const apiKey = process.env.TRANSLATE_API_KEY;
 
     // Handle Google Translate API
     if (configUrl?.includes('googleapis.com') || configUrl?.includes('google')) {

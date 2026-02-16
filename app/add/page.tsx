@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 export default function AddWordPage() {
     const t = useTranslations('add');
     const [word, setWord] = useState('');
+    const [shouldLemmatize, setShouldLemmatize] = useState(true);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -20,7 +21,7 @@ export default function AddWordPage() {
         setResult(null);
 
         try {
-            const res = await ingestWord(word.trim());
+            const res = await ingestWord(word.trim(), shouldLemmatize);
             setResult({ success: true, message: t('success', { word: res.lemma }) });
             setWord('');
             // No redirect, stay on page to add more words
@@ -38,17 +39,28 @@ export default function AddWordPage() {
                 <p className="text-white/40">{t('subtitle')}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative group">
-                    <input
-                        type="text"
-                        value={word}
-                        onChange={(e) => setWord(e.target.value)}
-                        disabled={loading}
-                        placeholder={t('placeholder')}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-6 px-6 text-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/20"
-                        autoFocus
-                    />
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-4">
+                    <div className="relative group">
+                        <input
+                            type="text"
+                            value={word}
+                            onChange={(e) => setWord(e.target.value)}
+                            disabled={loading}
+                            placeholder={t('placeholder')}
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-6 px-6 text-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/20"
+                            autoFocus
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-between px-2">
+                        <label className="text-sm text-white/40 cursor-pointer flex items-center gap-2 select-none" onClick={() => setShouldLemmatize(!shouldLemmatize)}>
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${shouldLemmatize ? 'bg-indigo-500 border-indigo-500' : 'border-white/20'}`}>
+                                {shouldLemmatize && <div className="w-2 h-2 bg-white rounded-full" />}
+                            </div>
+                            {t('lemmatizeLabel')}
+                        </label>
+                    </div>
                 </div>
 
                 <button

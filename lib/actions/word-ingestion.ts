@@ -6,8 +6,8 @@ import { fetchDictionaryData } from '@/lib/services/dictionary'
 import { translateToChinese } from '@/lib/services/translation'
 import { revalidatePath } from 'next/cache'
 
-export async function ingestWord(rawWord: string) {
-    console.log(`[Ingestion] Starting for: ${rawWord}`);
+export async function ingestWord(rawWord: string, shouldLemmatize: boolean = true) {
+    console.log(`[Ingestion] Starting for: ${rawWord} (lemmatize: ${shouldLemmatize})`);
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -16,13 +16,13 @@ export async function ingestWord(rawWord: string) {
     }
 
     // 0. Check 9pm cutoff
-    const now = new Date()
-    if (now.getHours() >= 21) {
-        throw new Error('Daily word list is locked after 9pm. Review your words now!');
-    }
+    // const now = new Date()
+    // if (now.getHours() >= 21) {
+    //     throw new Error('Daily word list is locked after 9pm. Review your words now!');
+    // }
 
-    const lemma = getLemma(rawWord)
-    console.log(`[Ingestion] Lemma identified: ${lemma}`);
+    const lemma = shouldLemmatize ? getLemma(rawWord) : rawWord.trim().toLowerCase();
+    console.log(`[Ingestion] Final word to store: ${lemma}`);
 
     // Pre-check: Verify table existence to give better error message
     const { error: tableError } = await supabase.from('words').select('id').limit(1);
