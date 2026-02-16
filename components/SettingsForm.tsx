@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { Target, Bell, Clock, Globe, Save, Loader2, SendHorizonal } from 'lucide-react';
-import { updateUserSettings, savePushSubscription } from '@/lib/actions/user-settings';
+import { updateUserSettings, savePushSubscription, deletePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
-import { subscribeToPush } from '@/lib/push-notifications';
+import { subscribeToPush, unsubscribeFromPush } from '@/lib/push-notifications';
 import { getModernTimezones } from '@/lib/timezones';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -113,10 +113,11 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                             onClick={async () => {
                                 const newVal = !form.notifications_enabled;
                                 setForm({ ...form, notifications_enabled: newVal });
+                                setStatus(null);
 
                                 if (newVal) {
                                     try {
-                                        const sub = await subscribeToPush();
+                                        const sub = await subscribeToPush(t);
                                         if (sub) {
                                             const subJson = sub.toJSON();
                                             if (subJson.endpoint && subJson.keys?.p256dh && subJson.keys?.auth) {
@@ -131,8 +132,18 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         }
                                     } catch (err) {
                                         console.error('Push subscription failed:', err);
-                                        setStatus({ type: 'error', message: t('pushError') });
-                                        setForm({ ...form, notifications_enabled: false });
+                                        const message = err instanceof Error ? err.message : t('pushError');
+                                        setStatus({ type: 'error', message });
+                                        setForm(f => ({ ...f, notifications_enabled: false }));
+                                    }
+                                } else {
+                                    try {
+                                        const endpoint = await unsubscribeFromPush();
+                                        if (endpoint) {
+                                            await deletePushSubscription(endpoint);
+                                        }
+                                    } catch (err) {
+                                        console.error('Failed to unsubscribe:', err);
                                     }
                                 }
                             }}
