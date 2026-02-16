@@ -35,7 +35,7 @@ export async function fetchDictionaryData(word: string): Promise<DictionaryData 
     const apiKey = process.env.WORDNIK_API_KEY;
     if (!apiKey || apiKey.includes('PLACEHOLDER')) {
         console.warn('[Dictionary] Wordnik API key is missing or not set.');
-        return null;
+        throw new Error('Dictionary service configuration missing. Please ensure WORDNIK_API_KEY is set in production.');
     }
 
     console.log(`[Dictionary] Fetching Wordnik data for: ${word}`);
@@ -48,6 +48,10 @@ export async function fetchDictionaryData(word: string): Promise<DictionaryData 
             fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/audio?useCanonical=false&limit=1&api_key=${apiKey}`),
             fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/pronunciations?useCanonical=false&limit=1&api_key=${apiKey}`)
         ]);
+
+        if (defsRes.status === 401) {
+            throw new Error('Dictionary service unauthorized. The API key might be invalid.');
+        }
 
         if (!defsRes.ok) {
             console.error(`[Dictionary] Failed to fetch definitions: ${defsRes.status}`);

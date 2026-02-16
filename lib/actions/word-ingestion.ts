@@ -157,66 +157,73 @@ export async function getOrCreateWord(word: string) {
 export async function ingestWord(rawWord: string, shouldLemmatize: boolean = true) {
     console.log(`[Ingestion] Starting for: ${rawWord} (lemmatize: ${shouldLemmatize})`);
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        throw new Error('Unauthorized');
-    }
 
-    const wordToProcess = shouldLemmatize ? getLemma(rawWord) : rawWord.trim().toLowerCase();
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+            return { success: false, error: 'Unauthorized' };
+        }
 
-    // Use the shared dictionary cache service
-    const wordRecord = await getOrCreateWord(wordToProcess);
+        const wordToProcess = shouldLemmatize ? getLemma(rawWord) : rawWord.trim().toLowerCase();
 
-    // Record user word history
-    await supabase.from('user_word_history').insert({
-        user_id: user.id,
-        word_id: wordRecord.id,
-        action_type: 'lookup'
-    });
+        // Use the shared dictionary cache service
+        const wordRecord = await getOrCreateWord(wordToProcess);
 
-    // Also link to user_words for the review system (if it still exists and uses this)
-    // The user request says "Remove old redundant storage logic" and "User tables should store only references (word_id)".
-    // Currently user_words stores word_id. We'll keep it but ensure it's updated.
-    const { data: existingUserWord } = await supabase
-        .from('user_words')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('word_id', wordRecord.id)
-        .single()
-
-    if (existingUserWord) {
-        await supabase
-            .from('user_words')
-            .update({ times_seen: existingUserWord.times_seen + 1 })
-            .eq('id', existingUserWord.id)
-    } else {
-        await supabase.from('user_words').insert({
+        // Record user word history
+        await supabase.from('user_word_history').insert({
             user_id: user.id,
             word_id: wordRecord.id,
-            times_seen: 1,
-            next_review_at: new Date().toISOString()
-        })
-    }
+            action_type: 'lookup'
+        });
 
-    revalidatePath('/')
-    return {
-        success: true,
-        id: wordRecord.id,
-        word: wordRecord.word,
-        phonetic: wordRecord.phonetic_ipa,
-        audioUrl: wordRecord.pronunciation_audio_url,
-        definitions: wordRecord.definitions.map((d: any) => ({
-            partOfSpeech: d.part_of_speech,
-            definition_en: d.definition_text_en,
-            definition_zh: d.definition_text_zh,
-            examples: d.examples ? d.examples.map((e: any) => ({
+        // Also link to user_words for the review system
+        const { data: existingUserWord } = await supabase
+            .from('user_words')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('word_id', wordRecord.id)
+            .single()
+
+        if (existingUserWord) {
+            await supabase
+                .from('user_words')
+                .update({ times_seen: existingUserWord.times_seen + 1 })
+                .eq('id', existingUserWord.id)
+        } else {
+            await supabase.from('user_words').insert({
+                user_id: user.id,
+                word_id: wordRecord.id,
+                times_seen: 1,
+                next_review_at: new Date().toISOString()
+            })
+        }
+
+        revalidatePath('/')
+        return {
+            success: true,
+            id: wordRecord.id,
+            word: wordRecord.word,
+            phonetic: wordRecord.phonetic_ipa,
+            audioUrl: wordRecord.pronunciation_audio_url,
+            definitions: wordRecord.definitions.map((d: any) => ({
+                partOfSpeech: d.part_of_speech,
+                definition_en: d.definition_text_en,
+                definition_zh: d.definition_text_zh,
+                examples: d.examples ? d.examples.map((e: any) => ({
+                    en: e.example_en,
+                    zh: e.example_zh
+                })) : []
+            })),
+            general_examples: wordRecord.general_examples ? wordRecord.general_examples.map((e: any) => ({
                 en: e.example_en,
                 zh: e.example_zh
             })) : []
-        })),
-        general_examples: wordRecord.general_examples ? wordRecord.general_examples.map((e: any) => ({
-            en: e.example_en,
-            zh: e.example_zh
-        })) : []
+        }
+    } catch (error: any) {
+        console.error(`[Ingestion] Failed for ${rawWord}:`, error);
+        return {
+            success: false,
+            error: error.message || 'Failed to process word. Please check if the word exists or try again later.'
+        };
     }
 }

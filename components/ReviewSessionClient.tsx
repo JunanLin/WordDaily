@@ -184,7 +184,12 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                 <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em]">{t('meaningUsage')}</span>
                                 <div className="space-y-6">
                                     <div className="space-y-3">
-                                        <h2 className="text-3xl font-bold font-outfit">{currentWord.words.word}</h2>
+                                        <div className="flex items-center justify-center gap-3">
+                                            <h2 className="text-3xl font-bold font-outfit">{currentWord.words.word}</h2>
+                                            <button onClick={playAudio} className="p-2 bg-purple-500/10 rounded-full hover:bg-purple-500/20 text-purple-400 transition-all active:scale-95">
+                                                <Volume2 size={18} />
+                                            </button>
+                                        </div>
                                         <div className="h-px bg-white/5 w-1/4 mx-auto" />
                                     </div>
                                     <div className="space-y-4 w-full text-left max-h-[400px] overflow-y-auto pr-2 scrollbar-none">
@@ -216,7 +221,12 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                             <div className="space-y-8 w-full">
                                 <span className="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em]">{t('selfAssessment')}</span>
                                 <div className="space-y-2">
-                                    <h3 className="text-4xl font-black font-outfit">{currentWord.words.word}</h3>
+                                    <div className="flex items-center justify-center gap-3">
+                                        <h3 className="text-4xl font-black font-outfit">{currentWord.words.word}</h3>
+                                        <button onClick={playAudio} className="p-2 bg-green-500/10 rounded-full hover:bg-green-500/20 text-green-400 transition-all active:scale-95">
+                                            <Volume2 size={20} />
+                                        </button>
+                                    </div>
                                     <div className="text-white/40 text-sm">{t('howEasy')}</div>
                                 </div>
 

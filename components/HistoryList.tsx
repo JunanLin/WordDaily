@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     format,
     parseISO,
@@ -69,6 +69,18 @@ export default function HistoryList({ history }: HistoryListProps) {
     const [visibleDaysCount, setVisibleDaysCount] = useState(3);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const router = useRouter();
+
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+        if (selectedWord) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [selectedWord]);
 
     // Group history by date
     const groupedHistory = history.reduce((acc: Record<string, UserWord[]>, item) => {
@@ -291,15 +303,15 @@ export default function HistoryList({ history }: HistoryListProps) {
             {/* Word Detail Modal */}
             <AnimatePresence>
                 {selectedWord && (
-                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm overscroll-none">
                         <motion.div
-                            initial={{ y: 100, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: 100, opacity: 0 }}
-                            className="w-full max-w-md bg-[#121218] border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="w-full max-w-md bg-[#121218] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
                         >
-                            <div className="p-6 space-y-6">
-                                <div className="flex justify-between items-start">
+                            <div className="p-6 space-y-6 flex flex-col h-full overflow-hidden">
+                                <div className="flex justify-between items-start flex-shrink-0">
                                     <div className="space-y-1">
                                         <h2 className="text-4xl font-black font-outfit">{selectedWord.words.word}</h2>
                                         <p className="text-white/40 font-mono italic text-sm">{selectedWord.words.phonetic_ipa}</p>
@@ -312,7 +324,7 @@ export default function HistoryList({ history }: HistoryListProps) {
                                     </button>
                                 </div>
 
-                                <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar-none">
+                                <div className="space-y-4 overflow-y-auto pr-2 flex-grow scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                     {/* Definitions */}
                                     {selectedWord.words.definitions.map((m, i) => (
                                         <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2">
@@ -363,7 +375,7 @@ export default function HistoryList({ history }: HistoryListProps) {
 
                                 <button
                                     onClick={() => setSelectedWord(null)}
-                                    className="btn-primary w-full py-4 text-sm font-bold tracking-widest uppercase"
+                                    className="btn-primary w-full py-4 text-sm font-bold tracking-widest uppercase flex-shrink-0 mt-auto shadow-2xl"
                                 >
                                     {t('closeDetail')}
                                 </button>

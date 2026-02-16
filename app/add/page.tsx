@@ -22,9 +22,12 @@ export default function AddWordPage() {
 
         try {
             const res = await ingestWord(word.trim(), shouldLemmatize);
-            setResult({ success: true, message: t('success', { word: res.word }) });
-            setWord('');
-            // No redirect, stay on page to add more words
+            if (res.success) {
+                setResult({ success: true, message: t('success', { word: res.word }) });
+                setWord('');
+            } else {
+                setResult({ success: false, message: res.error || t('error') });
+            }
         } catch (error: unknown) {
             setResult({ success: false, message: (error as Error).message || t('error') });
         } finally {
