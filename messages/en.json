@@ -74,6 +74,7 @@
         "addWordsDate": "+ Add words for this day",
         "closeDetail": "Close Detail",
         "example": "Example",
+        "usageExamples": "Usage Examples",
         "wordsCount": "{count} Words"
     },
     "auth": {

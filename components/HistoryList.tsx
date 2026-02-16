@@ -21,11 +21,16 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 
-interface WordMeaning {
+interface Example {
+    example_en: string;
+    example_zh: string;
+}
+
+interface WordDefinition {
     part_of_speech: string;
-    chinese_translation: string;
-    english_definition: string;
-    example_sentence?: string;
+    definition_text_zh: string;
+    definition_text_en: string;
+    examples: Example[];
 }
 
 interface UserWord {
@@ -33,9 +38,10 @@ interface UserWord {
     created_at: string;
     next_review_at: string;
     words: {
-        lemma: string;
-        phonetic?: string;
-        word_meanings: WordMeaning[];
+        word: string;
+        phonetic_ipa?: string;
+        definitions: WordDefinition[];
+        general_examples?: Example[];
     };
 }
 
@@ -44,7 +50,7 @@ interface HistoryListProps {
 }
 
 const getPOSColor = (pos: string) => {
-    const p = pos.toLowerCase();
+    const p = pos ? pos.toLowerCase() : '';
     if (p.includes('noun')) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
     if (p.includes('verb')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
     if (p.includes('adj')) return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
@@ -248,8 +254,8 @@ export default function HistoryList({ history }: HistoryListProps) {
                                     className="card group relative overflow-hidden py-4 px-5 flex items-center justify-between hover:bg-white/[0.07] transition-all cursor-pointer border-l-4 border-l-transparent hover:border-l-indigo-500"
                                 >
                                     <div className="flex flex-col">
-                                        <h4 className="text-xl font-bold font-outfit leading-tight">{uw.words.lemma}</h4>
-                                        <p className="text-sm text-white/40">{uw.words.word_meanings?.[0]?.chinese_translation}</p>
+                                        <h4 className="text-xl font-bold font-outfit leading-tight">{uw.words.word}</h4>
+                                        <p className="text-sm text-white/40">{uw.words.definitions?.[0]?.definition_text_zh}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button
@@ -295,8 +301,8 @@ export default function HistoryList({ history }: HistoryListProps) {
                             <div className="p-6 space-y-6">
                                 <div className="flex justify-between items-start">
                                     <div className="space-y-1">
-                                        <h2 className="text-4xl font-black font-outfit">{selectedWord.words.lemma}</h2>
-                                        <p className="text-white/40 font-mono italic text-sm">{selectedWord.words.phonetic}</p>
+                                        <h2 className="text-4xl font-black font-outfit">{selectedWord.words.word}</h2>
+                                        <p className="text-white/40 font-mono italic text-sm">{selectedWord.words.phonetic_ipa}</p>
                                     </div>
                                     <button
                                         onClick={() => setSelectedWord(null)}
@@ -307,27 +313,52 @@ export default function HistoryList({ history }: HistoryListProps) {
                                 </div>
 
                                 <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar-none">
-                                    {selectedWord.words.word_meanings.map((m, i) => (
+                                    {/* Definitions */}
+                                    {selectedWord.words.definitions.map((m, i) => (
                                         <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border", getPOSColor(m.part_of_speech))}>
-                                                    {m.part_of_speech}
+                                                    {m.part_of_speech || 'N/A'}
                                                 </span>
-                                                <p className="font-bold text-lg">{m.chinese_translation}</p>
+                                                <p className="font-bold text-lg">{m.definition_text_zh}</p>
                                             </div>
                                             <p className="text-sm text-white/60 leading-relaxed italic">
-                                                {m.english_definition}
+                                                {m.definition_text_en}
                                             </p>
-                                            {m.example_sentence && (
-                                                <div className="mt-3 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
-                                                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">{t('example')}</p>
-                                                    <p className="text-xs text-white/80 leading-relaxed italic">
-                                                        &quot;{m.example_sentence}&quot;
-                                                    </p>
+                                            {m.examples && m.examples.length > 0 && (
+                                                <div className="mt-3 space-y-2">
+                                                    {m.examples.map((ex, ei) => (
+                                                        <div key={ei} className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                                                            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">{t('example')}</p>
+                                                            <p className="text-xs text-white/80 leading-relaxed italic">
+                                                                &quot;{ex.example_en}&quot;
+                                                            </p>
+                                                            <p className="text-[10px] text-white/40 mt-1">{ex.example_zh}</p>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             )}
                                         </div>
                                     ))}
+
+                                    {/* General Usage Examples */}
+                                    {selectedWord.words.general_examples && selectedWord.words.general_examples.length > 0 && (
+                                        <div className="space-y-3 mt-6 pt-6 border-t border-white/5">
+                                            <div className="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] mb-2">
+                                                {t('usageExamples')}
+                                            </div>
+                                            <div className="space-y-3">
+                                                {selectedWord.words.general_examples.map((ex, ei) => (
+                                                    <div key={ei} className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
+                                                        <p className="text-xs text-white/80 leading-relaxed italic">
+                                                            &quot;{ex.example_en}&quot;
+                                                        </p>
+                                                        <p className="text-[10px] text-white/40 mt-1">{ex.example_zh}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <button

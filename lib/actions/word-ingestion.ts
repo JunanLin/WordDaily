@@ -6,93 +6,177 @@ import { fetchDictionaryData } from '@/lib/services/dictionary'
 import { translateToChinese } from '@/lib/services/translation'
 import { revalidatePath } from 'next/cache'
 
+/**
+ * Shared dictionary cache service.
+ * Fetches word data from Wordnik and translates it if not already in DB.
+ */
+export async function getOrCreateWord(word: string) {
+    const supabase = createClient()
+    const normalized = word.trim().toLowerCase()
+
+    // 1. Check if word already exists in cache with definitions and examples
+    const { data: existingWord } = await supabase
+        .from('words')
+        .select(`
+            *,
+            definitions (
+                *,
+                examples (*)
+            ),
+            general_examples:examples!examples_word_id_fkey (*)
+        `)
+        .eq('word', normalized)
+        .single()
+
+    // If word exists AND has definitions, return it
+    if (existingWord && existingWord.definitions && existingWord.definitions.length > 0) {
+        console.log(`[DictionaryCache] Hit for: ${normalized}`);
+        return existingWord;
+    }
+
+    console.log(`[DictionaryCache] Processing ${existingWord ? 'incomplete cache' : 'miss'} for: ${normalized}...`);
+
+    // 2. Fetch from Wordnik
+    const dictData = await fetchDictionaryData(normalized);
+    if (!dictData) {
+        throw new Error(`Could not find dictionary data for "${normalized}"`);
+    }
+
+    let wordRecord = existingWord;
+
+    // 3. Insert into words table if doesn't exist
+    if (!wordRecord) {
+        const { data: newWord, error: wordError } = await supabase
+            .from('words')
+            .insert({
+                word: normalized,
+                phonetic_ipa: dictData.phonetic,
+                pronunciation_audio_url: dictData.audioUrl
+            })
+            .select()
+            .single()
+
+        if (wordError) {
+            // Handle race condition: if another request inserted it just now
+            if (wordError.code === '23505') {
+                const { data: refetchedWord } = await supabase
+                    .from('words')
+                    .select(`*, definitions (*, examples (*)), general_examples:examples!examples_word_id_fkey (*)`)
+                    .eq('word', normalized)
+                    .single()
+
+                // If refetched has definitions, return it
+                if (refetchedWord && refetchedWord.definitions && refetchedWord.definitions.length > 0) {
+                    return refetchedWord;
+                }
+                wordRecord = refetchedWord;
+            } else {
+                throw wordError;
+            }
+        } else {
+            wordRecord = newWord;
+        }
+    }
+
+    // 4. Populate missing definitions and examples if needed
+    const definitionsWithExamples = [];
+
+    if (!wordRecord.definitions || wordRecord.definitions.length === 0) {
+        for (const def of dictData.definitions) {
+            const translatedDef = await translateToChinese(def.definition) || 'Translation pending...';
+
+            const { data: defRecord, error: defError } = await supabase
+                .from('definitions')
+                .insert({
+                    word_id: wordRecord.id,
+                    part_of_speech: def.partOfSpeech,
+                    definition_text_en: def.definition,
+                    definition_text_zh: translatedDef
+                })
+                .select()
+                .single()
+
+            if (defError) throw defError;
+
+            const examplesForThisDef = [];
+            // Handle per-definition examples if Wordnik provided them
+            if (def.examples && def.examples.length > 0) {
+                for (const exText of def.examples) {
+                    const translatedEx = await translateToChinese(exText) || 'Translation pending...';
+                    const { data: exRecord, error: exError } = await supabase
+                        .from('examples')
+                        .insert({
+                            definition_id: defRecord.id,
+                            example_en: exText,
+                            example_zh: translatedEx
+                        })
+                        .select()
+                        .single()
+                    if (!exError) examplesForThisDef.push(exRecord);
+                }
+            }
+
+            definitionsWithExamples.push({
+                ...defRecord,
+                examples: examplesForThisDef
+            });
+        }
+    } else {
+        definitionsWithExamples.push(...wordRecord.definitions);
+    }
+
+    // 5. Handle General Examples (not linked to a specific definition)
+    const generalExamples = [];
+    if (!wordRecord.general_examples || wordRecord.general_examples.length === 0) {
+        if (dictData.examples && dictData.examples.length > 0) {
+            for (const ex of dictData.examples) {
+                const translatedEx = await translateToChinese(ex.text) || 'Translation pending...';
+                const { data: exRecord, error: exError } = await supabase
+                    .from('examples')
+                    .insert({
+                        word_id: wordRecord.id,
+                        example_en: ex.text,
+                        example_zh: translatedEx
+                    })
+                    .select()
+                    .single()
+                if (!exError) generalExamples.push(exRecord);
+            }
+        }
+    } else {
+        generalExamples.push(...wordRecord.general_examples);
+    }
+
+    return {
+        ...wordRecord,
+        definitions: definitionsWithExamples,
+        general_examples: generalExamples
+    };
+}
+
 export async function ingestWord(rawWord: string, shouldLemmatize: boolean = true) {
     console.log(`[Ingestion] Starting for: ${rawWord} (lemmatize: ${shouldLemmatize})`);
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-        console.error('[Ingestion] Unauthorized access attempt');
         throw new Error('Unauthorized');
     }
 
-    // 0. Check 9pm cutoff
-    // const now = new Date()
-    // if (now.getHours() >= 21) {
-    //     throw new Error('Daily word list is locked after 9pm. Review your words now!');
-    // }
+    const wordToProcess = shouldLemmatize ? getLemma(rawWord) : rawWord.trim().toLowerCase();
 
-    const lemma = shouldLemmatize ? getLemma(rawWord) : rawWord.trim().toLowerCase();
-    console.log(`[Ingestion] Final word to store: ${lemma}`);
+    // Use the shared dictionary cache service
+    const wordRecord = await getOrCreateWord(wordToProcess);
 
-    // Pre-check: Verify table existence to give better error message
-    const { error: tableError } = await supabase.from('words').select('id').limit(1);
-    if (tableError && tableError.message.includes('relation "public.words" does not exist')) {
-        console.error('[Ingestion] Database tables not found. User needs to run migration.');
-        throw new Error('Database tables not found. Please run the SQL migration script provided in the "supabase/migrations" folder in your Supabase SQL Editor.');
-    }
-
-    // 1. Check if word already exists in public.words
-    let { data: wordRecord } = await supabase
-        .from('words')
-        .select('id')
-        .eq('lemma', lemma)
-        .single()
-
-    if (!wordRecord) {
-        // 2. Fetch dictionary data
-        const dictData = await fetchDictionaryData(lemma)
-        if (!dictData) {
-            // If dictionary fails, we might still want to store the word?
-            // For now, let's assume we need dictionary data for core features.
-            throw new Error(`Could not find dictionary data for "${lemma}"`)
-        }
-
-        // 3. Insert into public.words
-        const { data: newWord, error: insertError } = await supabase
-            .from('words')
-            .insert({
-                lemma: dictData.lemma,
-                phonetic: dictData.phonetic,
-                audio_url: dictData.audioUrl
-            })
-            .select()
-            .single()
-
-        if (insertError) throw insertError
-        wordRecord = newWord
-
-        // 4. Translate meanings and insert into public.word_meanings
-        for (const meaning of dictData.meanings) {
-            for (const def of meaning.definitions) {
-                let chineseTranslation = null;
-                try {
-                    chineseTranslation = await translateToChinese(def.definition);
-                } catch (e) {
-                    console.error(`[Ingestion] Translation failed for: ${def.definition}`, e);
-                }
-
-                if (wordRecord) {
-                    await supabase.from('word_meanings').insert({
-                        word_id: wordRecord.id,
-                        part_of_speech: meaning.partOfSpeech,
-                        english_definition: def.definition,
-                        chinese_translation: chineseTranslation || 'Translation pending...',
-                        example_sentence: def.example
-                    })
-                }
-            }
-        }
-    }
-
-    if (!wordRecord) throw new Error('Failed to create or find word record');
-
-    // 5. Ensure word variant exists
-    await supabase.from('word_variants').upsert({
+    // Record user word history
+    await supabase.from('user_word_history').insert({
+        user_id: user.id,
         word_id: wordRecord.id,
-        variant_text: rawWord.trim().toLowerCase()
-    })
+        action_type: 'lookup'
+    });
 
-    // 6. Link to user_words
+    // Also link to user_words for the review system (if it still exists and uses this)
+    // The user request says "Remove old redundant storage logic" and "User tables should store only references (word_id)".
+    // Currently user_words stores word_id. We'll keep it but ensure it's updated.
     const { data: existingUserWord } = await supabase
         .from('user_words')
         .select('*')
@@ -115,5 +199,24 @@ export async function ingestWord(rawWord: string, shouldLemmatize: boolean = tru
     }
 
     revalidatePath('/')
-    return { success: true, lemma: lemma }
+    return {
+        success: true,
+        id: wordRecord.id,
+        word: wordRecord.word,
+        phonetic: wordRecord.phonetic_ipa,
+        audioUrl: wordRecord.pronunciation_audio_url,
+        definitions: wordRecord.definitions.map((d: any) => ({
+            partOfSpeech: d.part_of_speech,
+            definition_en: d.definition_text_en,
+            definition_zh: d.definition_text_zh,
+            examples: d.examples ? d.examples.map((e: any) => ({
+                en: e.example_en,
+                zh: e.example_zh
+            })) : []
+        })),
+        general_examples: wordRecord.general_examples ? wordRecord.general_examples.map((e: any) => ({
+            en: e.example_en,
+            zh: e.example_zh
+        })) : []
+    }
 }

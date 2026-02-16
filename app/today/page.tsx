@@ -16,8 +16,8 @@ export default async function TodayPage() {
         .select(`
       *,
       words (
-        lemma,
-        phonetic
+        word,
+        phonetic_ipa
       )
     `)
         .eq('user_id', user.id)
@@ -37,8 +37,8 @@ export default async function TodayPage() {
                     words.map((uw) => (
                         <div key={uw.id} className="card py-4 px-5 flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <h4 className="text-lg font-bold">{uw.words.lemma}</h4>
-                                <p className="text-xs text-white/40 italic">{uw.words.phonetic}</p>
+                                <h4 className="text-lg font-bold">{uw.words.word}</h4>
+                                <p className="text-xs text-white/40 italic">{uw.words.phonetic_ipa}</p>
                             </div>
                             <div className="flex items-center gap-2">
                                 {new Date(uw.next_review_at) > today ? (

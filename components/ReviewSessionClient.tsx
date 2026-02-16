@@ -9,21 +9,26 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
-// ... interfaces ...
-interface WordMeaning {
+interface Example {
+    example_en: string;
+    example_zh: string;
+}
+
+interface WordDefinition {
     part_of_speech: string;
-    chinese_translation: string;
-    english_definition: string;
-    example_sentence?: string;
+    definition_text_zh: string;
+    definition_text_en: string;
+    examples: Example[];
 }
 
 interface ReviewWord {
     id: string;
     words: {
-        lemma: string;
-        phonetic?: string;
-        audio_url?: string;
-        word_meanings: WordMeaning[];
+        word: string;
+        phonetic_ipa?: string;
+        pronunciation_audio_url?: string;
+        definitions: WordDefinition[];
+        general_examples?: Example[];
     };
 }
 
@@ -32,7 +37,7 @@ interface ReviewSessionClientProps {
 }
 
 const getPOSColor = (pos: string) => {
-    const p = pos.toLowerCase();
+    const p = pos ? pos.toLowerCase() : '';
     if (p.includes('noun')) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
     if (p.includes('verb')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
     if (p.includes('adj')) return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
@@ -54,12 +59,28 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
     const total = words.length;
 
     // Safety check for empty session or finished session
-    if (words.length === 0 || finished || !currentWord) {
+    if (words.length === 0 && !finished) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
+                <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center text-green-500">
+                    <CheckCircle2 size={40} />
+                </div>
+                <h2 className="text-2xl font-bold">{t('allCaughtUp')}</h2>
+                <p className="text-white/40">{t('noWordsDue')}</p>
+            </div>
+        );
+    }
+
+    if (finished) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] space-y-4 text-center">
-                <div className="bg-indigo-500/20 p-6 rounded-full text-indigo-400 mb-4 animate-bounce">
+                <motion.div
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="bg-indigo-500/20 p-6 rounded-full text-indigo-400 mb-4"
+                >
                     <CheckCircle2 size={48} />
-                </div>
+                </motion.div>
                 <h2 className="text-3xl font-bold font-outfit">{t('sessionComplete')}</h2>
                 <p className="text-white/40">{t('mastered')}</p>
                 <button
@@ -90,7 +111,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                     spread: 70,
                     origin: { y: 0.6 }
                 });
-                setTimeout(() => router.push('/'), 2500);
+                // setTimeout(() => router.push('/'), 2500);
             }
         } catch (error) {
             console.error(error);
@@ -100,9 +121,9 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
     };
 
     const playAudio = () => {
-        if (currentWord.words.audio_url) {
-            console.log(`[Audio] Playing: ${currentWord.words.audio_url}`);
-            const audio = new Audio(currentWord.words.audio_url);
+        if (currentWord.words.pronunciation_audio_url) {
+            console.log(`[Audio] Playing: ${currentWord.words.pronunciation_audio_url}`);
+            const audio = new Audio(currentWord.words.pronunciation_audio_url);
             audio.play().catch(e => {
                 console.error('[Audio] Playback failed:', e);
                 alert('Audio playback failed. The source file might be missing or blocked by your browser.');
@@ -149,8 +170,8 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                             <div className="space-y-8">
                                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em]">{t('englishOrigin')}</span>
                                 <div className="space-y-4">
-                                    <h2 className="text-6xl font-black font-outfit tracking-tight">{currentWord.words.lemma}</h2>
-                                    <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.words.phonetic || '/.../'}</p>
+                                    <h2 className="text-6xl font-black font-outfit tracking-tight">{currentWord.words.word}</h2>
+                                    <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.words.phonetic_ipa || '/.../'}</p>
                                 </div>
                                 <button onClick={playAudio} className="p-5 bg-indigo-500/10 rounded-full hover:bg-indigo-500/20 text-indigo-400 transition-all active:scale-95">
                                     <Volume2 size={32} />
@@ -163,27 +184,27 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                 <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em]">{t('meaningUsage')}</span>
                                 <div className="space-y-6">
                                     <div className="space-y-3">
-                                        <h2 className="text-3xl font-bold font-outfit">{currentWord.words.lemma}</h2>
+                                        <h2 className="text-3xl font-bold font-outfit">{currentWord.words.word}</h2>
                                         <div className="h-px bg-white/5 w-1/4 mx-auto" />
                                     </div>
                                     <div className="space-y-4 w-full text-left max-h-[400px] overflow-y-auto pr-2 scrollbar-none">
-                                        {(isMeaningsExpanded ? currentWord.words.word_meanings : currentWord.words.word_meanings.slice(0, 3)).map((m, i) => (
+                                        {(isMeaningsExpanded ? currentWord.words.definitions : currentWord.words.definitions.slice(0, 3)).map((m, i) => (
                                             <div key={i} className="space-y-1 p-3 rounded-xl bg-white/5 border border-white/5">
                                                 <div className="flex items-center gap-2">
                                                     <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border", getPOSColor(m.part_of_speech))}>
-                                                        {m.part_of_speech}
+                                                        {m.part_of_speech || 'N/A'}
                                                     </span>
-                                                    <p className="text-xl font-bold text-white/90">{m.chinese_translation}</p>
+                                                    <p className="text-xl font-bold text-white/90">{m.definition_text_zh}</p>
                                                 </div>
-                                                <p className="text-xs text-white/40 italic leading-tight pl-1">{m.english_definition}</p>
+                                                <p className="text-xs text-white/40 italic leading-tight pl-1">{m.definition_text_en}</p>
                                             </div>
                                         ))}
-                                        {currentWord.words.word_meanings.length > 3 && (
+                                        {currentWord.words.definitions.length > 3 && (
                                             <button
                                                 onClick={() => setIsMeaningsExpanded(!isMeaningsExpanded)}
                                                 className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-indigo-400/60 hover:text-indigo-400 transition-colors"
                                             >
-                                                {isMeaningsExpanded ? t('showLess') : t('moreMeanings', { count: currentWord.words.word_meanings.length - 3 })}
+                                                {isMeaningsExpanded ? t('showLess') : t('moreMeanings', { count: currentWord.words.definitions.length - 3 })}
                                             </button>
                                         )}
                                     </div>
@@ -195,7 +216,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                             <div className="space-y-8 w-full">
                                 <span className="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em]">{t('selfAssessment')}</span>
                                 <div className="space-y-2">
-                                    <h3 className="text-4xl font-black font-outfit">{currentWord.words.lemma}</h3>
+                                    <h3 className="text-4xl font-black font-outfit">{currentWord.words.word}</h3>
                                     <div className="text-white/40 text-sm">{t('howEasy')}</div>
                                 </div>
 
@@ -288,16 +309,31 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                         <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-[0.2em]">{t('contextualUsage')}</span>
                     </div>
                     <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-none">
-                        {currentWord.words.word_meanings.some(m => m.example_sentence) ? (
-                            currentWord.words.word_meanings.map((m, i) => m.example_sentence && (
-                                <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.08] transition-colors">
+                        {/* Per-Definition Examples */}
+                        {currentWord.words.definitions.map((d, di) => (
+                            d.examples && d.examples.map((ex, ei) => (
+                                <div key={`def-${di}-${ei}`} className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.08] transition-colors">
                                     <p className="text-sm text-white/80 leading-relaxed italic">
-                                        &quot;{m.example_sentence}&quot;
+                                        &quot;{ex.example_en}&quot;
                                     </p>
+                                    <p className="text-xs text-white/40 mt-1">{ex.example_zh}</p>
                                 </div>
                             ))
-                        ) : (
-                            <p className="text-xs text-white/20 italic text-center py-4">{t('noExamples')}</p>
+                        ))}
+
+                        {/* General Word Examples */}
+                        {currentWord.words.general_examples && currentWord.words.general_examples.map((ex, ei) => (
+                            <div key={`gen-${ei}`} className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition-colors">
+                                <p className="text-sm text-white/80 leading-relaxed italic">
+                                    &quot;{ex.example_en}&quot;
+                                </p>
+                                <p className="text-xs text-white/40 mt-1">{ex.example_zh}</p>
+                            </div>
+                        ))}
+
+                        {/* Fallback if no examples anywhere */}
+                        {!currentWord.words.definitions.some(d => d.examples && d.examples.length > 0) && (!currentWord.words.general_examples || currentWord.words.general_examples.length === 0) && (
+                            <p className="text-center py-8 text-white/20 text-xs italic">{t('noExamples')}</p>
                         )}
                     </div>
                 </motion.div>

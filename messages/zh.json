@@ -74,6 +74,7 @@
         "addWordsDate": "+ 补卡 / 添加单词",
         "closeDetail": "关闭详情",
         "example": "例句",
+        "usageExamples": "语境用法",
         "wordsCount": "{count} 个单词"
     },
     "auth": {
