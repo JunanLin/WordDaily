@@ -12,12 +12,10 @@ const withPWA = withPWAInit({
 });
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default withPWA(withNextIntl(nextConfig));
-
-module.exports = {
+const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
 };
+
+export default withPWA(withNextIntl(nextConfig));
