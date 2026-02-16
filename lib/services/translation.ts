@@ -9,6 +9,10 @@ export async function translateToChinese(text: string): Promise<string | null> {
     const configUrl = process.env.TRANSLATE_URL;
     const apiKey = process.env.TRANSLATE_API_KEY;
 
+    if (!text || !text.trim()) {
+        return null;
+    }
+
     // Handle Google Translate API
     if (configUrl?.includes('googleapis.com') || configUrl?.includes('google')) {
         try {

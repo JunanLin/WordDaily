@@ -1,81 +1,90 @@
-export interface DictionaryData {
-    lemma: string;
-    phonetic?: string;
-    audioUrl?: string;
-    meanings: Array<{
-        partOfSpeech: string;
-        definitions: Array<{
-            definition: string;
-            example?: string;
-        }>;
-    }>;
-}
-
-interface DictionaryMeaning {
+export interface WordnikDefinition {
     partOfSpeech: string;
-    definitions: Array<{
-        definition: string;
-        example?: string;
-    }>;
+    text: string;
+    sourceDictionary: string;
+    exampleUses?: Array<{ text: string }>;
 }
 
-interface DictionaryEntry {
+export interface WordnikExample {
+    text: string;
+    title: string;
+}
+
+export interface WordnikAudio {
+    fileUrl: string;
+    audioType: string;
+}
+
+export interface DictionaryData {
     word: string;
     phonetic?: string;
-    phonetics: Array<{
-        audio: string;
-    }>;
-    meanings: Array<{
+    audioUrl?: string;
+    definitions: Array<{
         partOfSpeech: string;
-        definitions: Array<{
-            definition: string;
-            example?: string;
-        }>;
+        definition: string;
+        examples?: string[];
+    }>;
+    examples: Array<{
+        text: string;
     }>;
 }
 
+const WORDNIK_BASE_URL = 'https://api.wordnik.com/v4';
+
 export async function fetchDictionaryData(word: string): Promise<DictionaryData | null> {
-    console.log(`[Dictionary] Fetching data for: ${word}`);
+    const apiKey = process.env.WORDNIK_API_KEY;
+    if (!apiKey || apiKey.includes('PLACEHOLDER')) {
+        console.warn('[Dictionary] Wordnik API key is missing or not set.');
+        return null;
+    }
+
+    console.log(`[Dictionary] Fetching Wordnik data for: ${word}`);
+    const normalizedWord = word.trim().toLowerCase();
+
     try {
-        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-        if (!response.ok) return null;
+        const [defsRes, examplesRes, audioRes, pronunciationsRes] = await Promise.all([
+            fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/definitions?limit=5&includeRelated=false&useCanonical=false&includeTags=false&api_key=${apiKey}`),
+            fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/examples?includeDuplicates=false&useCanonical=false&limit=5&api_key=${apiKey}`),
+            fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/audio?useCanonical=false&limit=1&api_key=${apiKey}`),
+            fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/pronunciations?useCanonical=false&limit=1&api_key=${apiKey}`)
+        ]);
 
-        const data: DictionaryEntry[] = await response.json();
-        if (!Array.isArray(data) || data.length === 0) return null;
+        if (!defsRes.ok) {
+            console.error(`[Dictionary] Failed to fetch definitions: ${defsRes.status}`);
+            return null;
+        }
 
-        const allMeanings: DictionaryMeaning[] = [];
-        let firstPhonetic = '';
-        let firstAudio = '';
+        const definitions: WordnikDefinition[] = await defsRes.json();
+        const examplesData = await examplesRes.json();
+        const examples: WordnikExample[] = examplesData.examples || [];
+        const audio: WordnikAudio[] = await audioRes.json();
+        const pronunciations = await pronunciationsRes.json();
 
-        // Iterate through all entries to get a comprehensive definition set
-        data.forEach((entry) => {
-            if (!firstPhonetic && entry.phonetic) firstPhonetic = entry.phonetic;
-            if (!firstAudio) {
-                const audio = entry.phonetics?.find((p) => p.audio && p.audio.length > 0)?.audio;
-                if (audio) {
-                    firstAudio = audio.startsWith('//') ? `https:${audio}` : audio;
-                }
-            }
+        const filteredDefs = definitions
+            .filter(d => d.text && d.text.trim())
+            .map(d => ({
+                partOfSpeech: d.partOfSpeech,
+                definition: d.text,
+                examples: d.exampleUses?.map(ex => ex.text)
+            }));
 
-            entry.meanings.forEach((m) => {
-                allMeanings.push({
-                    partOfSpeech: m.partOfSpeech,
-                    definitions: m.definitions.map((d) => ({
-                        definition: d.definition,
-                        example: d.example,
-                    })),
-                });
-            });
-        });
+        const filteredEx = examples
+            .filter(e => e.text && e.text.trim())
+            .map(e => ({
+                text: e.text
+            }));
+
+        if (filteredDefs.length === 0) return null;
 
         return {
-            lemma: data[0].word,
-            phonetic: firstPhonetic,
-            audioUrl: firstAudio,
-            meanings: allMeanings,
+            word: normalizedWord,
+            phonetic: pronunciations[0]?.raw || undefined,
+            audioUrl: audio[0]?.fileUrl || undefined,
+            definitions: filteredDefs,
+            examples: filteredEx
         };
     } catch (error) {
-        console.error('Error fetching dictionary data:', error);
+        console.error('[Dictionary] Error fetching from Wordnik:', error);
         return null;
     }
 }

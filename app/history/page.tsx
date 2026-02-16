@@ -13,13 +13,16 @@ export default async function HistoryPage() {
     .select(`
       *,
       words (
-        lemma,
-        phonetic,
-        word_meanings (
+        word,
+        phonetic_ipa,
+        definitions (
           part_of_speech,
-          chinese_translation,
-          english_definition,
-          example_sentence
+          definition_text_zh,
+          definition_text_en,
+          examples (
+            example_en,
+            example_zh
+          )
         )
       )
     `)

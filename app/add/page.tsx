@@ -22,7 +22,7 @@ export default function AddWordPage() {
 
         try {
             const res = await ingestWord(word.trim(), shouldLemmatize);
-            setResult({ success: true, message: t('success', { word: res.lemma }) });
+            setResult({ success: true, message: t('success', { word: res.word }) });
             setWord('');
             // No redirect, stay on page to add more words
         } catch (error: unknown) {
