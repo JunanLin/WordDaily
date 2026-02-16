@@ -11,7 +11,6 @@ export default function AddWordPage() {
     const [word, setWord] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
-    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
