@@ -5,9 +5,10 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const withPWA = withPWAInit({
     dest: "public",
-    disable: process.env.NODE_ENV === "development",
+    disable: false, // Enabled in dev to allow testing push notifications
     register: true,
     skipWaiting: true,
+    customWorkerDir: "worker",
 });
 
 /** @type {import('next').NextConfig} */

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Target, Bell, Clock, Globe, Save, Loader2 } from 'lucide-react';
+import { Target, Bell, Clock, Globe, Save, Loader2, SendHorizonal } from 'lucide-react';
 import { updateUserSettings, savePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
 import { subscribeToPush } from '@/lib/push-notifications';
@@ -22,6 +22,7 @@ interface SettingsFormProps {
 export default function SettingsForm({ profile }: SettingsFormProps) {
     const t = useTranslations('settings');
     const [loading, setLoading] = useState(false);
+    const [testLoading, setTestLoading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const timezones = useMemo(() => getModernTimezones(), []);
 
@@ -46,6 +47,20 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
             setStatus({ type: 'error', message: t('error') });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleTestNotification = async () => {
+        setTestLoading(true);
+        setStatus(null);
+        try {
+            const res = await fetch('/api/notifications/test', { method: 'POST' });
+            if (!res.ok) throw new Error('Request failed');
+            setStatus({ type: 'success', message: t('testNotificationSuccess') });
+        } catch {
+            setStatus({ type: 'error', message: t('testNotificationError') });
+        } finally {
+            setTestLoading(false);
         }
     };
 
@@ -179,6 +194,17 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                     ))}
                                 </select>
                             </div>
+
+                            {/* Test Notification Button */}
+                            <button
+                                type="button"
+                                onClick={handleTestNotification}
+                                disabled={testLoading}
+                                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-bold hover:bg-pink-500/20 transition-colors disabled:opacity-50"
+                            >
+                                {testLoading ? <Loader2 className="animate-spin" size={16} /> : <SendHorizonal size={16} />}
+                                {t('sendTestNotification')}
+                            </button>
                         </div>
                     )}
                     <p className="text-xs text-white/30">{t('notificationsDesc')}</p>

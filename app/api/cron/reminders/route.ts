@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import webpush from 'web-push';
+import { sendPushToUser } from '@/lib/send-notification';
 import { NextResponse } from 'next/server';
 
 export async function GET(_request: Request) {
@@ -9,30 +9,12 @@ export async function GET(_request: Request) {
         return new Response('Unauthorized', { status: 401 });
     }
 
-    if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-        console.error('VAPID keys are missing');
-        return NextResponse.json({ error: 'VAPID keys missing' }, { status: 500 });
-    }
-
-    webpush.setVapidDetails(
-        'mailto:admin@worddaily.app',
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-        process.env.VAPID_PRIVATE_KEY
-    );
-
     const supabase = createClient();
 
-    // 1. Get users with notifications enabled and valid subscriptions
+    // 1. Get users with notifications enabled
     const { data: users, error: usersError } = await supabase
         .from('users')
-        .select(`
-            id,
-            push_subscriptions (
-                endpoint,
-                p256dh,
-                auth
-            )
-        `)
+        .select('id')
         .eq('notifications_enabled', true);
 
     if (usersError) {
@@ -59,35 +41,16 @@ export async function GET(_request: Request) {
         }
 
         if (count && count > 0) {
-            const payload = JSON.stringify({
-                title: 'You have words to review 📚',
-                body: `You have ${count} words ready for review today.`,
-                url: '/review'
-            });
-
-            // Send to all subscriptions for this user
-            const subscriptions = user.push_subscriptions;
-            if (subscriptions && Array.isArray(subscriptions)) {
-                for (const sub of subscriptions) {
-                    try {
-                        await webpush.sendNotification({
-                            endpoint: sub.endpoint,
-                            keys: {
-                                p256dh: sub.p256dh,
-                                auth: sub.auth
-                            }
-                        }, payload);
-                        results.push({ userId: user.id, status: 'sent' });
-                    } catch (error) {
-                        console.error(`Error sending push to user ${user.id}:`, error);
-                        // Optional: remove invalid subscription
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        if ((error as any).statusCode === 410) {
-                            await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
-                        }
-                        results.push({ userId: user.id, status: 'failed', error });
-                    }
-                }
+            try {
+                const result = await sendPushToUser(user.id, {
+                    title: 'You have words to review 📚',
+                    body: `You have ${count} words ready for review today.`,
+                    url: '/review',
+                });
+                results.push({ userId: user.id, ...result });
+            } catch (error) {
+                console.error(`Error sending push to user ${user.id}:`, error);
+                results.push({ userId: user.id, sent: 0, failed: 1 });
             }
         }
     }
@@ -95,6 +58,6 @@ export async function GET(_request: Request) {
     return NextResponse.json({
         success: true,
         processed: users.length,
-        notificationsSent: results.filter(r => r.status === 'sent').length
+        notificationsSent: results.reduce((sum, r) => sum + r.sent, 0),
     });
 }

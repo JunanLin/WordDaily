@@ -102,6 +102,9 @@
         "success": "设置已更新！",
         "error": "更新设置失败。",
         "pushError": "启用通知失败，请检查浏览器权限。",
+        "sendTestNotification": "发送测试",
+        "testNotificationSuccess": "测试通知已发送！",
+        "testNotificationError": "发送测试通知失败。",
         "tutorial": "使用教程"
     },
     "buttons": {

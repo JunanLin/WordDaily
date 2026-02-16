@@ -24,8 +24,7 @@ export default function AddWordPage() {
             const res = await ingestWord(word.trim());
             setResult({ success: true, message: t('success', { word: res.lemma }) });
             setWord('');
-            // Optional: redirect to dashboard after a delay
-            setTimeout(() => router.push('/'), 2000);
+            // No redirect, stay on page to add more words
         } catch (error: unknown) {
             setResult({ success: false, message: (error as Error).message || t('error') });
         } finally {

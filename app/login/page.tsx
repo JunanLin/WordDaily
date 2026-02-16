@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Loader2, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function LoginPage() {
     const t = useTranslations('auth');
@@ -41,6 +42,11 @@ export default function LoginPage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8">
+            {/* Language Switcher */}
+            <div className="w-full flex justify-end">
+                <LanguageSwitcher />
+            </div>
+
             <div className="text-center space-y-2">
                 <h2 className="text-4xl font-bold font-outfit bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                     {isSignUp ? t('join') : t('welcomeBack')}

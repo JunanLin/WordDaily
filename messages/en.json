@@ -102,6 +102,9 @@
         "success": "Settings updated successfully!",
         "error": "Failed to update settings.",
         "pushError": "Failed to enable notifications. Please check browser permissions.",
+        "sendTestNotification": "Send Test",
+        "testNotificationSuccess": "Test notification sent!",
+        "testNotificationError": "Failed to send test notification.",
         "tutorial": "How to Use"
     },
     "buttons": {
