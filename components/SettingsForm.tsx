@@ -55,10 +55,15 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
         setStatus(null);
         try {
             const res = await fetch('/api/notifications/test', { method: 'POST' });
-            if (!res.ok) throw new Error('Request failed');
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || t('testNotificationError'));
+            }
+
             setStatus({ type: 'success', message: t('testNotificationSuccess') });
-        } catch {
-            setStatus({ type: 'error', message: t('testNotificationError') });
+        } catch (error: any) {
+            setStatus({ type: 'error', message: error.message || t('testNotificationError') });
         } finally {
             setTestLoading(false);
         }

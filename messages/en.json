@@ -106,6 +106,7 @@
         "pushNotSupported": "Push notifications are not supported in this browser.",
         "pushConfigError": "VAPID configuration error.",
         "pushFailed": "Failed to subscribe to push notifications.",
+        "pushIOSHelp": "To enable notifications on iPhone, please open this app in Safari, tap the Share button, and 'Add to Home Screen'.",
         "sendTestNotification": "Send Test",
         "testNotificationSuccess": "Test notification sent!",
         "testNotificationError": "Failed to send test notification.",

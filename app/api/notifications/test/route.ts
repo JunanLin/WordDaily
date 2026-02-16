@@ -17,11 +17,21 @@ export async function POST() {
             url: '/settings',
         });
 
+        if (result.sent === 0) {
+            return NextResponse.json(
+                {
+                    error: 'No active devices reached. Please toggle notifications OFF and then ON again in Settings to refresh your connection.',
+                    ...result
+                },
+                { status: 400 }
+            );
+        }
+
         return NextResponse.json({ success: true, ...result });
     } catch (error) {
         console.error('Test notification error:', error);
         return NextResponse.json(
-            { error: 'Failed to send test notification' },
+            { error: 'Server error while sending notification' },
             { status: 500 }
         );
     }
