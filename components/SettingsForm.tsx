@@ -163,8 +163,8 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
 
                     {form.notifications_enabled && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
-                                <div className="space-y-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2 flex flex-col items-center sm:items-start text-center sm:text-left">
                                     <div className="flex items-center gap-2 text-white/40">
                                         <Clock size={14} />
                                         <label className="text-[10px] font-bold uppercase tracking-wider">{t('newWords')}</label>
@@ -173,10 +173,10 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         type="time"
                                         value={form.day_reminder_time}
                                         onChange={(e) => setForm({ ...form, day_reminder_time: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium"
+                                        className="w-full max-w-[140px] sm:max-w-none bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium text-center sm:text-left"
                                     />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 flex flex-col items-center sm:items-start text-center sm:text-left">
                                     <div className="flex items-center gap-2 text-white/40">
                                         <Clock size={14} />
                                         <label className="text-[10px] font-bold uppercase tracking-wider">{t('reviewSession')}</label>
@@ -185,7 +185,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         type="time"
                                         value={form.review_reminder_time}
                                         onChange={(e) => setForm({ ...form, review_reminder_time: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium"
+                                        className="w-full max-w-[140px] sm:max-w-none bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium text-center sm:text-left"
                                     />
                                 </div>
                             </div>
