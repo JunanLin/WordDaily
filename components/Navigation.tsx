@@ -13,7 +13,6 @@ export default function Navigation() {
 
     const navItems = [
         { href: '/', icon: Home, label: t('dashboard') },
-        { href: '/add', icon: PlusCircle, label: t('addWord') },
         { href: '/review', icon: BookOpen, label: t('review') },
         { href: '/history', icon: History, label: t('history') },
         { href: '/settings', icon: Settings, label: t('settings') },

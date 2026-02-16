@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import {
     format,
     parseISO,
     isSameDay,
+    isSameMonth,
     startOfMonth,
     endOfMonth,
     eachDayOfInterval,
@@ -47,6 +48,7 @@ interface UserWord {
 
 interface HistoryListProps {
     history: UserWord[];
+    recentLookups: any[];
 }
 
 const getPOSColor = (pos: string) => {
@@ -58,7 +60,7 @@ const getPOSColor = (pos: string) => {
     return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
 };
 
-export default function HistoryList({ history }: HistoryListProps) {
+export default function HistoryList({ history: initialHistory, recentLookups }: HistoryListProps) {
     const t = useTranslations('history');
     const locale = useLocale();
     const dateLocale = locale === 'zh' ? zhCN : enUS;
@@ -68,7 +70,16 @@ export default function HistoryList({ history }: HistoryListProps) {
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const [visibleDaysCount, setVisibleDaysCount] = useState(3);
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [history, setHistory] = useState(initialHistory);
+    const [isPending, startTransition] = useTransition();
     const router = useRouter();
+
+    // Only update local history if the initialHistory changes AND we are not in the middle of a transition
+    useEffect(() => {
+        if (!isPending) {
+            setHistory(initialHistory);
+        }
+    }, [initialHistory, isPending]);
 
     // Prevent body scroll when modal is open
     useEffect(() => {
@@ -97,15 +108,28 @@ export default function HistoryList({ history }: HistoryListProps) {
         if (!confirm(t('deleteConfirm'))) return;
 
         setIsDeleting(userWordId);
-        try {
-            await deleteUserWord(userWordId);
-            router.refresh();
-        } catch (error) {
-            console.error('Delete failed:', error);
-            alert(t('deleteFailed'));
-        } finally {
-            setIsDeleting(null);
-        }
+
+        // Optimistic update
+        setHistory(prev => prev.filter(w => w.id !== userWordId));
+
+        startTransition(async () => {
+            try {
+                const res = await deleteUserWord(userWordId);
+                if (res.success) {
+                    router.refresh();
+                } else {
+                    // Rollback on failure
+                    setHistory(initialHistory);
+                    alert(t('deleteFailed'));
+                }
+            } catch (error) {
+                console.error('Delete failed:', error);
+                setHistory(initialHistory);
+                alert(t('deleteFailed'));
+            } finally {
+                setIsDeleting(null);
+            }
+        });
     };
 
     // Calendar logic
@@ -194,7 +218,33 @@ export default function HistoryList({ history }: HistoryListProps) {
                         </div>
                     </div>
 
-                    <div className="space-y-0.5 px-2">
+                    <div className="space-y-4">
+                        <div className="px-2">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">Recent Searches</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2 px-2">
+                            {recentLookups && recentLookups.length > 0 ? (
+                                recentLookups.map((lookup) => (
+                                    <button
+                                        key={lookup.id}
+                                        onClick={() => setSelectedWord({
+                                            id: lookup.id,
+                                            created_at: lookup.created_at,
+                                            next_review_at: '',
+                                            words: lookup.words
+                                        })}
+                                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm hover:bg-white/10 transition-colors"
+                                    >
+                                        {lookup.words.word}
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="text-xs text-white/20 italic px-2">No recent searches</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="space-y-0.5 px-2 pt-4">
                         <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">{t('recentSessions')}</h3>
                     </div>
 

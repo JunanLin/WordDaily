@@ -1,7 +1,6 @@
 {
     "nav": {
         "dashboard": "主页",
-        "addWord": "添加单词",
         "review": "复习",
         "history": "历史",
         "settings": "设置"
@@ -65,6 +64,7 @@
         "wordsLearned": "已学单词",
         "recentSessions": "最近学习",
         "todaysWords": "今日单词",
+        "recentSearches": "最近搜索",
         "showMore": "显示更多 (剩余 {count} 天)",
         "backToHistory": "返回历史",
         "vocabularyArchive": "词汇归档",

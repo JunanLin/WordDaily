@@ -1,7 +1,6 @@
 {
     "nav": {
-        "dashboard": "Dashboard",
-        "addWord": "Add Word",
+        "dashboard": "Home",
         "review": "Review",
         "history": "History",
         "settings": "Settings"
@@ -65,6 +64,7 @@
         "wordsLearned": "Words Learned",
         "recentSessions": "Recent Sessions",
         "todaysWords": "Today's Words",
+        "recentSearches": "Recent Searches",
         "showMore": "Show More ({count} remaining)",
         "backToHistory": "Back to History",
         "vocabularyArchive": "Vocabulary Archive",
