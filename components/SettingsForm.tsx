@@ -5,7 +5,6 @@ import { Target, Bell, Clock, Globe, Save, Loader2, SendHorizonal } from 'lucide
 import { updateUserSettings, savePushSubscription, deletePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
 import { subscribeToPush, unsubscribeFromPush } from '@/lib/push-notifications';
-import { getModernTimezones } from '@/lib/timezones';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -24,14 +23,12 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
     const [loading, setLoading] = useState(false);
     const [testLoading, setTestLoading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
-    const timezones = useMemo(() => getModernTimezones(), []);
 
     const [form, setForm] = useState({
         daily_goal: profile.daily_goal,
         notifications_enabled: profile.notifications_enabled,
         day_reminder_time: profile.day_reminder_time,
         review_reminder_time: profile.review_reminder_time,
-        timezone: profile.timezone || 'UTC',
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -166,7 +163,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
 
                     {form.notifications_enabled && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-white/40">
                                         <Clock size={14} />
@@ -176,7 +173,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         type="time"
                                         value={form.day_reminder_time}
                                         onChange={(e) => setForm({ ...form, day_reminder_time: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -188,27 +185,17 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         type="time"
                                         value={form.review_reminder_time}
                                         onChange={(e) => setForm({ ...form, review_reminder_time: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium"
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-white/40">
-                                    <Globe size={14} />
-                                    <label className="text-[10px] font-bold uppercase tracking-wider">{t('timezone')}</label>
+                            <div className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 flex items-center gap-3">
+                                < Globe size={16} className="text-indigo-400 shrink-0" />
+                                <div className="text-[10px] text-white/40 leading-tight">
+                                    <p className="font-bold text-white/60 mb-0.5 uppercase tracking-wider">{t('timezone')}</p>
+                                    <p>Automatic: {profile.timezone || 'Detecting...'}</p>
                                 </div>
-                                <select
-                                    value={form.timezone}
-                                    onChange={(e) => setForm({ ...form, timezone: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium appearance-none"
-                                >
-                                    {timezones.map((tz) => (
-                                        <option key={tz.value} value={tz.value} className="bg-slate-900">
-                                            {tz.label}
-                                        </option>
-                                    ))}
-                                </select>
                             </div>
 
                             {/* Test Notification Button */}
