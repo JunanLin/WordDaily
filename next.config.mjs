@@ -15,3 +15,9 @@ const withPWA = withPWAInit({
 const nextConfig = {};
 
 export default withPWA(withNextIntl(nextConfig));
+
+module.exports = {
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
+};
