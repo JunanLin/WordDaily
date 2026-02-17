@@ -9,16 +9,23 @@ import { useTranslations } from 'next-intl';
 interface UserWord {
     id: string;
     next_review_at: string;
-    words: {
+    dictionary: {
         word: string;
-        phonetic_ipa?: string;
-        meanings?: Array<{ chinese_meaning: string }>;
+        phonetic?: string;
+        translation?: string;
     };
 }
 
 interface TodayListClientProps {
     initialWords: UserWord[];
 }
+
+const parseMeanings = (translation: string) => {
+    if (!translation) return '';
+    const line = translation.split(/\r?\n|\\n/)[0];
+    const match = line.match(/^([a-z]+\.)\s*(.*)/);
+    return match ? match[2].trim() : line.trim();
+};
 
 export default function TodayListClient({ initialWords }: TodayListClientProps) {
     const t = useTranslations('history');
@@ -73,10 +80,10 @@ export default function TodayListClient({ initialWords }: TodayListClientProps) 
             {words.map((uw) => (
                 <div key={uw.id} className="card py-4 px-5 flex items-center justify-between group">
                     <div className="space-y-0.5">
-                        <h4 className="text-lg font-bold">{uw.words.word}</h4>
+                        <h4 className="text-lg font-bold">{uw.dictionary.word}</h4>
                         <div className="flex items-center gap-2">
-                            <p className="text-xs text-white/40 italic">{uw.words.phonetic_ipa}</p>
-                            <p className="text-xs text-white/60">{uw.words.meanings?.[0]?.chinese_meaning}</p>
+                            <p className="text-xs text-white/40 italic">{uw.dictionary.phonetic || '/.../'}</p>
+                            <p className="text-xs text-white/60 line-clamp-1">{parseMeanings(uw.dictionary.translation || '')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">

@@ -20,9 +20,10 @@ export default async function TodayPage() {
         .select(`
             id,
             next_review_at,
-            words (
+            dictionary (
                 word,
-                phonetic_ipa
+                phonetic,
+                translation
             )
         `)
         .eq('user_id', user.id)
