@@ -8,155 +8,111 @@ import { revalidatePath } from 'next/cache'
 import { subDays, isAfter } from 'date-fns'
 
 /**
- * Shared dictionary cache service.
- * Fetches word data from Wordnik and translates it if not already in DB or if stale (1 month).
+ * Shared dictionary service using the unified 'dictionary' table.
  */
 export async function getOrCreateWord(word: string) {
     const supabase = createClient()
     const normalized = word.trim().toLowerCase()
-    const thirtyDaysAgo = subDays(new Date(), 30)
 
-    // 1. Check if word already exists in cache
-    const { data: existingWord } = await supabase
-        .from('words')
-        .select(`
-            *,
-            definitions (
-                *,
-                examples (*)
-            ),
-            general_examples:examples!examples_word_id_fkey (*)
-        `)
+    // 1. Check if word exists in the dictionary
+    const { data: entry, error: fetchError } = await supabase
+        .from('dictionary')
+        .select('*')
         .eq('word', normalized)
         .maybeSingle()
 
-    // If word exists, has definitions, and is not stale, return it
-    if (existingWord &&
-        existingWord.definitions &&
-        existingWord.definitions.length > 0 &&
-        isAfter(new Date(existingWord.updated_at), thirtyDaysAgo)) {
-        console.log(`[DictionaryCache] Fresh hit for: ${normalized}`);
-        return existingWord;
+    if (fetchError) {
+        console.error(`[Dictionary] Error fetching ${normalized}:`, fetchError);
+        throw fetchError;
     }
 
-    console.log(`[DictionaryCache] Processing ${existingWord ? (isAfter(new Date(existingWord.updated_at), thirtyDaysAgo) ? 'incomplete' : 'stale') : 'miss'} for: ${normalized}...`);
+    // If word doesn't exist at all, check Wordnik as a total fallback
+    if (!entry) {
+        const dictData = await fetchDictionaryData(normalized);
+        if (!dictData) return null;
 
-    // 2. Fetch from Wordnik
-    const dictData = await fetchDictionaryData(normalized);
-    if (!dictData) {
-        if (existingWord) return existingWord; // Return stale if API fails but we have something
-        throw new Error(`Could not find dictionary data for "${normalized}"`);
-    }
+        // Create a new entry from Wordnik data
+        // For new words not in ECDICT, we can populate translation from Google
+        const translation = await translateToChinese(dictData.definitions[0]?.definition || '');
 
-    let wordRecord = existingWord;
-
-    // 3. Insert or Update words table
-    if (!wordRecord) {
-        const { data: newWord, error: wordError } = await supabase
-            .from('words')
-            .insert({
-                word: normalized,
-                phonetic_ipa: dictData.phonetic,
-                pronunciation_audio_url: dictData.audioUrl,
-                updated_at: new Date().toISOString()
-            })
-            .select()
-            .single()
-
-        if (wordError) {
-            if (wordError.code === '23505') {
-                const { data: refetched } = await supabase.from('words').select('*').eq('word', normalized).single();
-                wordRecord = refetched;
-            } else throw wordError;
-        } else {
-            wordRecord = newWord;
-        }
-    } else {
-        // Update existing word metadata and timestamp
-        const { data: updatedWord, error: updateError } = await supabase
-            .from('words')
-            .update({
-                phonetic_ipa: dictData.phonetic,
-                pronunciation_audio_url: dictData.audioUrl,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', wordRecord.id)
-            .select()
-            .single()
-
-        if (!updateError) wordRecord = updatedWord;
-    }
-
-    // 4. Populate/Refresh definitions and examples
-    // If stale or missing, clear and re-populate
-    if (!wordRecord.definitions || wordRecord.definitions.length === 0 || !isAfter(new Date(existingWord?.updated_at || 0), thirtyDaysAgo)) {
-        // Delete old definitions (cascades to examples)
-        if (wordRecord.id) {
-            await supabase.from('definitions').delete().eq('word_id', wordRecord.id);
-            await supabase.from('examples').delete().eq('word_id', wordRecord.id);
-        }
-
-        const definitionsWithExamples = [];
-        for (const def of dictData.definitions) {
-            const translatedDef = await translateToChinese(def.definition) || 'Translation pending...';
-            const { data: defRecord, error: defError } = await supabase
-                .from('definitions')
-                .insert({
-                    word_id: wordRecord.id,
-                    part_of_speech: def.partOfSpeech,
-                    definition_text_en: def.definition,
-                    definition_text_zh: translatedDef
-                })
-                .select()
-                .single()
-
-            if (defError) continue;
-
-            const examplesForThisDef = [];
-            if (def.examples && def.examples.length > 0) {
-                for (const exText of def.examples) {
-                    const translatedEx = await translateToChinese(exText) || 'Translation pending...';
-                    const { data: exRecord } = await supabase
-                        .from('examples')
-                        .insert({
-                            definition_id: defRecord.id,
-                            example_en: exText,
-                            example_zh: translatedEx
-                        })
-                        .select()
-                        .single()
-                    if (exRecord) examplesForThisDef.push(exRecord);
-                }
-            }
-            definitionsWithExamples.push({ ...defRecord, examples: examplesForThisDef });
-        }
-
-        // Handle General Examples
-        const generalExamples = [];
+        // Prepare examples JSON
+        const examples = [];
         if (dictData.examples && dictData.examples.length > 0) {
             for (const ex of dictData.examples) {
-                const translatedEx = await translateToChinese(ex.text) || 'Translation pending...';
-                const { data: exRecord } = await supabase
-                    .from('examples')
-                    .insert({
-                        word_id: wordRecord.id,
-                        example_en: ex.text,
-                        example_zh: translatedEx
-                    })
-                    .select()
-                    .single()
-                if (exRecord) generalExamples.push(exRecord);
+                const translated = await translateToChinese(ex.text) || 'Translation pending...';
+                examples.push({ en: ex.text, zh: translated });
             }
         }
 
-        return {
-            ...wordRecord,
-            definitions: definitionsWithExamples,
-            general_examples: generalExamples
-        };
+        const { data: newEntry, error: insertError } = await supabase
+            .from('dictionary')
+            .insert({
+                word: normalized,
+                phonetic: dictData.phonetic,
+                audio: dictData.audioUrl,
+                definition: dictData.definitions[0]?.definition,
+                translation: translation,
+                pos: dictData.definitions[0]?.partOfSpeech,
+                detail: { examples },
+                updated_at: new Date().toISOString()
+            })
+            .select()
+            .single()
+
+        if (insertError) {
+            if (insertError.code === '23505') {
+                const { data: refetched } = await supabase.from('dictionary').select('*').eq('word', normalized).single();
+                return refetched;
+            }
+            console.error(`[Dictionary] Insert error for ${normalized}:`, insertError);
+            return null;
+        }
+        return newEntry;
     }
 
-    return wordRecord;
+    // 2. Check if the entry needs enrichment (missing audio or examples)
+    const hasAudio = !!entry.audio;
+    const hasExamples = entry.detail && (entry.detail as any).examples && (entry.detail as any).examples.length > 0;
+
+    if (!hasAudio || !hasExamples) {
+        console.log(`[Dictionary] Enriching ${normalized} (Missing: ${!hasAudio ? 'audio ' : ''}${!hasExamples ? 'examples' : ''})...`);
+        const dictData = await fetchDictionaryData(normalized);
+
+        if (dictData) {
+            const updates: any = {
+                updated_at: new Date().toISOString()
+            };
+
+            if (!hasAudio && dictData.audioUrl) {
+                updates.audio = dictData.audioUrl;
+            }
+
+            if (!hasExamples && dictData.examples && dictData.examples.length > 0) {
+                const enrichedExamples = [];
+                for (const ex of dictData.examples) {
+                    const translated = await translateToChinese(ex.text) || 'Translation pending...';
+                    enrichedExamples.push({ en: ex.text, zh: translated });
+                }
+                updates.detail = {
+                    ...(entry.detail as any || {}),
+                    examples: enrichedExamples
+                };
+            }
+
+            if (Object.keys(updates).length > 1) { // more than just updated_at
+                const { data: updatedEntry, error: updateError } = await supabase
+                    .from('dictionary')
+                    .update(updates)
+                    .eq('id', entry.id)
+                    .select()
+                    .single()
+
+                if (!updateError) return updatedEntry;
+            }
+        }
+    }
+
+    return entry;
 }
 
 export async function lookupWord(rawWord: string, shouldLemmatize: boolean = true) {
@@ -166,34 +122,43 @@ export async function lookupWord(rawWord: string, shouldLemmatize: boolean = tru
         if (!user) return { success: false, error: 'Unauthorized' };
 
         const wordToProcess = shouldLemmatize ? getLemma(rawWord) : rawWord.trim().toLowerCase();
-        const wordRecord = await getOrCreateWord(wordToProcess);
+        const entry = await getOrCreateWord(wordToProcess);
+
+        if (!entry) {
+            return { success: false, error: 'word_not_found' };
+        }
 
         // Record lookup history
         await supabase.from('user_word_history').insert({
             user_id: user.id,
-            word_id: wordRecord.id,
+            word_id: entry.id,
             action_type: 'lookup'
         });
 
+        const detailObj = entry.detail as any || {};
+        const examples = detailObj.examples || [];
+
         return {
             success: true,
-            id: wordRecord.id,
-            word: wordRecord.word,
-            phonetic: wordRecord.phonetic_ipa,
-            audioUrl: wordRecord.pronunciation_audio_url,
-            definitions: wordRecord.definitions?.map((d: any) => ({
-                partOfSpeech: d.part_of_speech,
-                definition_en: d.definition_text_en,
-                definition_zh: d.definition_text_zh,
-                examples: d.examples ? d.examples.map((e: any) => ({
-                    en: e.example_en,
-                    zh: e.example_zh
-                })) : []
-            })) || [],
-            general_examples: wordRecord.general_examples ? wordRecord.general_examples.map((e: any) => ({
-                en: e.example_en,
-                zh: e.example_zh
-            })) : []
+            id: entry.id,
+            word: entry.word,
+            phonetic: entry.phonetic,
+            audioUrl: entry.audio,
+            exchange: entry.exchange,
+            tags: entry.tag,
+            posDist: entry.pos,
+            bnc: entry.bnc,
+            frq: entry.frq,
+            translation: entry.translation,
+            definition: entry.definition,
+            collins: entry.collins,
+            oxford: entry.oxford,
+            meanings: entry.translation ? entry.translation.split(/\r?\n|\\n/).map((line: string) => {
+                const match = line.match(/^([a-z]+\.)\s*(.*)/);
+                if (match) return { part_of_speech: match[1].replace('.', ''), chinese_meaning: match[2].trim() };
+                return { part_of_speech: entry.pos || 'n/a', chinese_meaning: line.trim() };
+            }).filter((m: any) => m.chinese_meaning) : [],
+            examples: examples
         }
     } catch (error: any) {
         console.error('[lookupWord] Error:', error);

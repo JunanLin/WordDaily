@@ -14,21 +14,24 @@ interface Example {
     example_zh: string;
 }
 
-interface WordDefinition {
+interface Meaning {
     part_of_speech: string;
-    definition_text_zh: string;
-    definition_text_en: string;
-    examples: Example[];
+    chinese_meaning: string;
 }
 
 interface ReviewWord {
     id: string;
-    words: {
+    dictionary: {
         word: string;
-        phonetic_ipa?: string;
-        pronunciation_audio_url?: string;
-        definitions: WordDefinition[];
-        general_examples?: Example[];
+        phonetic?: string;
+        translation?: string;
+        pos?: string;
+        tag?: string;
+        bnc?: number;
+        frq?: number;
+        exchange?: string;
+        detail?: any;
+        audio?: string;
     };
 }
 
@@ -38,15 +41,37 @@ interface ReviewSessionClientProps {
 
 const getPOSColor = (pos: string) => {
     const p = pos ? pos.toLowerCase() : '';
-    if (p.includes('noun')) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-    if (p.includes('verb')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-    if (p.includes('adj')) return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-    if (p.includes('adv')) return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+    if (p.includes('noun') || p === 'n') return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+    if (p.includes('verb') || p === 'v') return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+    if (p.includes('adj') || p === 'a') return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+    if (p.includes('adv') || p === 'r') return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
     return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
 };
 
-export default function ReviewSessionClient({ words }: ReviewSessionClientProps) {
+/**
+ * Helper to parse ECDICT translation string into meanings array
+ */
+const parseMeanings = (translation: string, fallbackPos?: string) => {
+    if (!translation) return [];
+    // Split by actual newlines or literal \n strings
+    return translation.split(/\r?\n|\\n/).map(line => {
+        const match = line.match(/^([a-z]+\.)\s*(.*)/);
+        if (match) return { part_of_speech: match[1].replace('.', ''), chinese_meaning: match[2].trim() };
+        return { part_of_speech: fallbackPos || 'N/A', chinese_meaning: line.trim() };
+    }).filter(m => m.chinese_meaning);
+};
+
+/**
+ * Helper to extract examples from dictionary detail JSON
+ */
+const parseExamples = (detail: any) => {
+    if (!detail || !detail.examples) return [];
+    return detail.examples;
+};
+
+export default function ReviewSessionClient({ words: initialWords }: ReviewSessionClientProps) {
     const t = useTranslations('review');
+    const [words] = useState(initialWords);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [step, setStep] = useState<'STUDY' | 'REVEAL' | 'SCORE'>('STUDY');
     const [score, setScore] = useState(10);
@@ -93,6 +118,15 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
         );
     }
 
+    if (!currentWord) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
+                <Loader2 className="animate-spin text-indigo-500" size={40} />
+                <p className="text-white/40">{t('loading') || 'Loading...'}</p>
+            </div>
+        );
+    }
+
 
     const handleSubmit = async () => {
         setLoading(true);
@@ -120,17 +154,36 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
         }
     };
 
+    const parseExchange = (exchange: string) => {
+        if (!exchange) return [];
+        const codes: Record<string, string> = {
+            p: '过去式',
+            d: '过去分词',
+            i: '现在分词',
+            '3': '第三人称单数',
+            r: '比较级',
+            t: '最高级',
+            s: '复数',
+            '0': '原型',
+            '1': '变换'
+        };
+
+        return exchange.split('/').map(part => {
+            const [code, val] = part.split(':');
+            return {
+                label: codes[code] || code,
+                value: val
+            };
+        });
+    };
+
     const playAudio = () => {
-        if (currentWord.words.pronunciation_audio_url) {
-            console.log(`[Audio] Playing: ${currentWord.words.pronunciation_audio_url}`);
-            const audio = new Audio(currentWord.words.pronunciation_audio_url);
+        if (currentWord.dictionary.audio) {
+            console.log(`[Audio] Playing: ${currentWord.dictionary.audio}`);
+            const audio = new Audio(currentWord.dictionary.audio);
             audio.play().catch(e => {
                 console.error('[Audio] Playback failed:', e);
-                alert('Audio playback failed. The source file might be missing or blocked by your browser.');
             });
-        } else {
-            console.warn('[Audio] No audio URL found for this word.');
-            alert('No pronunciation audio available for this word.');
         }
     };
 
@@ -160,59 +213,66 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                     transition={{ duration: 0.2 }}
                     className="w-full"
                 >
-                    <div className="card w-full min-h-[350px] flex flex-col items-center justify-center text-center p-8 space-y-6 relative overflow-hidden ring-1 ring-white/10 shadow-2xl">
-                        {/* Background Decorative Element */}
-                        <div className="absolute -top-10 -right-10 opacity-5 blur-2xl">
-                            <div className="w-40 h-40 bg-indigo-500 rounded-full" />
-                        </div>
-
+                    <div className="card w-full min-h-[400px] flex flex-col items-center justify-center text-center p-8 space-y-6 relative overflow-hidden ring-1 ring-white/10 shadow-2xl bg-[#121218]">
                         {step === 'STUDY' && (
                             <div className="space-y-8">
                                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em]">{t('englishOrigin')}</span>
                                 <div className="space-y-4">
-                                    <h2 className="text-6xl font-black font-outfit tracking-tight">{currentWord.words.word}</h2>
-                                    <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.words.phonetic_ipa || '/.../'}</p>
+                                    <h2 className="text-6xl font-black font-outfit tracking-tight">{currentWord.dictionary.word}</h2>
+                                    <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
                                 </div>
-                                <button onClick={playAudio} className="p-5 bg-indigo-500/10 rounded-full hover:bg-indigo-500/20 text-indigo-400 transition-all active:scale-95">
+                                <button
+                                    onClick={() => {
+                                        if (currentWord.dictionary.audio) {
+                                            new Audio(currentWord.dictionary.audio).play().catch(e => console.error(e));
+                                        }
+                                    }}
+                                    className="p-5 bg-indigo-500/10 rounded-full hover:bg-indigo-500/20 text-indigo-400 transition-all active:scale-95"
+                                >
                                     <Volume2 size={32} />
                                 </button>
                             </div>
                         )}
 
                         {step === 'REVEAL' && (
-                            <div className="space-y-8 w-full">
-                                <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em]">{t('meaningUsage')}</span>
-                                <div className="space-y-6">
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-center gap-3">
-                                            <h2 className="text-3xl font-bold font-outfit">{currentWord.words.word}</h2>
-                                            <button onClick={playAudio} className="p-2 bg-purple-500/10 rounded-full hover:bg-purple-500/20 text-purple-400 transition-all active:scale-95">
-                                                <Volume2 size={18} />
-                                            </button>
+                            <div className="space-y-6 w-full max-w-lg">
+                                <div className="space-y-2">
+                                    <h2 className="text-4xl font-black font-outfit tracking-tight">{currentWord.dictionary.word}</h2>
+                                    <p className="text-white/20 font-mono text-xs tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
+                                </div>
+
+                                {/* Stats & Metadata */}
+                                {(currentWord.dictionary.tag || currentWord.dictionary.pos || currentWord.dictionary.bnc || currentWord.dictionary.frq || currentWord.dictionary.exchange) && (
+                                    <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-3">
+                                        <div className="flex flex-wrap gap-2 justify-center">
+                                            {currentWord.dictionary.tag?.split(' ').filter(Boolean).map((tag: string) => (
+                                                <span key={tag} className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-300">
+                                                    {t(`tag_${tag}`)}
+                                                </span>
+                                            ))}
                                         </div>
-                                        <div className="h-px bg-white/5 w-1/4 mx-auto" />
-                                    </div>
-                                    <div className="space-y-4 w-full text-left max-h-[400px] overflow-y-auto pr-2 scrollbar-none">
-                                        {(isMeaningsExpanded ? currentWord.words.definitions : currentWord.words.definitions.slice(0, 3)).map((m, i) => (
-                                            <div key={i} className="space-y-1 p-3 rounded-xl bg-white/5 border border-white/5">
-                                                <div className="flex items-center gap-2">
-                                                    <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border", getPOSColor(m.part_of_speech))}>
-                                                        {m.part_of_speech || 'N/A'}
-                                                    </span>
-                                                    <p className="text-xl font-bold text-white/90">{m.definition_text_zh}</p>
-                                                </div>
-                                                <p className="text-xs text-white/40 italic leading-tight pl-1">{m.definition_text_en}</p>
+                                        {currentWord.dictionary.exchange && (
+                                            <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center text-[10px]">
+                                                {parseExchange(currentWord.dictionary.exchange).map((ex: any, idx: number) => (
+                                                    <div key={idx} className="flex gap-1.5">
+                                                        <span className="text-white/20 uppercase font-black">{ex.label}</span>
+                                                        <span className="text-indigo-400 font-bold">{ex.value}</span>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                        {currentWord.words.definitions.length > 3 && (
-                                            <button
-                                                onClick={() => setIsMeaningsExpanded(!isMeaningsExpanded)}
-                                                className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-indigo-400/60 hover:text-indigo-400 transition-colors"
-                                            >
-                                                {isMeaningsExpanded ? t('showLess') : t('moreMeanings', { count: currentWord.words.definitions.length - 3 })}
-                                            </button>
                                         )}
                                     </div>
+                                )}
+
+                                <div className="space-y-3 text-left">
+                                    {parseMeanings(currentWord.dictionary.translation || '', currentWord.dictionary.pos).map((m: any, i: number) => (
+                                        <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3">
+                                            <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border", getPOSColor(m.part_of_speech))}>
+                                                {m.part_of_speech || 'N/A'}
+                                            </span>
+                                            <p className="text-lg font-bold text-white/90">{m.chinese_meaning}</p>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -221,12 +281,7 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                             <div className="space-y-8 w-full">
                                 <span className="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em]">{t('selfAssessment')}</span>
                                 <div className="space-y-2">
-                                    <div className="flex items-center justify-center gap-3">
-                                        <h3 className="text-4xl font-black font-outfit">{currentWord.words.word}</h3>
-                                        <button onClick={playAudio} className="p-2 bg-green-500/10 rounded-full hover:bg-green-500/20 text-green-400 transition-all active:scale-95">
-                                            <Volume2 size={20} />
-                                        </button>
-                                    </div>
+                                    <h3 className="text-4xl font-black font-outfit">{currentWord.dictionary.word}</h3>
                                     <div className="text-white/40 text-sm">{t('howEasy')}</div>
                                 </div>
 
@@ -252,13 +307,9 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                                         step="1"
                                         value={score}
                                         onChange={(e) => setScore(parseInt(e.target.value))}
-                                        className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
+                                        className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-500"
                                     />
                                 </div>
-
-                                {score <= 3 && <p className="text-xs text-red-400/60">{t('nextReviewSoon')}</p>}
-                                {score >= 4 && score <= 7 && <p className="text-xs text-yellow-400/60">{t('nextReviewNormal')}</p>}
-                                {score >= 8 && <p className="text-xs text-green-400/60">{t('nextReviewLater')}</p>}
                             </div>
                         )}
                     </div>
@@ -308,9 +359,9 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
             {/* Examples Preview in Scores/Reveal Steps */}
             {step !== 'STUDY' && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="w-full space-y-4 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 shadow-inner"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full space-y-4 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10"
                 >
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
@@ -319,30 +370,16 @@ export default function ReviewSessionClient({ words }: ReviewSessionClientProps)
                         <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-[0.2em]">{t('contextualUsage')}</span>
                     </div>
                     <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-none">
-                        {/* Per-Definition Examples */}
-                        {currentWord.words.definitions.map((d, di) => (
-                            d.examples && d.examples.map((ex, ei) => (
-                                <div key={`def-${di}-${ei}`} className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.08] transition-colors">
+                        {parseExamples(currentWord.dictionary.detail).length > 0 ? (
+                            parseExamples(currentWord.dictionary.detail).map((ex: any, ei: number) => (
+                                <div key={ei} className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
                                     <p className="text-sm text-white/80 leading-relaxed italic">
-                                        &quot;{ex.example_en}&quot;
+                                        &quot;{ex.en || ex.example_en}&quot;
                                     </p>
-                                    <p className="text-xs text-white/40 mt-1">{ex.example_zh}</p>
+                                    <p className="text-xs text-white/40 mt-1">{ex.zh || ex.example_zh}</p>
                                 </div>
                             ))
-                        ))}
-
-                        {/* General Word Examples */}
-                        {currentWord.words.general_examples && currentWord.words.general_examples.map((ex, ei) => (
-                            <div key={`gen-${ei}`} className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition-colors">
-                                <p className="text-sm text-white/80 leading-relaxed italic">
-                                    &quot;{ex.example_en}&quot;
-                                </p>
-                                <p className="text-xs text-white/40 mt-1">{ex.example_zh}</p>
-                            </div>
-                        ))}
-
-                        {/* Fallback if no examples anywhere */}
-                        {!currentWord.words.definitions.some(d => d.examples && d.examples.length > 0) && (!currentWord.words.general_examples || currentWord.words.general_examples.length === 0) && (
+                        ) : (
                             <p className="text-center py-8 text-white/20 text-xs italic">{t('noExamples')}</p>
                         )}
                     </div>

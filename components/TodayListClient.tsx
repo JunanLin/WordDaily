@@ -12,6 +12,7 @@ interface UserWord {
     words: {
         word: string;
         phonetic_ipa?: string;
+        meanings?: Array<{ chinese_meaning: string }>;
     };
 }
 
@@ -73,7 +74,10 @@ export default function TodayListClient({ initialWords }: TodayListClientProps) 
                 <div key={uw.id} className="card py-4 px-5 flex items-center justify-between group">
                     <div className="space-y-0.5">
                         <h4 className="text-lg font-bold">{uw.words.word}</h4>
-                        <p className="text-xs text-white/40 italic">{uw.words.phonetic_ipa}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-xs text-white/40 italic">{uw.words.phonetic_ipa}</p>
+                            <p className="text-xs text-white/60">{uw.words.meanings?.[0]?.chinese_meaning}</p>
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">

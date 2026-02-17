@@ -15,18 +15,17 @@ export default async function HistoryPage() {
     .from('user_words')
     .select(`
       *,
-      words (
+      dictionary (
         word,
-        phonetic_ipa,
-        definitions (
-          part_of_speech,
-          definition_text_zh,
-          definition_text_en,
-          examples (
-            example_en,
-            example_zh
-          )
-        )
+        phonetic,
+        translation,
+        pos,
+        tag,
+        bnc,
+        frq,
+        exchange,
+        detail,
+        audio
       )
     `)
     .eq('user_id', user.id)
@@ -37,14 +36,17 @@ export default async function HistoryPage() {
     .from('user_word_history')
     .select(`
         *,
-        words (
+        dictionary (
             word,
-            phonetic_ipa,
-            definitions (
-                part_of_speech,
-                definition_text_zh,
-                definition_text_en
-            )
+            phonetic,
+            translation,
+            pos,
+            tag,
+            bnc,
+            frq,
+            exchange,
+            detail,
+            audio
         )
     `)
     .eq('user_id', user.id)

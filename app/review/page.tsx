@@ -16,20 +16,17 @@ export default async function ReviewPage() {
         .from('user_words')
         .select(`
       *,
-      words (
+      dictionary (
         word,
-        phonetic_ipa,
-        pronunciation_audio_url,
-        definitions (
-          id,
-          part_of_speech,
-          definition_text_en,
-          definition_text_zh,
-          examples (
-            example_en,
-            example_zh
-          )
-        )
+        phonetic,
+        translation,
+        pos,
+        tag,
+        bnc,
+        frq,
+        exchange,
+        detail,
+        audio
       )
     `)
         .eq('user_id', user.id)

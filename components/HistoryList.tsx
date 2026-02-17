@@ -15,7 +15,7 @@ import {
     endOfWeek
 } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
-import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft } from 'lucide-react';
+import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft, Volume2 } from 'lucide-react';
 import { deleteUserWord } from '@/lib/actions/delete-word';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -27,41 +27,67 @@ interface Example {
     example_zh: string;
 }
 
-interface WordDefinition {
+interface Meaning {
     part_of_speech: string;
-    definition_text_zh: string;
-    definition_text_en: string;
-    examples: Example[];
+    chinese_meaning: string;
 }
 
 interface UserWord {
     id: string;
     created_at: string;
     next_review_at: string;
-    words: {
+    dictionary: {
         word: string;
-        phonetic_ipa?: string;
-        definitions: WordDefinition[];
-        general_examples?: Example[];
+        phonetic?: string;
+        translation?: string;
+        pos?: string;
+        tag?: string;
+        bnc?: number;
+        frq?: number;
+        exchange?: string;
+        detail?: any;
+        audio?: string;
     };
 }
 
 interface HistoryListProps {
     history: UserWord[];
-    recentLookups: any[];
+    recentLookups: UserWord[];
 }
 
 const getPOSColor = (pos: string) => {
     const p = pos ? pos.toLowerCase() : '';
-    if (p.includes('noun')) return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-    if (p.includes('verb')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-    if (p.includes('adj')) return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-    if (p.includes('adv')) return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+    if (p.includes('noun') || p === 'n') return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+    if (p.includes('verb') || p === 'v') return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+    if (p.includes('adj') || p === 'a') return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+    if (p.includes('adv') || p === 'r') return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
     return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+};
+
+/**
+ * Helper to parse ECDICT translation string into meanings array
+ */
+const parseMeanings = (translation: string, fallbackPos?: string) => {
+    if (!translation) return [];
+    // Split by actual newlines or literal \n strings
+    return translation.split(/\r?\n|\\n/).map(line => {
+        const match = line.match(/^([a-z]+\.)\s*(.*)/);
+        if (match) return { part_of_speech: match[1].replace('.', ''), chinese_meaning: match[2].trim() };
+        return { part_of_speech: fallbackPos || 'N/A', chinese_meaning: line.trim() };
+    }).filter(m => m.chinese_meaning);
+};
+
+/**
+ * Helper to extract examples from dictionary detail JSON
+ */
+const parseExamples = (detail: any) => {
+    if (!detail || !detail.examples) return [];
+    return detail.examples;
 };
 
 export default function HistoryList({ history: initialHistory, recentLookups }: HistoryListProps) {
     const t = useTranslations('history');
+    const tReview = useTranslations('review');
     const locale = useLocale();
     const dateLocale = locale === 'zh' ? zhCN : enUS;
 
@@ -73,6 +99,35 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
     const [history, setHistory] = useState(initialHistory);
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
+
+    const playAudio = (url?: string) => {
+        if (!url) return;
+        const audio = new Audio(url);
+        audio.play().catch(e => console.error('Audio play error:', e));
+    };
+
+    const parseExchange = (exchange: string) => {
+        if (!exchange) return [];
+        const codes: Record<string, string> = {
+            p: '过去式',
+            d: '过去分词',
+            i: '现在分词',
+            '3': '第三人称单数',
+            r: '比较级',
+            t: '最高级',
+            s: '复数',
+            '0': '原型',
+            '1': '变换'
+        };
+
+        return exchange.split('/').map(part => {
+            const [code, val] = part.split(':');
+            return {
+                label: codes[code] || code,
+                value: val
+            };
+        });
+    };
 
     // Only update local history if the initialHistory changes AND we are not in the middle of a transition
     useEffect(() => {
@@ -231,11 +286,11 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
                                             id: lookup.id,
                                             created_at: lookup.created_at,
                                             next_review_at: '',
-                                            words: lookup.words
+                                            dictionary: lookup.dictionary
                                         })}
                                         className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm hover:bg-white/10 transition-colors"
                                     >
-                                        {lookup.words.word}
+                                        {lookup.dictionary.word}
                                     </button>
                                 ))
                             ) : (
@@ -310,14 +365,13 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
                     <div className="space-y-3">
                         {groupedHistory[selectedDate] ? (
                             groupedHistory[selectedDate].map((uw) => (
-                                <div
-                                    key={uw.id}
-                                    onClick={() => setSelectedWord(uw)}
-                                    className="card group relative overflow-hidden py-4 px-5 flex items-center justify-between hover:bg-white/[0.07] transition-all cursor-pointer border-l-4 border-l-transparent hover:border-l-indigo-500"
-                                >
-                                    <div className="flex flex-col">
-                                        <h4 className="text-xl font-bold font-outfit leading-tight">{uw.words.word}</h4>
-                                        <p className="text-sm text-white/40">{uw.words.definitions?.[0]?.definition_text_zh}</p>
+                                <div key={uw.id} className="card py-4 px-5 flex items-center justify-between group cursor-pointer hover:bg-white/[0.07] transition-all" onClick={() => setSelectedWord(uw)}>
+                                    <div className="space-y-0.5">
+                                        <h4 className="text-lg font-bold">{uw.dictionary.word}</h4>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-xs text-white/40 italic">{uw.dictionary.phonetic || '/.../'}</p>
+                                            <p className="text-xs text-white/60 line-clamp-1">{uw.dictionary.translation}</p>
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button
@@ -363,8 +417,8 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
                             <div className="p-6 space-y-6 flex flex-col h-full overflow-hidden">
                                 <div className="flex justify-between items-start flex-shrink-0">
                                     <div className="space-y-1">
-                                        <h2 className="text-4xl font-black font-outfit">{selectedWord.words.word}</h2>
-                                        <p className="text-white/40 font-mono italic text-sm">{selectedWord.words.phonetic_ipa}</p>
+                                        <h2 className="text-4xl font-black font-outfit">{selectedWord.dictionary.word}</h2>
+                                        <p className="text-white/40 font-mono italic text-sm">{selectedWord.dictionary.phonetic || '/.../'}</p>
                                     </div>
                                     <button
                                         onClick={() => setSelectedWord(null)}
@@ -375,50 +429,90 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
                                 </div>
 
                                 <div className="space-y-4 overflow-y-auto pr-2 flex-grow scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                    {/* Definitions */}
-                                    {selectedWord.words.definitions.map((m, i) => (
-                                        <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2">
-                                            <div className="flex items-center gap-2">
-                                                <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border", getPOSColor(m.part_of_speech))}>
-                                                    {m.part_of_speech || 'N/A'}
-                                                </span>
-                                                <p className="font-bold text-lg">{m.definition_text_zh}</p>
-                                            </div>
-                                            <p className="text-sm text-white/60 leading-relaxed italic">
-                                                {m.definition_text_en}
-                                            </p>
-                                            {m.examples && m.examples.length > 0 && (
-                                                <div className="mt-3 space-y-2">
-                                                    {m.examples.map((ex, ei) => (
-                                                        <div key={ei} className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
-                                                            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">{t('example')}</p>
-                                                            <p className="text-xs text-white/80 leading-relaxed italic">
-                                                                &quot;{ex.example_en}&quot;
-                                                            </p>
-                                                            <p className="text-[10px] text-white/40 mt-1">{ex.example_zh}</p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                                    <div className="flex justify-center py-2">
+                                        <button
+                                            onClick={() => playAudio(selectedWord.dictionary.audio)}
+                                            className="p-4 bg-indigo-500/10 rounded-full hover:bg-indigo-500/20 text-indigo-400 transition-all active:scale-95"
+                                        >
+                                            <Volume2 size={24} />
+                                        </button>
+                                    </div>
 
-                                    {/* General Usage Examples */}
-                                    {selectedWord.words.general_examples && selectedWord.words.general_examples.length > 0 && (
-                                        <div className="space-y-3 mt-6 pt-6 border-t border-white/5">
-                                            <div className="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] mb-2">
-                                                {t('usageExamples')}
-                                            </div>
-                                            <div className="space-y-3">
-                                                {selectedWord.words.general_examples.map((ex, ei) => (
-                                                    <div key={ei} className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
-                                                        <p className="text-xs text-white/80 leading-relaxed italic">
-                                                            &quot;{ex.example_en}&quot;
-                                                        </p>
-                                                        <p className="text-[10px] text-white/40 mt-1">{ex.example_zh}</p>
+                                    {/* Exchange / Inflections */}
+                                    {selectedWord.dictionary.exchange && (
+                                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Inflections</p>
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                                                {parseExchange(selectedWord.dictionary.exchange).map((ex: any, idx: number) => (
+                                                    <div key={idx} className="flex gap-2">
+                                                        <span className="text-white/30">{ex.label}:</span>
+                                                        <span className="text-indigo-400 font-medium">{ex.value}</span>
                                                     </div>
                                                 ))}
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {/* Stats & Metadata Section */}
+                                    {(selectedWord.dictionary.tag || selectedWord.dictionary.pos || selectedWord.dictionary.bnc || selectedWord.dictionary.frq) && (
+                                        <div className="p-5 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-4">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400/60">
+                                                {tReview('wordStats')}
+                                            </p>
+
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedWord.dictionary.tag?.split(' ').filter(Boolean).map((tag: string) => (
+                                                    <span key={tag} className="px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-300">
+                                                        {tReview(`tag_${tag}`)}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4 pt-2">
+                                                {selectedWord.dictionary.pos && (
+                                                    <div className="space-y-1">
+                                                        <p className="text-[10px] text-white/40 font-bold uppercase">{tReview('posDistribution')}</p>
+                                                        <p className="text-xs text-indigo-200/80 font-mono">{selectedWord.dictionary.pos}</p>
+                                                    </div>
+                                                )}
+                                                {(selectedWord.dictionary.bnc || selectedWord.dictionary.frq) && (
+                                                    <div className="space-y-1">
+                                                        <p className="text-[10px] text-white/40 font-bold uppercase">{tReview('frequency')}</p>
+                                                        <div className="flex flex-col gap-1 text-[10px] text-indigo-200/80 font-mono">
+                                                            {selectedWord.dictionary.bnc && <span>BNC #{selectedWord.dictionary.bnc}</span>}
+                                                            {selectedWord.dictionary.frq && <span>FRQ #{selectedWord.dictionary.frq}</span>}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Meanings */}
+                                    {parseMeanings(selectedWord.dictionary.translation || '', selectedWord.dictionary.pos).map((m: any, i: number) => (
+                                        <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border leading-none", getPOSColor(m.part_of_speech))}>
+                                                    {m.part_of_speech || 'N/A'}
+                                                </span>
+                                                <p className="text-xl font-bold text-white/90">{m.chinese_meaning}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* Examples */}
+                                    {parseExamples(selectedWord.dictionary.detail).length > 0 && (
+                                        <div className="space-y-3 pt-4">
+                                            <div className="flex items-center gap-2 px-1">
+                                                <Volume2 size={12} className="text-indigo-400" />
+                                                <span className="text-[10px] font-bold text-indigo-400/60 uppercase tracking-widest">Usage Context</span>
+                                            </div>
+                                            {parseExamples(selectedWord.dictionary.detail).map((ex: any, ei: number) => (
+                                                <div key={ei} className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-1 hover:bg-indigo-500/10 transition-colors">
+                                                    <p className="text-sm text-white/80 leading-relaxed italic">&quot;{ex.en || ex.example_en}&quot;</p>
+                                                    <p className="text-xs text-white/40">{ex.zh || ex.example_zh}</p>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
@@ -427,7 +521,7 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
                                     onClick={() => setSelectedWord(null)}
                                     className="btn-primary w-full py-4 text-sm font-bold tracking-widest uppercase flex-shrink-0 mt-auto shadow-2xl"
                                 >
-                                    {t('closeDetail')}
+                                    Close Detail
                                 </button>
                             </div>
                         </motion.div>

@@ -28,7 +28,9 @@
         "success": "\"{word}\" added successfully!",
         "error": "Something went wrong",
         "proTipTitle": "Pro Tip",
-        "proTipDesc": "When enabled, words are lemmatized automatically. For example, adding \"developing\" will store \"develop\"."
+        "proTipDesc": "When enabled, words are lemmatized automatically. For example, adding \"developing\" will store \"develop\".",
+        "wordNotFound": "Sorry, we couldn't find that word in our dictionaries.",
+        "search": "Search"
     },
     "review": {
         "title": "Review",
@@ -56,7 +58,21 @@
         "unauthorized": "Unauthorized",
         "nextReviewSoon": "We'll show you this word again very soon.",
         "nextReviewNormal": "We'll show you this word again in a few days.",
-        "nextReviewLater": "Great! We'll push it further into the future."
+        "nextReviewLater": "Great! We'll push it further into the future.",
+        "wordStats": "Word Statistics",
+        "examPrep": "Exam Prep",
+        "frequency": "Frequency",
+        "posDistribution": "POS Distribution",
+        "bncIndex": "BNC Index",
+        "frqIndex": "FRQ Index",
+        "tag_zk": "Middle School",
+        "tag_gk": "High School",
+        "tag_cet4": "CET-4",
+        "tag_cet6": "CET-6",
+        "tag_ky": "Postgrad",
+        "tag_ielts": "IELTS",
+        "tag_toefl": "TOEFL",
+        "tag_gre": "GRE"
     },
     "history": {
         "title": "Archive",
@@ -124,17 +140,19 @@
         "memberSince": "Member since"
     },
     "tutorial": {
-        "title": "Welcome to WordDaily!",
-        "subtitle": "Learn how to master your vocabulary",
-        "step1Title": "Add Words",
-        "step1Desc": "Start by adding English words you want to learn. Our AI will automatically fetch definitions, translations, and example sentences.",
-        "step2Title": "Review Regularly",
-        "step2Desc": "Use spaced repetition to review words at optimal intervals. Rate how well you remember each word to adjust future review schedules.",
-        "step3Title": "Track Progress",
-        "step3Desc": "Monitor your daily learning goals and review your vocabulary archive. Watch your word collection grow over time!",
-        "step4Title": "Stay Consistent",
-        "step4Desc": "Enable notifications to get daily reminders. Consistency is key to building a strong vocabulary foundation.",
-        "getStarted": "Get Started",
-        "skipTutorial": "Skip Tutorial"
+        "welcomeTitle": "Welcome to WordDaily",
+        "welcomeDesc": "Master English vocabulary with AI-driven insights and spaced repetition.",
+        "searchTitle": "Intelligent Lookup",
+        "searchDesc": "Search any word to see definitions, Chinese translations, and contextual inflections.",
+        "historyTitle": "Personal Lexicon",
+        "historyDesc": "Your word journey is automatically saved. Organised by time for easy review.",
+        "reviewTitle": "Smart Review",
+        "reviewDesc": "Our SRS system helps you review words at the perfect moment for long-term memory.",
+        "settingsTitle": "Your Experience",
+        "settingsDesc": "Customise daily goals, timezones, and notifications to stay on track.",
+        "next": "Next Step",
+        "back": "Go Back",
+        "getStarted": "Start Learning",
+        "skip": "Skip"
     }
 }

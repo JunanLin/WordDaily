@@ -28,7 +28,9 @@
         "success": "\"{word}\" 添加成功！",
         "error": "出错了",
         "proTipTitle": "小贴士",
-        "proTipDesc": "启用后，单词会自动还原为原形。例如，添加 'developing' 将会保存 'develop'。"
+        "proTipDesc": "启用后，单词会自动还原为原形。例如，添加 'developing' 将会保存 'develop'。",
+        "wordNotFound": "抱歉，我们在字典中没有找到这个单词。",
+        "search": "搜索"
     },
     "review": {
         "title": "复习",
@@ -56,7 +58,21 @@
         "unauthorized": "未授权",
         "nextReviewSoon": "我们会尽快再次为您展示这个单词。",
         "nextReviewNormal": "我们会过几天再次为您展示这个单词。",
-        "nextReviewLater": "太棒了！我们已将此单词的复习时间推后。"
+        "nextReviewLater": "太棒了！我们已将此单词的复习时间推后。",
+        "wordStats": "统计信息",
+        "examPrep": "考试标签",
+        "frequency": "使用频率",
+        "posDistribution": "词性分布",
+        "bncIndex": "BNC排名",
+        "frqIndex": "FRQ排名",
+        "tag_zk": "中考",
+        "tag_gk": "高考",
+        "tag_cet4": "四级",
+        "tag_cet6": "六级",
+        "tag_ky": "考研",
+        "tag_ielts": "雅思",
+        "tag_toefl": "托福",
+        "tag_gre": "GRE"
     },
     "history": {
         "title": "归档",
@@ -124,17 +140,19 @@
         "memberSince": "加入时间"
     },
     "tutorial": {
-        "title": "欢迎使用 WordDaily！",
-        "subtitle": "学习如何掌握词汇",
-        "step1Title": "添加单词",
-        "step1Desc": "首先添加您想学习的英语单词。我们的 AI 会自动获取定义、翻译和例句。",
-        "step2Title": "定期复习",
-        "step2Desc": "使用间隔重复法在最佳时间复习单词。为每个单词评分,以调整未来的复习计划。",
-        "step3Title": "追踪进度",
-        "step3Desc": "监控您的每日学习目标并查看词汇归档。见证您的词汇量随时间增长！",
-        "step4Title": "保持一致",
-        "step4Desc": "启用通知以获取每日提醒。坚持是建立强大词汇基础的关键。",
-        "getStarted": "开始使用",
-        "skipTutorial": "跳过教程"
+        "welcomeTitle": "欢迎使用 WordDaily",
+        "welcomeDesc": "通过 AI 提供的内容和间隔重复系统，轻松掌握英语词汇。",
+        "searchTitle": "智能查词",
+        "searchDesc": "搜索任何单词，查看定义、中文翻译和语境词形变化。",
+        "historyTitle": "个人词库",
+        "historyDesc": "您的学习足迹会被自动保存，按时间排序，方便日后查阅。",
+        "reviewTitle": "智能复习",
+        "reviewDesc": "SRS 系统会在最合适的时机提醒您复习，巩固长期记忆。",
+        "settingsTitle": "个性化体验",
+        "settingsDesc": "自定义每日目标、时区和通知，保持学习进度。",
+        "next": "下一步",
+        "back": "返回",
+        "getStarted": "立即开始",
+        "skip": "跳过"
     }
 }
