@@ -261,6 +261,12 @@ export default function ReviewSessionClient({ words: initialWords }: ReviewSessi
                                                 ))}
                                             </div>
                                         )}
+                                        {currentWord.dictionary.pos && (
+                                            <div className="pt-2 border-t border-indigo-500/10">
+                                                <p className="text-[10px] text-white/40 font-bold uppercase mb-1">{t('posDistribution')}</p>
+                                                <p className="text-xs text-indigo-200/80 font-mono italic">{currentWord.dictionary.pos}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
