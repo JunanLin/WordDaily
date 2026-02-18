@@ -26,7 +26,7 @@ const parseMeanings = (translation: string) => {
     if (!translation) return '';
     const line = translation.split(/\r?\n|\\n/)[0];
     const match = line.match(/^([a-z]+\.)\s*(.*)/);
-    return match ? match[2].trim() : line.trim();
+    return match ? match[2].trim().replace(/\r?\n|\\n/g, '  ') : line.trim().replace(/\r?\n|\\n/g, '  ');
 };
 
 export default function TodayListClient({ initialWords, useCapitalCase = false }: TodayListClientProps) {
@@ -54,6 +54,7 @@ export default function TodayListClient({ initialWords, useCapitalCase = false }
                 const res = await deleteUserWord(id);
                 if (res.success) {
                     router.refresh();
+                    window.dispatchEvent(new CustomEvent('refresh-due-count'));
                 } else {
                     setWords(initialWords);
                     alert(t('deleteFailed'));

@@ -60,6 +60,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
             const res = await addWordToUserList(result.id);
             if (res.success) {
                 setIsAdded(true);
+                window.dispatchEvent(new CustomEvent('refresh-due-count'));
             } else {
                 setError(res.error || 'Failed to add word');
             }
@@ -73,7 +74,16 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
     const playAudio = () => {
         if (result?.audioUrl) {
             const audio = new Audio(result.audioUrl);
-            audio.play().catch(console.error);
+            audio.play().catch(e => {
+                console.error('Audio play error, falling back to TTS:', e);
+                const utterance = new SpeechSynthesisUtterance(result.word);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+            });
+        } else if (result?.word) {
+            const utterance = new SpeechSynthesisUtterance(result.word);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
         }
     };
 
@@ -219,14 +229,12 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     </h3>
                                     <div className="flex items-center gap-2">
                                         <p className="text-white/40 font-mono italic text-sm">{result.phonetic || '/.../'}</p>
-                                        {result.audioUrl && (
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); playAudio(); }}
-                                                className="p-1.5 bg-indigo-500/10 rounded-full text-indigo-400 hover:bg-indigo-500/20 transition-colors"
-                                            >
-                                                <Volume2 size={16} />
-                                            </button>
-                                        )}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); playAudio(); }}
+                                            className="p-1.5 bg-indigo-500/10 rounded-full text-indigo-400 hover:bg-indigo-500/20 transition-colors"
+                                        >
+                                            <Volume2 size={16} />
+                                        </button>
                                     </div>
                                 </div>
 

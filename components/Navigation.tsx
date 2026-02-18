@@ -20,9 +20,21 @@ export default function Navigation() {
             setDueCount(count);
         };
         fetchCount();
+
+        // Listen for immediate updates
+        const handleRefresh = () => fetchCount();
+        const handleFinished = () => setDueCount(0);
+
+        window.addEventListener('refresh-due-count', handleRefresh);
+        window.addEventListener('review-finished', handleFinished);
+
         // Refresh every minute
         const interval = setInterval(fetchCount, 60000);
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('refresh-due-count', handleRefresh);
+            window.removeEventListener('review-finished', handleFinished);
+        };
     }, []);
 
     const navItems = [

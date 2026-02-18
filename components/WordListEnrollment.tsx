@@ -21,10 +21,12 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
     const router = useRouter()
 
     const [step, setStep] = useState<'help' | 'enroll' | 'success'>('help')
-    const [wordCount, setWordCount] = useState(50)
+    const [wordCount, setWordCount] = useState<number | ''>(50)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [dontShowAgain, setDontShowAgain] = useState(false)
     const [enrolledCount, setEnrolledCount] = useState(0)
+    const [allRemaining, setAllRemaining] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const skipHelp = localStorage.getItem('hideWordListHelp') === 'true'
@@ -35,19 +37,25 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
 
     const handleEnroll = async () => {
         setIsSubmitting(true)
+        setError(null)
         try {
-            const result = await enrollRandomWords(listId, wordCount) as { success: boolean, enrolledCount: number }
+            const result = await enrollRandomWords(listId, Number(wordCount)) as any
             if (result.success) {
                 setEnrolledCount(result.enrolledCount)
+                setAllRemaining(result.allRemaining || false)
                 setStep('success')
                 if (dontShowAgain) {
                     localStorage.setItem('hideWordListHelp', 'true')
                 }
                 onSuccess()
+            } else if (result.error === 'LIST_LOCKED') {
+                setError(t('listLocked'))
+            } else {
+                setError(result.error || 'Failed to add words')
             }
         } catch (error) {
             console.error(error)
-            alert('Failed to enroll words. Please try again.')
+            setError('Failed to add words. Please try again.')
         } finally {
             setIsSubmitting(false)
         }
@@ -64,7 +72,9 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold font-outfit uppercase tracking-tight">
-                            {step === 'success' ? t('enrollSuccess', { count: enrolledCount }) : t('enrollmentTitle', { name: listName })}
+                            {step === 'success'
+                                ? (allRemaining ? t('title') : t('enrollSuccess', { count: enrolledCount }))
+                                : t('enrollmentTitle', { name: listName })}
                         </h2>
                         <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
                             <X size={20} />
@@ -129,7 +139,14 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                     <input
                                         type="number"
                                         value={wordCount}
-                                        onChange={(e) => setWordCount(parseInt(e.target.value) || 0)}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === '') {
+                                                setWordCount('');
+                                            } else {
+                                                setWordCount(parseInt(val) || 0);
+                                            }
+                                        }}
                                         min={1}
                                         max={500}
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-2xl font-black font-outfit text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
@@ -147,9 +164,15 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                     </div>
                                 </div>
 
+                                {error && (
+                                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm font-bold">
+                                        {error}
+                                    </div>
+                                )}
+
                                 <button
                                     onClick={handleEnroll}
-                                    disabled={isSubmitting || wordCount <= 0}
+                                    disabled={isSubmitting || !wordCount || Number(wordCount) <= 0}
                                     className="btn-primary w-full py-4 uppercase tracking-widest text-sm flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : t('enrollButton')}
@@ -168,9 +191,11 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                     <CheckCircle2 size={40} />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-xl font-bold">{t('enrollSuccess', { count: enrolledCount })}</h3>
+                                    <h3 className="text-xl font-bold">
+                                        {allRemaining ? t('allRemainingSuccess') : t('enrollSuccess', { count: enrolledCount })}
+                                    </h3>
                                     <p className="text-sm text-white/40">
-                                        Your selected words are now in your Review tab. Start learning them now to boost your memory!
+                                        {t('successMessage', { defaultValue: 'Your selected words are now in your Review tab. Start learning them now to boost your memory!' })}
                                     </p>
                                 </div>
                                 <div className="space-y-3 pt-4">

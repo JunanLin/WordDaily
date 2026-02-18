@@ -1,10 +1,11 @@
 'use client'
 
-import { Star, Sun, ChevronRight } from 'lucide-react'
+import { Star, Sun, ChevronRight, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 
 interface WordListCardProps {
@@ -14,6 +15,7 @@ interface WordListCardProps {
         name: string
         description: string
         total_words: number
+        isLocked?: boolean
         progress: {
             current_position: number
             completed_rounds: number
@@ -41,16 +43,26 @@ export default function WordListCard({ list }: WordListCardProps) {
         : 0
 
     return (
-        <Link href={`/lists/${list.id}`}>
+        <Link href={`/lists/${list.code}`}>
             <motion.div
                 whileHover={{ y: -5, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="card group cursor-pointer h-full flex flex-col justify-between p-6"
+                className={cn(
+                    "card group cursor-pointer h-full flex flex-col justify-between p-6 transition-all",
+                    list.isLocked && "opacity-80 border-amber-500/20"
+                )}
             >
                 <div>
                     <div className="flex justify-between items-start mb-6">
-                        <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-[0.2em]">
-                            {list.code}
+                        <div className="flex items-center gap-2">
+                            <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-[0.2em]">
+                                {list.code}
+                            </div>
+                            {list.isLocked && (
+                                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-[0.2em] flex items-center gap-1">
+                                    <Lock size={10} /> Locked
+                                </div>
+                            )}
                         </div>
                         <div className="flex gap-1 text-yellow-500">
                             {[...Array(progress.suns)].map((_, i) => (

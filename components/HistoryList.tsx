@@ -102,10 +102,20 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
-    const playAudio = (url?: string) => {
-        if (!url) return;
-        const audio = new Audio(url);
-        audio.play().catch(e => console.error('Audio play error:', e));
+    const playAudio = (text: string, url?: string) => {
+        if (url) {
+            const audio = new Audio(url);
+            audio.play().catch(e => {
+                console.error('Audio play error, falling back to TTS:', e);
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+            });
+        } else {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        }
     };
 
     const parseExchange = (exchange: string) => {
@@ -192,6 +202,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                 const res = await deleteUserWord(userWordId);
                 if (res.success) {
                     router.refresh();
+                    window.dispatchEvent(new CustomEvent('refresh-due-count'));
                 } else {
                     // Rollback on failure
                     setHistory(initialHistory);
@@ -367,12 +378,6 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                         >
                             <ChevronRight size={16} className="rotate-180" /> {t('backToHistory')}
                         </button>
-                        <button
-                            onClick={() => router.push('/add')}
-                            className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2 text-xs font-bold hover:bg-white/10 transition-colors"
-                        >
-                            <Plus size={14} /> {t('addWordsDate')}
-                        </button>
                     </div>
 
                     <div className="space-y-1 pb-2">
@@ -412,12 +417,6 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                         ) : (
                             <div className="py-12 bg-white/5 rounded-3xl border border-dashed border-white/10 text-center">
                                 <p className="text-white/40 text-sm">{t('noWordsDate')}</p>
-                                <button
-                                    onClick={() => router.push('/add')}
-                                    className="mt-4 text-indigo-400 text-xs font-bold uppercase tracking-widest hover:underline"
-                                >
-                                    {t('addWordsDate')}
-                                </button>
                             </div>
                         )}
                     </div>
@@ -451,7 +450,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                 <div className="space-y-4 overflow-y-auto pr-2 flex-grow scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                     <div className="flex justify-center py-2">
                                         <button
-                                            onClick={() => playAudio(selectedWord.dictionary.audio)}
+                                            onClick={() => playAudio(selectedWord.dictionary.word, selectedWord.dictionary.audio)}
                                             className="p-4 bg-indigo-500/10 rounded-full hover:bg-indigo-500/20 text-indigo-400 transition-all active:scale-95"
                                         >
                                             <Volume2 size={24} />
@@ -515,7 +514,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                                 <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border leading-none", getPOSColor(m.part_of_speech))}>
                                                     {m.part_of_speech || 'N/A'}
                                                 </span>
-                                                <p className="text-xl font-bold text-white/90">{m.chinese_meaning}</p>
+                                                <p className="text-xl font-bold text-white/90">{m.chinese_meaning?.replace(/\r?\n|\\n/g, '  ')}</p>
                                             </div>
                                         </div>
                                     ))}

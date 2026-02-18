@@ -10,11 +10,12 @@ import { useTranslations } from 'next-intl'
 interface WordListStudyClientProps {
     listId: string
     listName: string
+    isLocked?: boolean
 }
 
-export default function WordListStudyClient({ listId, listName }: WordListStudyClientProps) {
+export default function WordListStudyClient({ listId, listName, isLocked = false }: WordListStudyClientProps) {
     const t = useTranslations('lists')
-    const [showEnrollment, setShowEnrollment] = useState(true)
+    const [showEnrollment, setShowEnrollment] = useState(!isLocked)
     const router = useRouter()
 
     return (
@@ -24,7 +25,7 @@ export default function WordListStudyClient({ listId, listName }: WordListStudyC
                     href="/lists"
                     className="flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm font-bold uppercase tracking-widest"
                 >
-                    <ArrowLeft size={18} /> {t('subtitle')}
+                    <ArrowLeft size={18} /> {t('backToLists')}
                 </Link>
                 <button
                     onClick={() => {
@@ -44,13 +45,14 @@ export default function WordListStudyClient({ listId, listName }: WordListStudyC
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black font-outfit uppercase tracking-tight">{listName}</h2>
                     <p className="text-white/40 max-w-sm mx-auto text-sm px-6">
-                        Use the randomized system to enroll in new words and expand your vocabulary systematically.
+                        {isLocked ? t('listLocked') : t('randomSystemDesc')}
                     </p>
                 </div>
 
                 <button
                     onClick={() => setShowEnrollment(true)}
-                    className="btn-primary py-4 px-12 uppercase tracking-widest text-sm shadow-xl shadow-indigo-600/10"
+                    disabled={isLocked}
+                    className="btn-primary py-4 px-12 uppercase tracking-widest text-sm shadow-xl shadow-indigo-600/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {t('enrollButton')}
                 </button>

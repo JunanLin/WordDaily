@@ -23,10 +23,34 @@ export async function getWordLists() {
         return []
     }
 
-    const listData = lists.map(list => ({
-        ...list,
-        total_words: list.word_list_items[0]?.count || 0,
-        progress: list.user_list_progress[0] || null
+    const listData = await Promise.all(lists.map(async list => {
+        const totalWords = list.word_list_items[0]?.count || 0
+        const progress = list.user_list_progress[0] || null
+
+        // Check if list is locked (has words from this list in review queue)
+        let isLocked = false
+        if (progress) {
+            const { count: pendingCount } = await supabase
+                .from('user_words')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id)
+                .lte('next_review_at', new Date().toISOString())
+                .in('word_id', (
+                    await supabase
+                        .from('word_list_items')
+                        .select('word_id')
+                        .eq('list_id', list.id)
+                ).data?.map(i => i.word_id) || [])
+
+            isLocked = (pendingCount || 0) > 0
+        }
+
+        return {
+            ...list,
+            total_words: totalWords,
+            progress: progress,
+            isLocked
+        }
     }))
 
     const ORDER = ['zk', 'gk', 'cet4', 'cet6', 'ky', 'ielts', 'toefl', 'gre']
@@ -87,7 +111,8 @@ export async function getNextWordFromList(listId: string) {
     if (itemError) {
         // If we can't find the word at this position, maybe we reached the end
         if (itemError.code === 'PGRST116') {
-            return await handleRoundCompletion(user.id, listId, progress)
+            const result = await handleRoundCompletion(user.id, listId, progress)
+            return { ...result, word_id: null }
         }
         throw new Error('Failed to fetch word')
     }
@@ -123,7 +148,8 @@ export async function getNextWordFromList(listId: string) {
         .eq('list_id', listId)
 
     if (progress.current_position + 1 >= (count || 0)) {
-        return await handleRoundCompletion(user.id, listId, progress)
+        const result = await handleRoundCompletion(user.id, listId, progress)
+        return { ...result, word_id: item.word_id }
     }
 
     return { word_id: item.word_id, finished: false }
@@ -152,8 +178,26 @@ export async function enrollRandomWords(listId: string, count: number) {
         progress = newProgress
     }
 
-    // 2. Find words not yet enrolled in this round
-    // This is more efficient than checking user_words which might have words from other sources
+    // 2. CHECK LOCK: Are there pending reviews for this list?
+    const { data: wordIdsInList } = await supabase
+        .from('word_list_items')
+        .select('word_id')
+        .eq('list_id', listId)
+
+    const listWordIds = wordIdsInList?.map(i => i.word_id) || []
+
+    const { count: pendingCount } = await supabase
+        .from('user_words')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .lte('next_review_at', new Date().toISOString())
+        .in('word_id', listWordIds)
+
+    if ((pendingCount || 0) > 0) {
+        return { success: false, error: 'LIST_LOCKED' }
+    }
+
+    // 3. Find available words
     const { data: enrolledIds } = await supabase
         .from('user_word_list_enrolled')
         .select('word_id')
@@ -170,16 +214,17 @@ export async function enrollRandomWords(listId: string, count: number) {
         .not('word_id', 'in', `(${excludedIds.join(',') || '00000000-0000-0000-0000-000000000000'})`)
 
     if (!availableItems || availableItems.length === 0) {
-        // Round potentially finished or all words enrolled
-        return await handleRoundCompletion(user.id, listId, progress)
+        const result = await handleRoundCompletion(user.id, listId, progress)
+        return { ...result, success: true, enrolledCount: 0, allRemaining: true }
     }
 
-    // 3. Select random words
+    // 4. Select random words
+    const allRemaining = count >= availableItems.length
     const shuffled = [...availableItems].sort(() => 0.5 - Math.random())
     const selected = shuffled.slice(0, Math.min(count, shuffled.length))
     const selectedIds = selected.map(s => s.word_id)
 
-    // 4. Enroll them (insert into both tables)
+    // 5. Enroll them
     const enrollmentItems = selectedIds.map(wordId => ({
         user_id: user.id,
         list_id: listId,
@@ -193,7 +238,6 @@ export async function enrollRandomWords(listId: string, count: number) {
 
     if (enrolError) throw enrolError
 
-    // Also add to user_words for review
     const userWordsToInsert = selectedIds.map(wordId => ({
         user_id: user.id,
         word_id: wordId,
@@ -202,25 +246,35 @@ export async function enrollRandomWords(listId: string, count: number) {
 
     await supabase.from('user_words').upsert(userWordsToInsert, { onConflict: 'user_id,word_id' })
 
-    // 5. Update progress position
     const newPosition = progress.current_position + selectedIds.length
     await supabase
         .from('user_list_progress')
         .update({ current_position: newPosition })
         .eq('id', progress.id)
 
-    // Check if we finished the list
+    // 6. Check if we finished the list
     const { count: totalWords } = await supabase
         .from('word_list_items')
         .select('*', { count: 'exact', head: true })
         .eq('list_id', listId)
 
+    let completionResult = null
     if (newPosition >= (totalWords || 0)) {
-        return await handleRoundCompletion(user.id, listId, { ...progress, current_position: newPosition })
+        completionResult = await handleRoundCompletion(user.id, listId, { ...progress, current_position: newPosition })
     }
 
+    // Force revalidation of all relevant paths
+    revalidatePath('/')
     revalidatePath('/lists')
-    return { success: true, enrolledCount: selectedIds.length }
+    revalidatePath('/review')
+    revalidatePath(`/lists/${listId}`)
+
+    return {
+        success: true,
+        enrolledCount: selectedIds.length,
+        allRemaining: allRemaining || (completionResult?.finished || false),
+        ...completionResult
+    }
 }
 
 async function handleRoundCompletion(userId: string, listId: string, progress: any) {
@@ -250,5 +304,5 @@ async function handleRoundCompletion(userId: string, listId: string, progress: a
 
     if (error) throw new Error('Failed to update completion progress')
 
-    return { finished: true, progress: updatedProgress }
+    return { finished: true, success: true, progress: updatedProgress }
 }

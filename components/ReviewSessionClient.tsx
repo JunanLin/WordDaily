@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
 import { submitReview } from '@/lib/actions/review';
@@ -82,6 +82,13 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
     const [isMeaningsExpanded, setIsMeaningsExpanded] = useState(false);
     const router = useRouter();
 
+    // Reset due count in navigation when session is empty or finished
+    useEffect(() => {
+        if (initialWords.length === 0) {
+            window.dispatchEvent(new CustomEvent('review-finished'));
+        }
+    }, [initialWords.length]);
+
     const currentWord = words[currentIndex];
     const total = words.length;
 
@@ -142,6 +149,9 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                 setIsMeaningsExpanded(false);
             } else {
                 setFinished(true);
+                // Dispatch event to update navigation immediately
+                window.dispatchEvent(new CustomEvent('review-finished'));
+
                 confetti({
                     particleCount: 150,
                     spread: 70,

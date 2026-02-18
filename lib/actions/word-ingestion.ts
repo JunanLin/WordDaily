@@ -64,41 +64,28 @@ export async function getOrCreateWord(word: string) {
     }
 
     // 2. Check if the entry needs enrichment (missing audio or examples)
-    const hasAudio = !!entry.audio;
     const hasExamples = entry.detail && (entry.detail as any).examples && (entry.detail as any).examples.length > 0;
 
-    if (!hasAudio || !hasExamples) {
-        console.log(`[Dictionary] Enriching ${normalized} (Missing: ${!hasAudio ? 'audio ' : ''}${!hasExamples ? 'examples' : ''})...`);
-        const dictData = await fetchDictionaryData(normalized);
+    if (!hasExamples) {
+        console.log(`[Dictionary] Enriching ${normalized} (Missing: examples)...`);
 
-        if (dictData) {
-            const updates: any = {
-                updated_at: new Date().toISOString()
-            };
-
-            if (!hasAudio && dictData.audioUrl) {
-                updates.audio = dictData.audioUrl;
+        const examples = await fetchExamplesFromDeepSeek(normalized);
+        const updates: any = {
+            updated_at: new Date().toISOString(),
+            detail: {
+                ...(entry.detail as any || {}),
+                examples: examples
             }
+        };
 
-            if (!hasExamples) {
-                const examples = await fetchExamplesFromDeepSeek(normalized);
-                updates.detail = {
-                    ...(entry.detail as any || {}),
-                    examples: examples
-                };
-            }
+        const { data: updatedEntry, error: updateError } = await supabase
+            .from('dictionary')
+            .update(updates)
+            .eq('id', entry.id)
+            .select()
+            .single()
 
-            if (Object.keys(updates).length > 1) { // more than just updated_at
-                const { data: updatedEntry, error: updateError } = await supabase
-                    .from('dictionary')
-                    .update(updates)
-                    .eq('id', entry.id)
-                    .select()
-                    .single()
-
-                if (!updateError) return updatedEntry;
-            }
-        }
+        if (!updateError) return updatedEntry;
     }
 
     return entry;
