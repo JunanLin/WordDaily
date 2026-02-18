@@ -194,9 +194,11 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                     <h3 className="text-xl font-bold">
                                         {allRemaining ? t('allRemainingSuccess') : t('enrollSuccess', { count: enrolledCount })}
                                     </h3>
-                                    <p className="text-sm text-white/40">
-                                        {t('successMessage', { defaultValue: 'Your selected words are now in your Review tab. Start learning them now to boost your memory!' })}
-                                    </p>
+                                    {!allRemaining && (
+                                        <p className="text-sm text-white/40">
+                                            {t('successMessage', { defaultValue: 'Your selected words are now in your Review tab. Start learning them now to boost your memory!' })}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="space-y-3 pt-4">
                                     <button

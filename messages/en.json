@@ -167,13 +167,13 @@
         "back": "Go Back",
         "getStarted": "Start Learning",
         "skip": "Skip",
-        "listsTitle": "Review Collections",
-        "listsDesc": "We provide curated collections for different levels. Add words to your daily review session!"
+        "listsTitle": "Word Lists",
+        "listsDesc": "We provide curated word lists for different levels. Add words to your daily review session!"
     },
     "lists": {
-        "title": "Review Collections",
+        "title": "Word Lists",
         "subtitle": "Curated collections for your success",
-        "backToLists": "Back to Collections",
+        "backToLists": "Back to Word Lists",
         "help": "Help",
         "noLists": "No collections available yet.",
         "enrollmentTitle": "Add from {name}",
@@ -183,7 +183,8 @@
         "howManyWords": "How many words would you like to add to your Review session?",
         "enrollButton": "Add to Review",
         "enrollSuccess": "Successfully added {count} words to Review!",
-        "allRemainingSuccess": "All remaining words from this collection have been added to Review!",
+        "successMessage": "Your selected words are now in your Review session. Start learning them now!",
+        "allRemainingSuccess": "This collection has been completed!",
         "listLocked": "This collection is locked until you clear your pending reviews for it.",
         "goToReview": "Go to Review",
         "wordsInReview": "Words in Review",

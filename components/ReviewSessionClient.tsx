@@ -191,11 +191,17 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
 
     const playAudio = () => {
         if (currentWord.dictionary.audio) {
-            console.log(`[Audio] Playing: ${currentWord.dictionary.audio}`);
             const audio = new Audio(currentWord.dictionary.audio);
             audio.play().catch(e => {
-                console.error('[Audio] Playback failed:', e);
+                console.error('[Audio] Playback failed, falling back to TTS:', e);
+                const utterance = new SpeechSynthesisUtterance(currentWord.dictionary.word);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
             });
+        } else if (currentWord.dictionary.word) {
+            const utterance = new SpeechSynthesisUtterance(currentWord.dictionary.word);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
         }
     };
 
@@ -252,14 +258,10 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                     <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
                                 </div>
                                 <button
-                                    onClick={() => {
-                                        if (currentWord.dictionary.audio) {
-                                            new Audio(currentWord.dictionary.audio).play().catch(e => console.error(e));
-                                        }
-                                    }}
-                                    className="p-5 bg-indigo-500/10 rounded-full hover:bg-indigo-500/20 text-indigo-400 transition-all active:scale-95"
+                                    onClick={playAudio}
+                                    className="p-5 bg-indigo-500/10 rounded-full hover:bg-indigo-500/20 text-indigo-400 transition-all active:scale-95 shadow-lg shadow-indigo-500/5 group"
                                 >
-                                    <Volume2 size={32} />
+                                    <Volume2 size={32} className="group-hover:scale-110 transition-transform" />
                                 </button>
                             </div>
                         )}
@@ -270,7 +272,15 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                     <h2 className={cn("font-black font-outfit tracking-tight break-words", getRevealWordSizeClass(currentWord.dictionary.word))}>
                                         {formatWord(currentWord.dictionary.word, useCapitalCase)}
                                     </h2>
-                                    <p className="text-white/20 font-mono text-xs tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
+                                    <div className="flex items-center justify-center gap-3">
+                                        <p className="text-white/20 font-mono text-xs tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
+                                        <button
+                                            onClick={playAudio}
+                                            className="p-1.5 bg-indigo-500/10 rounded-full text-indigo-400 hover:bg-indigo-500/20 transition-colors"
+                                        >
+                                            <Volume2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Stats & Metadata */}
@@ -405,7 +415,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                 >
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
-                            <Volume2 size={16} />
+                            <CheckCircle2 size={16} />
                         </div>
                         <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-[0.2em]">{t('contextualUsage')}</span>
                     </div>
