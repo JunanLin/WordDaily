@@ -65,3 +65,22 @@ export async function submitReview(userWordId: string, score: number, direction:
     revalidatePath('/')
     return { success: true }
 }
+
+export async function getDueCount() {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return 0
+
+    const { count, error } = await supabase
+        .from('user_words')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .lte('next_review_at', new Date().toISOString())
+
+    if (error) {
+        console.error('Error fetching due count:', error)
+        return 0
+    }
+
+    return count || 0
+}

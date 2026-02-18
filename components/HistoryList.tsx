@@ -21,6 +21,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
+import { formatWord } from '@/lib/utils/format';
 
 interface Example {
     example_en: string;
@@ -53,6 +54,7 @@ interface UserWord {
 interface HistoryListProps {
     history: UserWord[];
     recentLookups: UserWord[];
+    useCapitalCase?: boolean;
 }
 
 const getPOSColor = (pos: string) => {
@@ -85,7 +87,7 @@ const parseExamples = (detail: any) => {
     return detail.examples;
 };
 
-export default function HistoryList({ history: initialHistory, recentLookups }: HistoryListProps) {
+export default function HistoryList({ history: initialHistory, recentLookups, useCapitalCase = false }: HistoryListProps) {
     const t = useTranslations('history');
     const tReview = useTranslations('review');
     const locale = useLocale();
@@ -135,6 +137,24 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
             setHistory(initialHistory);
         }
     }, [initialHistory, isPending]);
+
+    // Handle direct word links from query params
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const wordId = searchParams.get('wordId');
+        if (wordId) {
+            const word = history.find(w => w.id === wordId) || recentLookups.find(w => w.id === wordId);
+            if (word) {
+                setSelectedWord(word);
+                // Clear the param so it doesn't reopen on every mount
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            } else {
+                // If not found, maybe re-trigger a refresh or wait
+                // For now, let's just wait as history might update
+            }
+        }
+    }, [history, recentLookups, router]);
 
     // Prevent body scroll when modal is open
     useEffect(() => {
@@ -290,7 +310,7 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
                                         })}
                                         className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm hover:bg-white/10 transition-colors"
                                     >
-                                        {lookup.dictionary.word}
+                                        {formatWord(lookup.dictionary.word, useCapitalCase)}
                                     </button>
                                 ))
                             ) : (
@@ -367,7 +387,7 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
                             groupedHistory[selectedDate].map((uw) => (
                                 <div key={uw.id} className="card py-4 px-5 flex items-center justify-between group cursor-pointer hover:bg-white/[0.07] transition-all" onClick={() => setSelectedWord(uw)}>
                                     <div className="space-y-0.5">
-                                        <h4 className="text-lg font-bold">{uw.dictionary.word}</h4>
+                                        <h4 className="text-lg font-bold">{formatWord(uw.dictionary.word, useCapitalCase)}</h4>
                                         <div className="flex items-center gap-2">
                                             <p className="text-xs text-white/40 italic">{uw.dictionary.phonetic || '/.../'}</p>
                                             <p className="text-xs text-white/60 line-clamp-1">{uw.dictionary.translation}</p>
@@ -417,7 +437,7 @@ export default function HistoryList({ history: initialHistory, recentLookups }: 
                             <div className="p-6 space-y-6 flex flex-col h-full overflow-hidden">
                                 <div className="flex justify-between items-start flex-shrink-0">
                                     <div className="space-y-1">
-                                        <h2 className="text-4xl font-black font-outfit">{selectedWord.dictionary.word}</h2>
+                                        <h2 className="text-4xl font-black font-outfit">{formatWord(selectedWord.dictionary.word, useCapitalCase)}</h2>
                                         <p className="text-white/40 font-mono italic text-sm">{selectedWord.dictionary.phonetic || '/.../'}</p>
                                     </div>
                                     <button

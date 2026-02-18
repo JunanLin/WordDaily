@@ -8,6 +8,7 @@ import confetti from 'canvas-confetti';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { formatWord } from '@/lib/utils/format';
 
 interface Example {
     example_en: string;
@@ -37,6 +38,7 @@ interface ReviewWord {
 
 interface ReviewSessionClientProps {
     words: ReviewWord[];
+    useCapitalCase?: boolean;
 }
 
 const getPOSColor = (pos: string) => {
@@ -69,7 +71,7 @@ const parseExamples = (detail: any) => {
     return detail.examples;
 };
 
-export default function ReviewSessionClient({ words: initialWords }: ReviewSessionClientProps) {
+export default function ReviewSessionClient({ words: initialWords, useCapitalCase = false }: ReviewSessionClientProps) {
     const t = useTranslations('review');
     const [words] = useState(initialWords);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -187,8 +189,24 @@ export default function ReviewSessionClient({ words: initialWords }: ReviewSessi
         }
     };
 
+    const getWordSizeClass = (word: string) => {
+        const len = word.length;
+        if (len > 20) return 'text-2xl';
+        if (len > 15) return 'text-3xl';
+        if (len > 10) return 'text-4xl';
+        return 'text-6xl';
+    };
+
+    const getRevealWordSizeClass = (word: string) => {
+        const len = word.length;
+        if (len > 20) return 'text-xl';
+        if (len > 15) return 'text-2xl';
+        if (len > 10) return 'text-3xl';
+        return 'text-4xl';
+    };
+
     return (
-        <div className="flex flex-col h-full min-h-[70vh] items-center justify-center space-y-8">
+        <div className="flex flex-col h-full min-h-[70vh] items-center space-y-6">
             {/* Progress */}
             <div className="w-full flex justify-between items-center text-xs font-bold text-white/30 uppercase tracking-widest px-2">
                 <span>{t('sessionProgress')}</span>
@@ -211,14 +229,16 @@ export default function ReviewSessionClient({ words: initialWords }: ReviewSessi
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 1.05 }}
                     transition={{ duration: 0.2 }}
-                    className="w-full"
+                    className="w-full h-[450px]"
                 >
-                    <div className="card w-full min-h-[400px] flex flex-col items-center justify-center text-center p-8 space-y-6 relative overflow-hidden ring-1 ring-white/10 shadow-2xl bg-[#121218]">
+                    <div className="card w-full h-full flex flex-col items-center justify-start text-center p-8 relative overflow-y-auto ring-1 ring-white/10 shadow-2xl bg-[#121218] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                         {step === 'STUDY' && (
-                            <div className="space-y-8">
+                            <div className="space-y-8 my-auto py-4">
                                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em]">{t('englishOrigin')}</span>
                                 <div className="space-y-4">
-                                    <h2 className="text-6xl font-black font-outfit tracking-tight">{currentWord.dictionary.word}</h2>
+                                    <h2 className={cn("font-black font-outfit tracking-tight break-words", getWordSizeClass(currentWord.dictionary.word))}>
+                                        {formatWord(currentWord.dictionary.word, useCapitalCase)}
+                                    </h2>
                                     <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
                                 </div>
                                 <button
@@ -235,9 +255,11 @@ export default function ReviewSessionClient({ words: initialWords }: ReviewSessi
                         )}
 
                         {step === 'REVEAL' && (
-                            <div className="space-y-6 w-full max-w-lg">
+                            <div className="space-y-6 w-full max-w-lg py-4">
                                 <div className="space-y-2">
-                                    <h2 className="text-4xl font-black font-outfit tracking-tight">{currentWord.dictionary.word}</h2>
+                                    <h2 className={cn("font-black font-outfit tracking-tight break-words", getRevealWordSizeClass(currentWord.dictionary.word))}>
+                                        {formatWord(currentWord.dictionary.word, useCapitalCase)}
+                                    </h2>
                                     <p className="text-white/20 font-mono text-xs tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
                                 </div>
 
@@ -256,7 +278,7 @@ export default function ReviewSessionClient({ words: initialWords }: ReviewSessi
                                                 {parseExchange(currentWord.dictionary.exchange).map((ex: any, idx: number) => (
                                                     <div key={idx} className="flex gap-1.5">
                                                         <span className="text-white/20 uppercase font-black">{ex.label}</span>
-                                                        <span className="text-indigo-400 font-bold">{ex.value}</span>
+                                                        <span className="text-indigo-400 font-bold">{formatWord(ex.value, useCapitalCase)}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -284,10 +306,12 @@ export default function ReviewSessionClient({ words: initialWords }: ReviewSessi
                         )}
 
                         {step === 'SCORE' && (
-                            <div className="space-y-8 w-full">
+                            <div className="space-y-8 w-full my-auto py-4">
                                 <span className="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em]">{t('selfAssessment')}</span>
                                 <div className="space-y-2">
-                                    <h3 className="text-4xl font-black font-outfit">{currentWord.dictionary.word}</h3>
+                                    <h3 className={cn("font-black font-outfit break-words", getRevealWordSizeClass(currentWord.dictionary.word))}>
+                                        {formatWord(currentWord.dictionary.word, useCapitalCase)}
+                                    </h3>
                                     <div className="text-white/40 text-sm">{t('howEasy')}</div>
                                 </div>
 

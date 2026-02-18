@@ -3,7 +3,8 @@
         "dashboard": "Home",
         "review": "Review",
         "history": "History",
-        "settings": "Settings"
+        "settings": "Settings",
+        "lists": "Lists"
     },
     "dashboard": {
         "welcome": "Welcome to WordDaily",
@@ -128,7 +129,11 @@
         "sendTestNotification": "Send Test",
         "testNotificationSuccess": "Test notification sent!",
         "testNotificationError": "Failed to send test notification.",
-        "tutorial": "How to Use"
+        "tutorial": "How to Use",
+        "casePreference": "Case Preference",
+        "casePreferenceDesc": "Toggle between CAPITAL or lower-case spelling for words.",
+        "capitalCase": "CAPITAL",
+        "lowerCase": "lower-case"
     },
     "buttons": {
         "save": "Save",
@@ -153,6 +158,32 @@
         "next": "Next Step",
         "back": "Go Back",
         "getStarted": "Start Learning",
-        "skip": "Skip"
+        "skip": "Skip",
+        "listsTitle": "Curated Word Lists",
+        "listsDesc": "Enroll in curated word lists for different levels. We'll pick random words for you to master each day."
+    },
+    "lists": {
+        "title": "Vocabulary Lists",
+        "subtitle": "Curated word lists for your success",
+        "help": "Help",
+        "noLists": "No lists available yet.",
+        "enrollmentTitle": "Enroll in {name}",
+        "randomSystemTitle": "Randomized Learning",
+        "randomSystemDesc": "We use a randomized system to select words from this list. This ensures a balanced exposure to the entire vocabulary set over time.",
+        "doNotShowAgain": "Don't show this again",
+        "howManyWords": "How many words would you like to start memorizing?",
+        "enrollButton": "Enroll Now",
+        "enrollSuccess": "Successfully enrolled in {count} words!",
+        "goToReview": "Go to Review",
+        "wordsInReview": "Words in Review",
+        "completedRounds": "Completed {count} rounds",
+        "zk_name": "Middle School",
+        "gk_name": "High School",
+        "cet4_name": "CET-4",
+        "cet6_name": "CET-6",
+        "ky_name": "Postgrad",
+        "ielts_name": "IELTS",
+        "toefl_name": "TOEFL",
+        "gre_name": "GRE"
     }
 }

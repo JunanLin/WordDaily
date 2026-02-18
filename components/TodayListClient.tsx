@@ -5,6 +5,7 @@ import { Trash2, CheckCircle2, Clock, BookOpen } from 'lucide-react';
 import { deleteUserWord } from '@/lib/actions/delete-word';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { formatWord } from '@/lib/utils/format';
 
 interface UserWord {
     id: string;
@@ -18,6 +19,7 @@ interface UserWord {
 
 interface TodayListClientProps {
     initialWords: UserWord[];
+    useCapitalCase?: boolean;
 }
 
 const parseMeanings = (translation: string) => {
@@ -27,7 +29,7 @@ const parseMeanings = (translation: string) => {
     return match ? match[2].trim() : line.trim();
 };
 
-export default function TodayListClient({ initialWords }: TodayListClientProps) {
+export default function TodayListClient({ initialWords, useCapitalCase = false }: TodayListClientProps) {
     const t = useTranslations('history');
     const [words, setWords] = useState(initialWords);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export default function TodayListClient({ initialWords }: TodayListClientProps) 
             {words.map((uw) => (
                 <div key={uw.id} className="card py-4 px-5 flex items-center justify-between group">
                     <div className="space-y-0.5">
-                        <h4 className="text-lg font-bold">{uw.dictionary.word}</h4>
+                        <h4 className="text-lg font-bold">{formatWord(uw.dictionary.word, useCapitalCase)}</h4>
                         <div className="flex items-center gap-2">
                             <p className="text-xs text-white/40 italic">{uw.dictionary.phonetic || '/.../'}</p>
                             <p className="text-xs text-white/60 line-clamp-1">{parseMeanings(uw.dictionary.translation || '')}</p>

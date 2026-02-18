@@ -31,6 +31,12 @@ export default async function TodayPage() {
         .lte('created_at', end)
         .order('created_at', { ascending: false });
 
+    const { data: profile } = await supabase
+        .from('users')
+        .select('use_capital_case')
+        .eq('id', user.id)
+        .single();
+
     return (
         <div className="space-y-6 pb-20">
             <div className="space-y-1">
@@ -40,7 +46,7 @@ export default async function TodayPage() {
                 </p>
             </div>
 
-            <TodayListClient initialWords={words as any || []} />
+            <TodayListClient initialWords={words as any || []} useCapitalCase={profile?.use_capital_case} />
         </div>
     );
 }

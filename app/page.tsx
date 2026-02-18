@@ -25,7 +25,7 @@ export default async function HomePage() {
   // Fetch user profile (daily_goal and tutorial_completed)
   const { data: profile } = await supabase
     .from('users')
-    .select('daily_goal, tutorial_completed')
+    .select('daily_goal, tutorial_completed, use_capital_case')
     .eq('id', user.id)
     .single();
 
@@ -65,7 +65,7 @@ export default async function HomePage() {
         <p className="text-white/40 text-sm font-medium tracking-wide">Lookup and learn new words every day.</p>
       </div>
 
-      <WordSearch />
+      <WordSearch useCapitalCase={profile?.use_capital_case} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Progress Card */}

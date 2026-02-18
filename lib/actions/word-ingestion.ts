@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getLemma } from '@/lib/services/lemma'
 import { fetchDictionaryData } from '@/lib/services/dictionary'
+import { fetchExamplesFromDeepSeek } from '@/lib/services/deepseek'
 import { translateToChinese } from '@/lib/services/translation'
 import { revalidatePath } from 'next/cache'
 import { subDays, isAfter } from 'date-fns'
@@ -32,17 +33,9 @@ export async function getOrCreateWord(word: string) {
         if (!dictData) return null;
 
         // Create a new entry from Wordnik data
-        // For new words not in ECDICT, we can populate translation from Google
+        // For new words, we use DeepSeek for professional examples and translations
+        const examples = await fetchExamplesFromDeepSeek(normalized);
         const translation = await translateToChinese(dictData.definitions[0]?.definition || '');
-
-        // Prepare examples JSON
-        const examples = [];
-        if (dictData.examples && dictData.examples.length > 0) {
-            for (const ex of dictData.examples) {
-                const translated = await translateToChinese(ex.text) || 'Translation pending...';
-                examples.push({ en: ex.text, zh: translated });
-            }
-        }
 
         const { data: newEntry, error: insertError } = await supabase
             .from('dictionary')
@@ -87,15 +80,11 @@ export async function getOrCreateWord(word: string) {
                 updates.audio = dictData.audioUrl;
             }
 
-            if (!hasExamples && dictData.examples && dictData.examples.length > 0) {
-                const enrichedExamples = [];
-                for (const ex of dictData.examples) {
-                    const translated = await translateToChinese(ex.text) || 'Translation pending...';
-                    enrichedExamples.push({ en: ex.text, zh: translated });
-                }
+            if (!hasExamples) {
+                const examples = await fetchExamplesFromDeepSeek(normalized);
                 updates.detail = {
                     ...(entry.detail as any || {}),
-                    examples: enrichedExamples
+                    examples: examples
                 };
             }
 

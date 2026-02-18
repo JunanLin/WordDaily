@@ -15,6 +15,7 @@ interface SettingsFormProps {
         day_reminder_time: string;
         review_reminder_time: string;
         timezone: string;
+        use_capital_case: boolean;
     };
 }
 
@@ -29,6 +30,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
         notifications_enabled: profile.notifications_enabled,
         day_reminder_time: profile.day_reminder_time,
         review_reminder_time: profile.review_reminder_time,
+        use_capital_case: profile.use_capital_case,
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -99,6 +101,40 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                         />
                     </div>
                     <p className="text-xs text-white/30">{t('learningGoalDesc')}</p>
+                </div>
+
+                <div className="h-px bg-white/5" />
+
+                {/* Case Preference */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-amber-400">
+                            < Globe size={20} />
+                            <span className="font-bold uppercase tracking-widest text-[10px]">{t('casePreference')}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", !form.use_capital_case ? "text-indigo-400" : "text-white/20")}>
+                                {t('lowerCase')}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setForm({ ...form, use_capital_case: !form.use_capital_case })}
+                                className={cn(
+                                    "w-11 h-6 rounded-full transition-colors relative",
+                                    form.use_capital_case ? "bg-indigo-500" : "bg-white/10"
+                                )}
+                            >
+                                <div className={cn(
+                                    "w-4 h-4 bg-white rounded-full absolute top-1 transition-all",
+                                    form.use_capital_case ? "right-1" : "left-1"
+                                )} />
+                            </button>
+                            <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", form.use_capital_case ? "text-indigo-400" : "text-white/20")}>
+                                {t('capitalCase')}
+                            </span>
+                        </div>
+                    </div>
+                    <p className="text-xs text-white/30">{t('casePreferenceDesc')}</p>
                 </div>
 
                 <div className="h-px bg-white/5" />

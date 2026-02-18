@@ -3,7 +3,8 @@
         "dashboard": "主页",
         "review": "复习",
         "history": "历史",
-        "settings": "设置"
+        "settings": "设置",
+        "lists": "词库"
     },
     "dashboard": {
         "welcome": "欢迎来到 WordDaily",
@@ -128,7 +129,11 @@
         "sendTestNotification": "发送测试",
         "testNotificationSuccess": "测试通知已发送！",
         "testNotificationError": "发送测试通知失败。",
-        "tutorial": "使用教程"
+        "tutorial": "使用教程",
+        "casePreference": "字母大小写",
+        "casePreferenceDesc": "切换单词拼写显示为 大写 或 小写。",
+        "capitalCase": "大写",
+        "lowerCase": "小写"
     },
     "buttons": {
         "save": "保存",
@@ -153,6 +158,32 @@
         "next": "下一步",
         "back": "返回",
         "getStarted": "立即开始",
-        "skip": "跳过"
+        "skip": "跳过",
+        "listsTitle": "精选词库",
+        "listsDesc": "探索 GRE、TOEFL 等精选词库。我们将每天为您随机挑选单词进行学习。"
+    },
+    "lists": {
+        "title": "精选词库",
+        "subtitle": "精选词库，助你高效备考",
+        "help": "帮助",
+        "noLists": "暂无词库可用。",
+        "enrollmentTitle": "加入 {name}",
+        "randomSystemTitle": "随机学习系统",
+        "randomSystemDesc": "我们使用随机系统从词库中挑选单词。这能确保您在一段时间内均衡地接触到所有词汇。",
+        "doNotShowAgain": "不再显示",
+        "howManyWords": "您今天想开始背诵多少个单词？",
+        "enrollButton": "立即添加",
+        "enrollSuccess": "成功添加 {count} 个单词！",
+        "goToReview": "去复习",
+        "wordsInReview": "复习中的单词",
+        "completedRounds": "已完成 {count} 轮",
+        "zk_name": "中考词汇",
+        "gk_name": "高考词汇",
+        "cet4_name": "四级词汇",
+        "cet6_name": "六级词汇",
+        "ky_name": "考研词汇",
+        "ielts_name": "雅思词汇",
+        "toefl_name": "托福词汇",
+        "gre_name": "GRE 词汇"
     }
 }

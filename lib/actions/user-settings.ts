@@ -9,6 +9,7 @@ export async function updateUserSettings(data: {
     day_reminder_time?: string;
     review_reminder_time?: string;
     timezone?: string;
+    use_capital_case?: boolean;
 }) {
     const supabase = createClient();
 
@@ -69,4 +70,19 @@ export async function deletePushSubscription(endpoint: string) {
 
     if (error) throw error;
     return { success: true };
+}
+
+export async function getUserSettings() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    if (error) return null;
+    return data;
 }

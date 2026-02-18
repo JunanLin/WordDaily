@@ -12,7 +12,8 @@ import {
     CheckCircle2,
     Sparkles,
     Volume2,
-    Plus
+    Plus,
+    Shuffle
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -47,6 +48,13 @@ const steps = [
         color: 'text-purple-400',
         bg: 'bg-purple-400/10',
         border: 'border-purple-400/20'
+    },
+    {
+        id: 'lists',
+        icon: Plus,
+        color: 'text-amber-400',
+        bg: 'bg-amber-400/10',
+        border: 'border-amber-400/20'
     },
     {
         id: 'settings',
@@ -163,6 +171,21 @@ export default function Tutorial() {
                                             {s}
                                         </div>
                                     ))}
+                                </div>
+                            )}
+
+                            {/* Visual Aid for Lists (Step 4) */}
+                            {step.id === 'lists' && (
+                                <div className="flex gap-3 justify-center">
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 scale-90 animate-pulse">
+                                        <Shuffle size={24} className="text-amber-400" />
+                                    </div>
+                                    <div className="p-4 bg-amber-400/20 rounded-2xl border border-amber-400/20 scale-100">
+                                        <Plus size={24} className="text-amber-400" />
+                                    </div>
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 scale-90 opacity-50">
+                                        <CheckCircle2 size={24} className="text-white/20" />
+                                    </div>
                                 </div>
                             )}
                         </motion.div>

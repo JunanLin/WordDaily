@@ -42,11 +42,9 @@ export async function fetchDictionaryData(word: string): Promise<DictionaryData 
     const normalizedWord = word.trim().toLowerCase();
 
     try {
-        const [defsRes, examplesRes, audioRes, pronunciationsRes] = await Promise.all([
+        const [defsRes, audioRes] = await Promise.all([
             fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/definitions?limit=5&includeRelated=false&useCanonical=false&includeTags=false&api_key=${apiKey}`),
-            fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/examples?includeDuplicates=false&useCanonical=false&limit=5&api_key=${apiKey}`),
-            fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/audio?useCanonical=false&limit=1&api_key=${apiKey}`),
-            fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/pronunciations?useCanonical=false&limit=1&api_key=${apiKey}`)
+            fetch(`${WORDNIK_BASE_URL}/word.json/${normalizedWord}/audio?useCanonical=false&limit=1&api_key=${apiKey}`)
         ]);
 
         if (defsRes.status === 401) {
@@ -59,10 +57,7 @@ export async function fetchDictionaryData(word: string): Promise<DictionaryData 
         }
 
         const definitions: WordnikDefinition[] = await defsRes.json();
-        const examplesData = await examplesRes.json();
-        const examples: WordnikExample[] = examplesData.examples || [];
         const audio: WordnikAudio[] = await audioRes.json();
-        const pronunciations = await pronunciationsRes.json();
 
         const filteredDefs = definitions
             .filter(d => d.text && d.text.trim())
@@ -72,20 +67,13 @@ export async function fetchDictionaryData(word: string): Promise<DictionaryData 
                 examples: d.exampleUses?.map(ex => ex.text)
             }));
 
-        const filteredEx = examples
-            .filter(e => e.text && e.text.trim())
-            .map(e => ({
-                text: e.text
-            }));
-
         if (filteredDefs.length === 0) return null;
 
         return {
             word: normalizedWord,
-            phonetic: pronunciations[0]?.raw || undefined,
             audioUrl: audio[0]?.fileUrl || undefined,
             definitions: filteredDefs,
-            examples: filteredEx
+            examples: [] // We use DeepSeek for examples now
         };
     } catch (error) {
         console.error('[Dictionary] Error fetching from Wordnik:', error);

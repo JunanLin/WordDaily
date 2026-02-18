@@ -45,9 +45,16 @@ export default async function ReviewPage() {
         }))
         .sort((a, b) => b.priority - a.priority);
 
+    // Fetch user profile for settings
+    const { data: profile } = await supabase
+        .from('users')
+        .select('use_capital_case')
+        .eq('id', user.id)
+        .single();
+
     return (
         <div className="h-full">
-            <ReviewSessionClient words={sortedWords} />
+            <ReviewSessionClient words={sortedWords} useCapitalCase={profile?.use_capital_case} />
         </div>
     );
 }

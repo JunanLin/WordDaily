@@ -2,12 +2,17 @@
 
 import { useState } from 'react';
 import { lookupWord, addWordToUserList } from '@/lib/actions/word-ingestion';
-import { Search, Plus, Loader2, Volume2, CheckCircle2, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, Loader2, Volume2, CheckCircle2, XCircle, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatWord } from '@/lib/utils/format';
 
-export default function WordSearch() {
+interface WordSearchProps {
+    useCapitalCase?: boolean;
+}
+
+export default function WordSearch({ useCapitalCase = false }: WordSearchProps) {
     const t = useTranslations('add');
     const tReview = useTranslations('review');
     const [word, setWord] = useState('');
@@ -17,6 +22,8 @@ export default function WordSearch() {
     const [error, setError] = useState<string | null>(null);
     const [isAdded, setIsAdded] = useState(false);
     const [expandedDefs, setExpandedDefs] = useState(false);
+    const [shouldLemmatize, setShouldLemmatize] = useState(true);
+    const [showTip, setShowTip] = useState(false);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,11 +36,11 @@ export default function WordSearch() {
         setExpandedDefs(false);
 
         try {
-            const res = await lookupWord(word.trim());
+            const res = await lookupWord(word.trim(), shouldLemmatize);
             if (res.success) {
                 setResult(res);
             } else {
-                if (res.error === 'word_not_fount') {
+                if (res.error === 'word_not_fount' || res.error === 'word_not_found') {
                     setError(t('wordNotFound'));
                 } else {
                     setError(res.error || t('error'));
@@ -121,6 +128,56 @@ export default function WordSearch() {
                         )}
                     </button>
                 </div>
+
+                <div className="mt-4 flex items-center gap-3 px-2">
+                    <label className="flex items-center gap-2 cursor-pointer group/label">
+                        <div className="relative flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={shouldLemmatize}
+                                onChange={(e) => setShouldLemmatize(e.target.checked)}
+                                className="peer sr-only"
+                            />
+                            <div className="w-9 h-5 bg-white/10 rounded-full peer-checked:bg-indigo-600 transition-colors border border-white/5" />
+                            <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm" />
+                        </div>
+                        <span className="text-xs font-bold text-white/40 group-hover/label:text-white/60 transition-colors">
+                            {t('lemmatizeLabel')}
+                        </span>
+                    </label>
+
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onMouseEnter={() => setShowTip(true)}
+                            onMouseLeave={() => setShowTip(false)}
+                            onClick={() => setShowTip(!showTip)}
+                            className="text-white/20 hover:text-indigo-400 transition-colors"
+                        >
+                            <HelpCircle size={14} />
+                        </button>
+
+                        <AnimatePresence>
+                            {showTip && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute left-0 bottom-full mb-3 w-64 p-4 rounded-2xl bg-[#1a1a24] border border-white/10 shadow-2xl z-50 text-xs pointer-events-none"
+                                >
+                                    <p className="font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <div className="w-1 h-1 rounded-full bg-indigo-500" />
+                                        {t('proTipTitle')}
+                                    </p>
+                                    <p className="text-white/60 leading-relaxed">
+                                        {t('proTipDesc')}
+                                    </p>
+                                    <div className="absolute left-4 top-full w-2 h-2 bg-[#1a1a24] border-r border-b border-white/10 rotate-45 -translate-y-1" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
             </form>
 
             <AnimatePresence>
@@ -157,7 +214,9 @@ export default function WordSearch() {
                             {/* Modal Header */}
                             <div className="p-6 pb-0 flex justify-between items-start z-10">
                                 <div className="space-y-1">
-                                    <h3 className="text-4xl font-black font-outfit uppercase tracking-tight text-white">{result.word}</h3>
+                                    <h3 className={cn("text-4xl font-black font-outfit tracking-tight text-white", useCapitalCase ? "uppercase" : "lowercase")}>
+                                        {formatWord(result.word, useCapitalCase)}
+                                    </h3>
                                     <div className="flex items-center gap-2">
                                         <p className="text-white/40 font-mono italic text-sm">{result.phonetic || '/.../'}</p>
                                         {result.audioUrl && (
@@ -192,7 +251,7 @@ export default function WordSearch() {
                                                 {parseExchange(result.exchange).map((ex, idx) => (
                                                     <div key={idx} className="flex gap-2">
                                                         <span className="text-white/30">{ex.label}:</span>
-                                                        <span className="text-indigo-400 font-medium">{ex.value}</span>
+                                                        <span className="text-indigo-400 font-medium">{formatWord(ex.value, useCapitalCase)}</span>
                                                     </div>
                                                 ))}
                                             </div>

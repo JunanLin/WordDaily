@@ -54,6 +54,13 @@ export default async function HistoryPage() {
     .order('created_at', { ascending: false })
     .limit(20);
 
+  // Fetch user profile for settings
+  const { data: profile } = await supabase
+    .from('users')
+    .select('use_capital_case')
+    .eq('id', user.id)
+    .single();
+
   return (
     <div className="space-y-6 pb-20">
       <div className="space-y-1">
@@ -61,7 +68,11 @@ export default async function HistoryPage() {
         <p className="text-white/40 text-sm font-medium tracking-wide">{t('subtitle')}</p>
       </div>
 
-      <HistoryList history={history || []} recentLookups={lookups || []} />
+      <HistoryList
+        history={history || []}
+        recentLookups={lookups || []}
+        useCapitalCase={profile?.use_capital_case}
+      />
     </div>
   );
 }
