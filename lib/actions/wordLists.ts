@@ -2,11 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { validateSession } from '@/lib/security'
 
 export async function getWordLists() {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
+    const { user, supabase } = await validateSession(false)
     if (!user) return []
 
     const { data: lists, error } = await supabase
@@ -156,10 +155,7 @@ export async function getNextWordFromList(listId: string) {
 }
 
 export async function enrollRandomWords(listId: string, count: number) {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) throw new Error('Unauthorized')
+    const { user, supabase } = await validateSession()
 
     // 1. Get or create progress
     let { data: progress } = await supabase

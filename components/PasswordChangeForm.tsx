@@ -1,0 +1,81 @@
+'use client';
+
+import { useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { Lock, Save, Loader2, CheckCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+export default function PasswordChangeForm() {
+    const tAuth = useTranslations('auth');
+    const tSettings = useTranslations('settings');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    const supabase = createClient();
+
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setStatus(null);
+
+        const { error: updateError } = await supabase.auth.updateUser({
+            password: password
+        });
+
+        if (updateError) {
+            setStatus({ type: 'error', message: updateError.message });
+        } else {
+            setStatus({ type: 'success', message: tAuth('passwordUpdated') });
+            setPassword('');
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className="card space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-1 text-center sm:text-left">
+                <div className="flex items-center gap-3 text-indigo-400 justify-center sm:justify-start">
+                    <Lock size={20} />
+                    <span className="font-bold uppercase tracking-widest text-[10px]">{tAuth('resetPassword')}</span>
+                </div>
+                <p className="text-xs text-white/30">Set a new password for your account.</p>
+            </div>
+
+            <form onSubmit={handleUpdate} className="space-y-4">
+                <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                    <input
+                        type="password"
+                        placeholder={tAuth('newPasswordPlaceholder')}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium"
+                        required
+                        minLength={6}
+                    />
+                </div>
+
+                {status && (
+                    <div className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 animate-in zoom-in duration-300 ${status.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                        }`}>
+                        {status.type === 'success' && <CheckCircle size={14} />}
+                        {status.message}
+                    </div>
+                )}
+
+                <button
+                    type="submit"
+                    disabled={loading || !password}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-500 hover:bg-indigo-600 disabled:bg-white/5 disabled:text-white/20 text-white rounded-xl transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 disabled:shadow-none"
+                >
+                    {loading ? <Loader2 className="animate-spin" size={16} /> : (
+                        <>
+                            <Save size={16} />
+                            {tAuth('updatePassword')}
+                        </>
+                    )}
+                </button>
+            </form>
+        </div>
+    );
+}

@@ -30,7 +30,10 @@ export async function updateSession(request: NextRequest) {
     // IMPORTANT: Avoid writing any logic between createServerClient and
     // supabase.auth.getUser(). A simple mistake could make it very hard to debug
     // auth issues.
-    await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    return supabaseResponse
+    return {
+        response: supabaseResponse,
+        user,
+    }
 }

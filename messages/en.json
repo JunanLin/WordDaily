@@ -105,7 +105,15 @@
         "haveAccount": "Already have an account? Sign In",
         "noAccount": "Don't have an account? Sign Up",
         "securedBy": "Secured by Supabase Auth",
-        "checkEmail": "Please check your email to confirm your account first."
+        "checkEmail": "Please check your email to confirm your account first.",
+        "forgotPassword": "Forgot Password?",
+        "resetPassword": "Reset Password",
+        "sendResetLink": "Send Reset Link",
+        "resetEmailSent": "Check your email for the password reset link.",
+        "newPasswordPlaceholder": "New Password",
+        "updatePassword": "Update Password",
+        "passwordUpdated": "Password updated successfully!",
+        "signInWithGoogle": "Continue with Google"
     },
     "settings": {
         "title": "Settings",
@@ -154,13 +162,13 @@
         "reviewTitle": "Smart Review",
         "reviewDesc": "Our SRS system helps you review words at the perfect moment for long-term memory.",
         "settingsTitle": "Your Experience",
-        "settingsDesc": "Customise daily goals, timezones, and notifications to stay on track.",
+        "settingsDesc": "Customise daily goals and notifications to stay on track.",
         "next": "Next Step",
         "back": "Go Back",
         "getStarted": "Start Learning",
         "skip": "Skip",
         "listsTitle": "Review Collections",
-        "listsDesc": "Add words from curated collections for different levels. We'll pick random words for you to study each day."
+        "listsDesc": "We provide curated collections for different levels. Add words to your daily review session!"
     },
     "lists": {
         "title": "Review Collections",

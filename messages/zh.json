@@ -105,7 +105,15 @@
         "haveAccount": "已有账号？去登录",
         "noAccount": "没有账号？去注册",
         "securedBy": "Secured by Supabase Auth",
-        "checkEmail": "请先检查您的邮箱并确认您的账号。"
+        "checkEmail": "请先检查您的邮箱并确认您的账号。",
+        "forgotPassword": "忘记密码？",
+        "resetPassword": "重置密码",
+        "sendResetLink": "发送重置链接",
+        "resetEmailSent": "重置邮件已发送，请检查您的邮箱。",
+        "newPasswordPlaceholder": "新密码",
+        "updatePassword": "更新密码",
+        "passwordUpdated": "密码更新成功！",
+        "signInWithGoogle": "使用 Google 账号登录"
     },
     "settings": {
         "title": "设置",
@@ -154,13 +162,13 @@
         "reviewTitle": "智能复习",
         "reviewDesc": "SRS 系统会在最合适的时机提醒您复习，巩固长期记忆。",
         "settingsTitle": "个性化体验",
-        "settingsDesc": "自定义每日目标、时区和通知，保持学习进度。",
+        "settingsDesc": "自定义每日目标和通知，保持学习进度。",
         "next": "下一步",
         "back": "返回",
         "getStarted": "立即开始",
         "skip": "跳过",
         "listsTitle": "精选词库",
-        "listsDesc": "探索 GRE、TOEFL 等精选词库。我们将每天为您随机挑选单词加入复习。"
+        "listsDesc": "我们提供 GRE、TOEFL 等精选词库。每天添加单词加入复习吧！"
     },
     "lists": {
         "title": "精选词库",

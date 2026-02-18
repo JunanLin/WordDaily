@@ -3,11 +3,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { updateSpacedRepetition } from '@/lib/services/sm2'
 import { revalidatePath } from 'next/cache'
+import { validateSession } from '@/lib/security'
 
 export async function submitReview(userWordId: string, score: number, direction: 'EN_TO_CN' | 'CN_TO_EN') {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    const { user, supabase } = await validateSession()
 
     // 1. Fetch current word state
     const { data: userWord, error: fetchError } = await supabase

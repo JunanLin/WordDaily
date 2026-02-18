@@ -7,6 +7,7 @@ import { fetchExamplesFromDeepSeek } from '@/lib/services/deepseek'
 import { translateToChinese } from '@/lib/services/translation'
 import { revalidatePath } from 'next/cache'
 import { subDays, isAfter } from 'date-fns'
+import { validateSession } from '@/lib/security'
 
 /**
  * Shared dictionary service using the unified 'dictionary' table.
@@ -92,10 +93,8 @@ export async function getOrCreateWord(word: string) {
 }
 
 export async function lookupWord(rawWord: string, shouldLemmatize: boolean = true) {
-    const supabase = createClient()
     try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return { success: false, error: 'Unauthorized' };
+        const { user, supabase } = await validateSession(false)
 
         const wordToProcess = shouldLemmatize ? getLemma(rawWord) : rawWord.trim().toLowerCase();
         const entry = await getOrCreateWord(wordToProcess);
@@ -143,10 +142,8 @@ export async function lookupWord(rawWord: string, shouldLemmatize: boolean = tru
 }
 
 export async function addWordToUserList(wordId: string) {
-    const supabase = createClient()
     try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return { success: false, error: 'Unauthorized' };
+        const { user, supabase } = await validateSession(false)
 
         const { data: existingUserWord } = await supabase
             .from('user_words')

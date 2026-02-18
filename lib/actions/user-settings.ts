@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { validateSession } from '@/lib/security';
 
 export async function updateUserSettings(data: {
     daily_goal?: number;
@@ -11,10 +12,7 @@ export async function updateUserSettings(data: {
     timezone?: string;
     use_capital_case?: boolean;
 }) {
-    const supabase = createClient();
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    const { user, supabase } = await validateSession();
 
     const { error } = await supabase
         .from('users')
@@ -35,10 +33,7 @@ export async function savePushSubscription(subscription: {
         auth: string
     }
 }) {
-    const supabase = createClient();
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    const { user, supabase } = await validateSession();
 
     const { endpoint, keys } = subscription;
     const { p256dh, auth } = keys;
@@ -57,10 +52,7 @@ export async function savePushSubscription(subscription: {
 }
 
 export async function deletePushSubscription(endpoint: string) {
-    const supabase = createClient();
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    const { user, supabase } = await validateSession();
 
     const { error } = await supabase
         .from('push_subscriptions')
