@@ -37,3 +37,6 @@ next-env.d.ts
 
 # Service Worker related
 public/sw.js*
+
+# Local curated word lists
+lib/scripts/enrichment/*.json
