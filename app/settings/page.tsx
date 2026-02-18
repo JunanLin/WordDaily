@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { LogOut, BookOpenCheck, Settings, ArrowRight, ArrowLeft } from 'lucide-react';
 import SettingsForm from '@/components/SettingsForm';
 import PasswordChangeForm from '@/components/PasswordChangeForm';
+import PWAInstallSettingsEntry from '@/components/PWAInstallSettingsEntry';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
@@ -54,6 +55,7 @@ export default async function SettingsPage() {
                     </div>
                 </div>
             </Link>
+            <PWAInstallSettingsEntry />
 
             <div className="card bg-white/[0.01] border-white/5">
                 <div className="flex items-center gap-5 mb-8 p-1">

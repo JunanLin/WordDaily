@@ -5,6 +5,7 @@ import { endOfDay, startOfDay } from 'date-fns';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import WordSearch from '@/components/WordSearch';
+import PWAInstallTrigger from '@/components/PWAInstallTrigger';
 
 export default async function HomePage() {
   const supabase = createClient();
@@ -119,6 +120,7 @@ export default async function HomePage() {
         </p>
         <p className="text-xs mt-3 font-bold uppercase tracking-widest text-white/20">&mdash; {t('author', { defaultValue: 'Ludwig Wittgenstein' })}</p>
       </div>
+      <PWAInstallTrigger />
     </div>
   );
 }
