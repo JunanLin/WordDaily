@@ -72,6 +72,7 @@ export async function GET(_request: Request) {
                     .from('user_words')
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', user.id)
+                    .lt('memory_score', 10)
                     .lte('next_review_at', now.toISOString());
 
                 if (count && count > 0) {

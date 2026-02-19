@@ -10,10 +10,8 @@
         "welcome": "Welcome to WordDaily",
         "signInDesc": "Sign in to start your vocabulary journey.",
         "signInButton": "Sign In",
-        "dailyProgress": "Daily Progress",
+        "todaysWords": "Words Added Today",
         "words": "words",
-        "goalAchieved": "Daily goal achieved!",
-        "addMore": "Add {count} more words today",
         "dueReview": "Due Review",
         "newWord": "New Word",
         "quote": "\"The limit of my language means the limit of my world.\"",
@@ -73,7 +71,8 @@
         "tag_ky": "Postgrad",
         "tag_ielts": "IELTS",
         "tag_toefl": "TOEFL",
-        "tag_gre": "GRE"
+        "tag_gre": "GRE",
+        "memoryScore10Hint": "Words rated 10 will be considered mastered and won't appear in future reviews."
     },
     "history": {
         "title": "Archive",
@@ -243,5 +242,16 @@
         "ielts_name": "IELTS",
         "toefl_name": "TOEFL",
         "gre_name": "GRE"
+    },
+    "feedback": {
+        "title": "Feedback & Suggestions",
+        "messageLabel": "Your Message",
+        "messagePlaceholder": "Tell us what's on your mind... (bugs, suggestions, or just a hello!)",
+        "pageLabel": "Page (Optional)",
+        "notPageSpecific": "Not page-specific",
+        "submit": "Submit Feedback",
+        "success": "Thank you for your feedback!",
+        "error": "Failed to submit feedback.",
+        "unexpectedError": "An unexpected error occurred."
     }
 }

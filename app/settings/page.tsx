@@ -5,6 +5,7 @@ import PasswordChangeForm from '@/components/PasswordChangeForm';
 import PWAInstallSettingsEntry from '@/components/PWAInstallSettingsEntry';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import FeedbackForm from '@/components/FeedbackForm';
 
 export default async function SettingsPage() {
     const supabase = createClient();
@@ -67,6 +68,8 @@ export default async function SettingsPage() {
                 </div>
             </Link>
             <PWAInstallSettingsEntry />
+
+            <FeedbackForm />
 
             <div className="card bg-white/[0.01] border-white/5">
                 <div className="flex items-center gap-5 mb-8 p-1">

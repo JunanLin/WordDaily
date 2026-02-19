@@ -40,7 +40,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
             if (res.success) {
                 setResult(res);
             } else {
-                if (res.error === 'word_not_fount' || res.error === 'word_not_found') {
+                if (res.error === 'word_not_found') {
                     setError(t('wordNotFound'));
                 } else {
                     setError(res.error || t('error'));

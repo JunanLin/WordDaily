@@ -359,6 +359,21 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                         onChange={(e) => setScore(parseInt(e.target.value))}
                                         className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-500"
                                     />
+
+                                    <div className="h-10 flex items-center justify-center">
+                                        <AnimatePresence>
+                                            {score === 10 && (
+                                                <motion.p
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="text-[10px] text-green-400/80 font-medium italic leading-relaxed"
+                                                >
+                                                    {t('memoryScore10Hint')}
+                                                </motion.p>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
                                 </div>
                             </div>
                         )}

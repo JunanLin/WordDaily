@@ -30,6 +30,7 @@ export default async function ReviewPage() {
       )
     `)
         .eq('user_id', user.id)
+        .lt('memory_score', 10)
         .lte('next_review_at', new Date().toISOString());
 
     if (error) {

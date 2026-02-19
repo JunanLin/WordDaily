@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { BookOpen, CheckCircle2, AlertCircle } from 'lucide-react';
+import { BookOpen, CheckCircle2 } from 'lucide-react';
 import { endOfDay, startOfDay } from 'date-fns';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
@@ -35,8 +35,6 @@ export default async function HomePage() {
     redirect('/tutorial');
   }
 
-  const dailyGoal = profile?.daily_goal || 20;
-
   // Fetch words added today
   const today = new Date();
   const startOfRange = startOfDay(today).toISOString();
@@ -49,15 +47,12 @@ export default async function HomePage() {
     .gte('created_at', startOfRange)
     .lte('created_at', endOfRange);
 
-  // Fetch words due for review
   const { count: wordsToReview } = await supabase
     .from('user_words')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
+    .lt('memory_score', 10)
     .lte('next_review_at', new Date().toISOString());
-
-  const progress = Math.min(100, ((wordsAddedToday || 0) / dailyGoal) * 100);
-  const isGoalMet = (wordsAddedToday || 0) >= dailyGoal;
 
   return (
     <div className="space-y-8 pb-10">
@@ -69,34 +64,20 @@ export default async function HomePage() {
       <WordSearch useCapitalCase={profile?.use_capital_case} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Progress Card */}
-        <section className="card space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white/80">{t('dailyProgress')}</h3>
-            <span className="text-sm font-medium text-indigo-400">
-              {wordsAddedToday || 0} / {dailyGoal} {t('words')}
-            </span>
+        {/* Words Added Today Card */}
+        <div className="card group relative flex items-center justify-between overflow-hidden hover:bg-white/10 transition-colors">
+          <div className="space-y-1">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-white/20">{t('todaysWords')}</p>
+            <h4 className="text-4xl font-black font-outfit">{wordsAddedToday || 0}</h4>
+            <p className="text-xs text-white/40 font-bold uppercase tracking-widest">{t('words')}</p>
           </div>
-
-          <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden border border-white/10">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000 shadow-[0_0_20px_rgba(99,102,241,0.5)]"
-              style={{ width: `${progress}%` }}
-            />
+          <div className="p-4 bg-indigo-500/10 rounded-2xl text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-500">
+            <CheckCircle2 size={32} />
           </div>
-
-          {isGoalMet ? (
-            <div className="flex items-center gap-2 text-green-400 text-sm">
-              <CheckCircle2 size={16} />
-              <span>{t('goalAchieved')}</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-indigo-300 text-sm">
-              <AlertCircle size={16} />
-              <span>{t('addMore', { count: dailyGoal - (wordsAddedToday || 0) })}</span>
-            </div>
-          )}
-        </section>
+          <div className="absolute -bottom-1 -right-1 text-white/5 font-black text-6xl select-none group-hover:text-white/10 transition-colors">
+            TODAY
+          </div>
+        </div>
 
         <Link href="/review" className="card group relative flex items-center justify-between overflow-hidden hover:bg-white/10 transition-colors">
           <div className="space-y-1">

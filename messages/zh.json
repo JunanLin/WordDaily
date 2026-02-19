@@ -10,10 +10,8 @@
         "welcome": "欢迎来到 WordDaily",
         "signInDesc": "登录以开始您的词汇之旅。",
         "signInButton": "登录",
-        "dailyProgress": "今日进度",
+        "todaysWords": "今日添加单词",
         "words": "个单词",
-        "goalAchieved": "今日目标达成！",
-        "addMore": "还需要添加 {count} 个单词",
         "dueReview": "待复习",
         "newWord": "新单词",
         "quote": "\"语言的边界就是世界的边界。\"",
@@ -73,7 +71,8 @@
         "tag_ky": "考研",
         "tag_ielts": "雅思",
         "tag_toefl": "托福",
-        "tag_gre": "GRE"
+        "tag_gre": "GRE",
+        "memoryScore10Hint": "评分 10 的单词将被视为已掌握，不会再出现在复习中。"
     },
     "history": {
         "title": "归档",
@@ -243,5 +242,16 @@
         "ielts_name": "雅思词汇",
         "toefl_name": "托福词汇",
         "gre_name": "GRE 词汇"
+    },
+    "feedback": {
+        "title": "反馈与建议",
+        "messageLabel": "反馈内容",
+        "messagePlaceholder": "有什么想说的？（Bug 反馈、功能建议都可以！）",
+        "pageLabel": "相关页面（可选）",
+        "notPageSpecific": "不针对特定页面",
+        "submit": "提交反馈",
+        "success": "感谢您的反馈！",
+        "error": "反馈提交失败。",
+        "unexpectedError": "发生了意外错误。"
     }
 }

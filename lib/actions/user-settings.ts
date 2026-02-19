@@ -5,7 +5,6 @@ import { revalidatePath } from 'next/cache';
 import { validateSession } from '@/lib/security';
 
 export async function updateUserSettings(data: {
-    daily_goal?: number;
     notifications_enabled?: boolean;
     day_reminder_time?: string;
     review_reminder_time?: string;

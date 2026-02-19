@@ -3,17 +3,20 @@
 import { createClient } from '@/lib/supabase/server'
 import { getLemma } from '@/lib/services/lemma'
 import { fetchDictionaryData } from '@/lib/services/dictionary'
-import { fetchExamplesFromDeepSeek } from '@/lib/services/deepseek'
+import { fetchEnrichmentFromDeepSeek } from '@/lib/services/deepseek'
 import { translateToChinese } from '@/lib/services/translation'
 import { revalidatePath } from 'next/cache'
 import { subDays, isAfter } from 'date-fns'
 import { validateSession } from '@/lib/security'
+
+import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
  * Shared dictionary service using the unified 'dictionary' table.
  */
 export async function getOrCreateWord(word: string) {
     const supabase = createClient()
+    const adminSupabase = createAdminClient()
     const normalized = word.trim().toLowerCase()
 
     // 1. Check if word exists in the dictionary
@@ -35,10 +38,10 @@ export async function getOrCreateWord(word: string) {
 
         // Create a new entry from Wordnik data
         // For new words, we use DeepSeek for professional examples and translations
-        const examples = await fetchExamplesFromDeepSeek(normalized);
-        const translation = await translateToChinese(dictData.definitions[0]?.definition || '');
+        const enrichment = await fetchEnrichmentFromDeepSeek(normalized);
+        const translation = enrichment?.translation || await translateToChinese(dictData.definitions[0]?.definition || '');
 
-        const { data: newEntry, error: insertError } = await supabase
+        const { data: newEntry, error: insertError } = await adminSupabase
             .from('dictionary')
             .insert({
                 word: normalized,
@@ -47,7 +50,7 @@ export async function getOrCreateWord(word: string) {
                 definition: dictData.definitions[0]?.definition,
                 translation: translation,
                 pos: dictData.definitions[0]?.partOfSpeech,
-                detail: { examples },
+                detail: { examples: enrichment?.examples || [] },
                 updated_at: new Date().toISOString()
             })
             .select()
@@ -64,29 +67,41 @@ export async function getOrCreateWord(word: string) {
         return newEntry;
     }
 
-    // 2. Check if the entry needs enrichment (missing audio or examples)
-    const hasExamples = entry.detail && (entry.detail as any).examples && (entry.detail as any).examples.length > 0;
+    // 2. Check if the entry needs enrichment (missing examples or translation)
+    const detailObj = entry.detail as any || {};
+    const hasExamples = detailObj.examples && Array.isArray(detailObj.examples) && detailObj.examples.length >= 4;
+    const hasTranslation = entry.translation && entry.translation.trim().length > 0;
 
-    if (!hasExamples) {
-        console.log(`[Dictionary] Enriching ${normalized} (Missing: examples)...`);
+    if (!hasExamples || !hasTranslation) {
+        console.log(`[Dictionary] Enriching ${normalized} (Missing: ${!hasExamples ? 'examples' : ''} ${!hasTranslation ? 'translation' : ''})...`);
 
-        const examples = await fetchExamplesFromDeepSeek(normalized);
-        const updates: any = {
-            updated_at: new Date().toISOString(),
-            detail: {
-                ...(entry.detail as any || {}),
-                examples: examples
+        const enrichment = await fetchEnrichmentFromDeepSeek(normalized);
+        if (enrichment) {
+            const updates: any = {
+                updated_at: new Date().toISOString(),
+                detail: {
+                    ...detailObj,
+                    examples: enrichment.examples
+                }
+            };
+
+            if (!hasTranslation && enrichment.translation) {
+                updates.translation = enrichment.translation;
             }
-        };
 
-        const { data: updatedEntry, error: updateError } = await supabase
-            .from('dictionary')
-            .update(updates)
-            .eq('id', entry.id)
-            .select()
-            .single()
+            const { data: updatedEntry, error: updateError } = await adminSupabase
+                .from('dictionary')
+                .update(updates)
+                .eq('id', entry.id)
+                .select()
+                .single()
 
-        if (!updateError) return updatedEntry;
+            if (updateError) {
+                console.error(`[Dictionary] enrichment update error for ${normalized}:`, updateError);
+            } else {
+                return updatedEntry;
+            }
+        }
     }
 
     return entry;

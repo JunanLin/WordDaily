@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Target, Bell, Clock, Globe, Save, Loader2, SendHorizonal } from 'lucide-react';
+import { Bell, Clock, Globe, Save, Loader2, SendHorizonal } from 'lucide-react';
 import { updateUserSettings, savePushSubscription, deletePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
 import { subscribeToPush, unsubscribeFromPush } from '@/lib/push-notifications';
@@ -10,7 +10,6 @@ import LanguageSwitcher from './LanguageSwitcher';
 
 interface SettingsFormProps {
     profile: {
-        daily_goal: number;
         notifications_enabled: boolean;
         day_reminder_time: string;
         review_reminder_time: string;
@@ -26,7 +25,6 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
     const [form, setForm] = useState({
-        daily_goal: profile.daily_goal,
         notifications_enabled: profile.notifications_enabled,
         day_reminder_time: profile.day_reminder_time,
         review_reminder_time: profile.review_reminder_time,
@@ -80,27 +78,6 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                         </div>
                         <LanguageSwitcher />
                     </div>
-                </div>
-
-                <div className="h-px bg-white/5" />
-
-                {/* Daily Goal */}
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-indigo-400">
-                            <Target size={20} />
-                            <span className="font-bold uppercase tracking-widest text-[10px]">{t('learningGoal')}</span>
-                        </div>
-                        <input
-                            type="number"
-                            min="1"
-                            max="100"
-                            value={form.daily_goal}
-                            onChange={(e) => setForm({ ...form, daily_goal: parseInt(e.target.value) })}
-                            className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 w-20 text-right font-bold focus:ring-1 focus:ring-indigo-500 outline-none"
-                        />
-                    </div>
-                    <p className="text-xs text-white/30">{t('learningGoalDesc')}</p>
                 </div>
 
                 <div className="h-px bg-white/5" />

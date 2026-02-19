@@ -11,10 +11,15 @@ export interface DeepSeekExample {
     zh: string;
 }
 
-export async function fetchExamplesFromDeepSeek(word: string): Promise<DeepSeekExample[]> {
+export interface DeepSeekResult {
+    translation: string;
+    examples: DeepSeekExample[];
+}
+
+export async function fetchEnrichmentFromDeepSeek(word: string): Promise<DeepSeekResult | null> {
     if (!openai) {
         console.warn('[DeepSeek] API key is missing.');
-        return [];
+        return null;
     }
 
     try {
@@ -22,7 +27,7 @@ export async function fetchExamplesFromDeepSeek(word: string): Promise<DeepSeekE
             messages: [
                 {
                     role: 'system',
-                    content: 'You are a professional dictionary assistant. Generate 4 professional English-Chinese example sentences for the given word. Return data ONLY in the following JSON format: { "examples": [{ "en": "English sentence", "zh": "中文翻译" }] }'
+                    content: 'You are a professional dictionary assistant. Generate a concise Chinese translation and 4 professional English-Chinese example sentences for the given word. Return data ONLY in the following JSON format: { "translation": "中文翻译", "examples": [{ "en": "English sentence", "zh": "中文翻译" }] }'
                 },
                 { role: 'user', content: word }
             ],
@@ -33,10 +38,13 @@ export async function fetchExamplesFromDeepSeek(word: string): Promise<DeepSeekE
         const content = completion.choices[0].message.content;
         if (content) {
             const parsed = JSON.parse(content);
-            return parsed.examples || [];
+            return {
+                translation: parsed.translation || '',
+                examples: parsed.examples || []
+            };
         }
     } catch (error: any) {
         console.error('[DeepSeek] Error:', error.message);
     }
-    return [];
+    return null;
 }
