@@ -49,6 +49,8 @@ export default function LoginPage() {
         if (authError) {
             if (authError.message.includes('Email not confirmed')) {
                 setError(t('checkEmail'));
+            } else if (authError.message.includes('Invalid login credentials')) {
+                setError(t('invalidCredentials'));
             } else {
                 setError(authError.message);
             }

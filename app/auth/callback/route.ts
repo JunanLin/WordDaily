@@ -13,16 +13,14 @@ export async function GET(request: Request) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
         if (!error) {
             const redirectPath = next === '/' ? '/auth/verified' : next
-            const forwardedHost = request.headers.get('x-forwarded-host')
-            const isLocalEnv = process.env.NODE_ENV === 'development'
 
-            if (isLocalEnv) {
-                return NextResponse.redirect(`${origin}${redirectPath}`)
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${redirectPath}`)
-            } else {
+            // For relative paths, prepend the request origin (safest for cross-env)
+            if (redirectPath.startsWith('/')) {
                 return NextResponse.redirect(`${origin}${redirectPath}`)
             }
+
+            // For absolute external URLs, redirect directly
+            return NextResponse.redirect(redirectPath)
         }
     }
 

@@ -31,12 +31,23 @@ export default async function SettingsPage() {
 
             <SettingsForm profile={profile} />
 
-            <div className="space-y-4">
-                <div className="flex items-center gap-3 px-1 text-white/20">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Security</span>
+            {/* Security Link */}
+            <Link href="/oauth/consent" className="card block hover:bg-white/[0.03] transition-colors border-white/5">
+                <div className="flex items-center justify-between py-4 px-2 group">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 shadow-inner">
+                            <Settings size={22} className="text-indigo-400" />
+                        </div>
+                        <div>
+                            <p className="font-bold text-lg">{t('settings.security')}</p>
+                            <p className="text-xs text-white/30 font-medium">{t('settings.securityDesc')}</p>
+                        </div>
+                    </div>
+                    <div className="text-white/20 group-hover:text-white/40 group-hover:translate-x-1 transition-all">
+                        <ArrowRight size={20} />
+                    </div>
                 </div>
-                <PasswordChangeForm />
-            </div>
+            </Link>
 
             {/* Tutorial Link */}
             <Link href="/tutorial" className="card block hover:bg-white/[0.03] transition-colors border-white/5">

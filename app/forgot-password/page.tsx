@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
                 <h2 className="text-4xl font-black font-outfit bg-gradient-to-br from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                     {t('resetPassword')}
                 </h2>
-                <p className="text-white/40 font-medium">Enter your email and we'll send you a link to reset your password.</p>
+                <p className="text-white/40 font-medium">{t('resetPasswordDesc')}</p>
             </div>
 
             <form onSubmit={handleReset} className="w-full space-y-6">
