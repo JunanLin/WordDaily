@@ -125,7 +125,10 @@
         "googleAccount": "Google Sign-in",
         "emailAccount": "Email Account",
         "enterNewPassword": "Please enter your new password below.",
-        "dualSigninEnabled": "Dual Sign-in Enabled"
+        "dualSigninEnabled": "Dual Sign-in Enabled",
+        "emailVerifiedTitle": "Email Verified!",
+        "emailVerifiedDesc": "Your account has been successfully verified. You can now start building your daily vocabulary.",
+        "goToDashboard": "Go to Dashboard"
     },
     "settings": {
         "title": "Settings",

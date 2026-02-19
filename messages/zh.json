@@ -125,7 +125,10 @@
         "googleAccount": "Google 登录",
         "emailAccount": "电子邮箱账号",
         "enterNewPassword": "请在下方输入您的新密码。",
-        "dualSigninEnabled": "双重登录已启用"
+        "dualSigninEnabled": "双重登录已启用",
+        "emailVerifiedTitle": "邮箱已确认！",
+        "emailVerifiedDesc": "您的账号已成功确认。现在您可以开始积累您的每日词汇了。",
+        "goToDashboard": "前往控制面板"
     },
     "settings": {
         "title": "设置",
