@@ -113,7 +113,8 @@
         "newPasswordPlaceholder": "New Password",
         "updatePassword": "Update Password",
         "passwordUpdated": "Password updated successfully!",
-        "signInWithGoogle": "Continue with Google"
+        "signInWithGoogle": "Continue with Google",
+        "googleUserSetupPassword": "Since you use Google to sign in, set a password here to also enable signing in with your email address."
     },
     "settings": {
         "title": "Settings",

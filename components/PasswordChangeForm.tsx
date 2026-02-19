@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Lock, Save, Loader2, CheckCircle } from 'lucide-react';
+import { Lock, Save, Loader2, CheckCircle, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function PasswordChangeForm() {
@@ -11,7 +11,19 @@ export default function PasswordChangeForm() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    const [isGoogleUser, setIsGoogleUser] = useState(false);
     const supabase = createClient();
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const googleIdentity = user.identities?.some(id => id.provider === 'google');
+                setIsGoogleUser(!!googleIdentity);
+            }
+        };
+        checkUser();
+    }, [supabase]);
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,12 +45,25 @@ export default function PasswordChangeForm() {
 
     return (
         <div className="card space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="space-y-1 text-center sm:text-left">
-                <div className="flex items-center gap-3 text-indigo-400 justify-center sm:justify-start">
-                    <Lock size={20} />
-                    <span className="font-bold uppercase tracking-widest text-[10px]">{tAuth('resetPassword')}</span>
+            <div className="space-y-3">
+                <div className="space-y-1 text-center sm:text-left">
+                    <div className="flex items-center gap-3 text-indigo-400 justify-center sm:justify-start">
+                        <Lock size={20} />
+                        <span className="font-bold uppercase tracking-widest text-[10px]">{tAuth('resetPassword')}</span>
+                    </div>
+                    <p className="text-xs text-white/30">
+                        {isGoogleUser ? tAuth('googleUserSetupPassword') : 'Set a new password for your account.'}
+                    </p>
                 </div>
-                <p className="text-xs text-white/30">Set a new password for your account.</p>
+
+                {isGoogleUser && (
+                    <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center gap-3">
+                        <UserPlus size={16} className="text-indigo-400" />
+                        <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">
+                            Enable Email Login
+                        </p>
+                    </div>
+                )}
             </div>
 
             <form onSubmit={handleUpdate} className="space-y-4">

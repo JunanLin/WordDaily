@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Loader2, Lock, CheckCircle, ArrowRight } from 'lucide-react';
+import { Loader2, Lock, CheckCircle, ArrowRight, UserPlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -12,8 +12,20 @@ export default function ResetPasswordPage() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isGoogleUser, setIsGoogleUser] = useState(false);
     const supabase = createClient();
     const router = useRouter();
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const googleIdentity = user.identities?.some(id => id.provider === 'google');
+                setIsGoogleUser(!!googleIdentity);
+            }
+        };
+        checkUser();
+    }, [supabase]);
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,10 +52,23 @@ export default function ResetPasswordPage() {
         <div className="flex flex-col items-center justify-center min-h-screen max-w-sm mx-auto p-6 space-y-8">
             <div className="text-center space-y-2">
                 <h2 className="text-4xl font-black font-outfit bg-gradient-to-br from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                    {t('newPasswordPlaceholder')}
+                    {isGoogleUser ? t('resetPassword') : t('newPasswordPlaceholder')}
                 </h2>
-                <p className="text-white/40 font-medium">Please enter your new password below.</p>
+                <p className="text-white/40 font-medium">
+                    {isGoogleUser ? t('googleUserSetupPassword') : 'Please enter your new password below.'}
+                </p>
             </div>
+
+            {isGoogleUser && (
+                <div className="w-full p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
+                        <UserPlus size={20} />
+                    </div>
+                    <p className="text-xs text-indigo-300 font-bold leading-relaxed uppercase tracking-widest">
+                        Dual Sign-in Enabled
+                    </p>
+                </div>
+            )}
 
             <form onSubmit={handleUpdate} className="w-full space-y-6">
                 <div className="relative">
