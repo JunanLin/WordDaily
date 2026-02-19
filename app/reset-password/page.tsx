@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 export default function ResetPasswordPage() {
     const t = useTranslations('auth');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -29,6 +30,12 @@ export default function ResetPasswordPage() {
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (password !== confirmPassword) {
+            setError(t('passwordMismatch'));
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -55,7 +62,7 @@ export default function ResetPasswordPage() {
                     {isGoogleUser ? t('resetPassword') : t('newPasswordPlaceholder')}
                 </h2>
                 <p className="text-white/40 font-medium">
-                    {isGoogleUser ? t('googleUserSetupPassword') : 'Please enter your new password below.'}
+                    {isGoogleUser ? t('googleUserSetupPassword') : t('enterNewPassword')}
                 </p>
             </div>
 
@@ -65,23 +72,38 @@ export default function ResetPasswordPage() {
                         <UserPlus size={20} />
                     </div>
                     <p className="text-xs text-indigo-300 font-bold leading-relaxed uppercase tracking-widest">
-                        Dual Sign-in Enabled
+                        {t('dualSigninEnabled')}
                     </p>
                 </div>
             )}
 
             <form onSubmit={handleUpdate} className="w-full space-y-6">
-                <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
-                    <input
-                        type="password"
-                        placeholder={t('newPasswordPlaceholder')}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/30"
-                        required
-                        minLength={6}
-                    />
+                <div className="space-y-4">
+                    <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                        <input
+                            type="password"
+                            placeholder={t('newPasswordPlaceholder')}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/30"
+                            required
+                            minLength={6}
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                        <input
+                            type="password"
+                            placeholder={t('confirmPasswordPlaceholder')}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/30"
+                            required
+                            minLength={6}
+                        />
+                    </div>
                 </div>
 
                 {error && (

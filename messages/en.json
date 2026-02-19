@@ -112,11 +112,20 @@
         "resetEmailSent": "Check your email for the password reset link.",
         "resetPasswordDesc": "Enter your email and we'll send you a link to reset your password.",
         "newPasswordPlaceholder": "New Password",
+        "confirmPasswordPlaceholder": "Confirm New Password",
         "updatePassword": "Update Password",
         "passwordUpdated": "Password updated successfully!",
+        "passwordMismatch": "Passwords do not match",
         "invalidCredentials": "Invalid login credentials",
         "signInWithGoogle": "Continue with Google",
-        "googleUserSetupPassword": "Since you use Google to sign in, set a password here to also enable signing in with your email address."
+        "googleUserSetupPassword": "Since you use Google to sign in, set a password here to also enable signing in with your email address.",
+        "securityAndIdentity": "Security & Identity",
+        "manageAccount": "Manage Account",
+        "manageAccountDesc": "Secure your account and manage your sign-in methods.",
+        "googleAccount": "Google Sign-in",
+        "emailAccount": "Email Account",
+        "enterNewPassword": "Please enter your new password below.",
+        "dualSigninEnabled": "Dual Sign-in Enabled"
     },
     "settings": {
         "title": "Settings",

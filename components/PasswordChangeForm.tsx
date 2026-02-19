@@ -9,6 +9,7 @@ export default function PasswordChangeForm() {
     const tAuth = useTranslations('auth');
     const tSettings = useTranslations('settings');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const [isGoogleUser, setIsGoogleUser] = useState(false);
@@ -27,6 +28,12 @@ export default function PasswordChangeForm() {
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (password !== confirmPassword) {
+            setStatus({ type: 'error', message: tAuth('passwordMismatch') });
+            return;
+        }
+
         setLoading(true);
         setStatus(null);
 
@@ -39,6 +46,7 @@ export default function PasswordChangeForm() {
         } else {
             setStatus({ type: 'success', message: tAuth('passwordUpdated') });
             setPassword('');
+            setConfirmPassword('');
         }
         setLoading(false);
     };
@@ -67,17 +75,32 @@ export default function PasswordChangeForm() {
             </div>
 
             <form onSubmit={handleUpdate} className="space-y-4">
-                <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-                    <input
-                        type="password"
-                        placeholder={tAuth('newPasswordPlaceholder')}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium"
-                        required
-                        minLength={6}
-                    />
+                <div className="space-y-4">
+                    <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <input
+                            type="password"
+                            placeholder={tAuth('newPasswordPlaceholder')}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium"
+                            required
+                            minLength={6}
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <input
+                            type="password"
+                            placeholder={tAuth('confirmPasswordPlaceholder')}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium"
+                            required
+                            minLength={6}
+                        />
+                    </div>
                 </div>
 
                 {status && (

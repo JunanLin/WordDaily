@@ -45,6 +45,10 @@ export default function Navigation() {
         { href: '/settings', icon: Settings, label: t('settings') },
     ];
 
+    // Hide navigation on auth-related pages that require focus
+    const hiddenPaths = ['/reset-password', '/forgot-password', '/oauth/consent'];
+    if (hiddenPaths.includes(pathname)) return null;
+
     return (
         <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass-panel py-3 px-6 z-50 shadow-2xl">
             <ul className="flex justify-between items-center">
