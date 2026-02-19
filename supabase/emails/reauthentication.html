@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reauthenticate Your Account</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+            color: #111827;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #0a0a0f;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.025em;
+            text-decoration: none;
+        }
+
+        .content {
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #4b5563;
+            margin-bottom: 32px;
+        }
+
+        .token-container {
+            background-color: #f3f4f6;
+            padding: 24px;
+            border-radius: 12px;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: #4f46e5;
+            margin: 0 auto 32px;
+            display: inline-block;
+        }
+
+        .footer {
+            padding: 40px;
+            background-color: #f3f4f6;
+            text-align: center;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">WordDaily</div>
+        </div>
+        <div class="content">
+            <h1>Sensitive Action Confirmation</h1>
+            <p>Please use the following code to confirm your identity before proceeding with this sensitive action.</p>
+            <div class="token-container">{{ .Token }}</div>
+            <p>This code will expire in 10 minutes.</p>
+        </div>
+        <div class="footer">
+            <p>If you didn't initiate this action, please secure your account immediately.</p>
+            <p>&copy; 2026 WordDaily. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>
