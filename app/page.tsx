@@ -23,10 +23,10 @@ export default async function HomePage() {
     );
   }
 
-  // Fetch user profile (daily_goal and tutorial_completed)
+  // Fetch user profile
   const { data: profile } = await supabase
     .from('users')
-    .select('daily_goal, tutorial_completed, use_capital_case')
+    .select('daily_goal, tutorial_completed, use_capital_case, timezone')
     .eq('id', user.id)
     .single();
 
@@ -35,10 +35,32 @@ export default async function HomePage() {
     redirect('/tutorial');
   }
 
-  // Fetch words added today
-  const today = new Date();
-  const startOfRange = startOfDay(today).toISOString();
-  const endOfRange = endOfDay(today).toISOString();
+  // Fetch words added today in user's timezone
+  const userTimezone = profile?.timezone || 'UTC';
+  const now = new Date();
+
+  // Get YYYY-MM-DD in user's timezone
+  const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: userTimezone }).format(now);
+
+  // Calculate UTC start and end bounds for this local date
+  const getUTCRange = (dStr: string, tz: string) => {
+    const start = new Date(`${dStr}T00:00:00Z`);
+    const getOffset = (d: Date, t: string) => {
+      try {
+        const utcDate = new Date(d.toLocaleString('en-US', { timeZone: 'UTC' }));
+        const tzDate = new Date(d.toLocaleString('en-US', { timeZone: t }));
+        return (utcDate.getTime() - tzDate.getTime());
+      } catch (e) {
+        return 0;
+      }
+    };
+    const offset = getOffset(start, tz);
+    const startUTC = new Date(start.getTime() + offset);
+    const endUTC = new Date(startUTC.getTime() + 24 * 60 * 60 * 1000 - 1);
+    return { start: startUTC.toISOString(), end: endUTC.toISOString() };
+  };
+
+  const { start: startOfRange, end: endOfRange } = getUTCRange(dateStr, userTimezone);
 
   const { count: wordsAddedToday } = await supabase
     .from('user_words')

@@ -15,7 +15,7 @@ import {
     endOfWeek
 } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
-import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft, Volume2 } from 'lucide-react';
+import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft, Volume2, HelpCircle } from 'lucide-react';
 import { deleteUserWord } from '@/lib/actions/delete-word';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -97,6 +97,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
     const [selectedWord, setSelectedWord] = useState<UserWord | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const [visibleDaysCount, setVisibleDaysCount] = useState(3);
+    const [showFreqTip, setShowFreqTip] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [history, setHistory] = useState(initialHistory);
     const [isPending, startTransition] = useTransition();
@@ -496,7 +497,41 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                                 )}
                                                 {(selectedWord.dictionary.bnc || selectedWord.dictionary.frq) && (
                                                     <div className="space-y-1">
-                                                        <p className="text-[10px] text-white/40 font-bold uppercase">{tReview('frequency')}</p>
+                                                        <div className="flex items-center gap-1">
+                                                            <p className="text-[10px] text-white/40 font-bold uppercase">{tReview('frequency')}</p>
+                                                            <div className="relative">
+                                                                <button
+                                                                    type="button"
+                                                                    onMouseEnter={() => setShowFreqTip(true)}
+                                                                    onMouseLeave={() => setShowFreqTip(false)}
+                                                                    onClick={(e) => { e.stopPropagation(); setShowFreqTip(!showFreqTip); }}
+                                                                    className="text-white/20 hover:text-indigo-400 transition-colors"
+                                                                >
+                                                                    <HelpCircle size={10} />
+                                                                </button>
+                                                                <AnimatePresence>
+                                                                    {showFreqTip && (
+                                                                        <motion.div
+                                                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                            className="absolute left-auto right-0 sm:right-auto sm:left-0 bottom-full mb-2 w-72 p-4 rounded-2xl bg-[#1a1a24] border border-white/10 shadow-2xl z-[110] text-[10px] pointer-events-none"
+                                                                        >
+                                                                            <p className="font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                                                <div className="w-1 h-1 rounded-full bg-indigo-500" />
+                                                                                {tReview('frequencyHelpTitle')}
+                                                                            </p>
+                                                                            <div className="space-y-2 text-white/60 leading-relaxed">
+                                                                                <p><span className="text-white/80 font-bold underline decoration-indigo-500/50">BNC:</span> {tReview('bncDescription')}</p>
+                                                                                <p><span className="text-white/80 font-bold underline decoration-indigo-500/50">FRQ:</span> {tReview('frqDescription')}</p>
+                                                                                <p className="pt-1 text-indigo-300/80 italic font-medium">{tReview('frequencyCombined')}</p>
+                                                                            </div>
+                                                                            <div className="absolute right-1 sm:right-auto sm:left-2 top-full w-2 h-2 bg-[#1a1a24] border-r border-b border-white/10 rotate-45 -translate-y-1" />
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
+                                                        </div>
                                                         <div className="flex flex-col gap-1 text-[10px] text-indigo-200/80 font-mono">
                                                             {selectedWord.dictionary.bnc && <span>BNC #{selectedWord.dictionary.bnc}</span>}
                                                             {selectedWord.dictionary.frq && <span>FRQ #{selectedWord.dictionary.frq}</span>}
