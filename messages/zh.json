@@ -58,7 +58,7 @@
         "nextReviewSoon": "我们会尽快再次为您展示这个单词。",
         "nextReviewNormal": "我们会过几天再次为您展示这个单词。",
         "nextReviewLater": "太棒了！我们已将此单词的复习时间推后。",
-        "wordStats": "统计信息",
+        "wordStats": "考纲词汇",
         "examPrep": "考试标签",
         "frequency": "使用频率",
         "posDistribution": "词性分布",
@@ -72,7 +72,11 @@
         "tag_ielts": "雅思",
         "tag_toefl": "托福",
         "tag_gre": "GRE",
-        "memoryScore10Hint": "评分 10 的单词将被视为已掌握，不会再出现在复习中。"
+        "memoryScore10Hint": "评分 10 的单词将被视为已掌握，不会再出现在复习中。",
+        "frequencyHelpTitle": "关于词频",
+        "bncDescription": "BNC (英国国家语料库) 统计的是最近几百年的历史文献，与经典名著更相关。",
+        "frqDescription": "FRQ (当代语料库) 统计的是最近 20 年的各类资料，与现代资讯更相关。",
+        "frequencyCombined": "数字越小，代表使用频率越高。"
     },
     "history": {
         "title": "归档",

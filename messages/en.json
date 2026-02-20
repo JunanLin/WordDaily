@@ -58,7 +58,7 @@
         "nextReviewSoon": "We'll show you this word again very soon.",
         "nextReviewNormal": "We'll show you this word again in a few days.",
         "nextReviewLater": "Great! We'll push it further into the future.",
-        "wordStats": "Word Statistics",
+        "wordStats": "Exam Vocabulary",
         "examPrep": "Exam Prep",
         "frequency": "Frequency",
         "posDistribution": "POS Distribution",
@@ -72,7 +72,11 @@
         "tag_ielts": "IELTS",
         "tag_toefl": "TOEFL",
         "tag_gre": "GRE",
-        "memoryScore10Hint": "Words rated 10 will be considered mastered and won't appear in future reviews."
+        "memoryScore10Hint": "Words rated 10 will be considered mastered and won't appear in future reviews.",
+        "frequencyHelpTitle": "About Word Frequency",
+        "bncDescription": "BNC (British National Corpus) reflects historical frequency over several centuries, and is more relevant for literary classics.",
+        "frqDescription": "FRQ (Modern Corpus) reflects contemporary usage from the last 20 years, focusing on modern media and technology.",
+        "frequencyCombined": "A smaller value implies more frequent use."
     },
     "history": {
         "title": "Archive",
