@@ -1,0 +1,8 @@
+name: worddaily
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - nodejs=20
+  - ca-certificates
+  - openssl
