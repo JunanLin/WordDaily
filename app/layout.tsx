@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   title: "WordDaily | Master Your Vocabulary",
   description: "Spaced-repetition vocabulary learning app.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon-192x192.png",
+    apple: "/icons/icon-192x192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
