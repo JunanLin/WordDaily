@@ -14,7 +14,7 @@
         "words": "words",
         "dueReview": "Due Review",
         "newWord": "New Word",
-        "quote": "\"The limit of my language means the limit of my world.\"",
+        "quote": "The limit of my language means the limit of my world.",
         "author": "Ludwig Wittgenstein"
     },
     "add": {
@@ -131,7 +131,11 @@
         "dualSigninEnabled": "Dual Sign-in Enabled",
         "emailVerifiedTitle": "Email Verified!",
         "emailVerifiedDesc": "Your account has been successfully verified. You can now start building your daily vocabulary.",
-        "goToDashboard": "Go to Dashboard"
+        "goToDashboard": "Go to Dashboard",
+        "authErrorTitle": "Authentication Error",
+        "authErrorDesc": "Something went wrong during the authentication process. This often happens if the link has expired or was used in a different browser.",
+        "backToLogin": "Try Signing In Again",
+        "backToHome": "Back to Home"
     },
     "settings": {
         "title": "Settings",

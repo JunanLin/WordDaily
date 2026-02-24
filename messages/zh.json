@@ -14,7 +14,7 @@
         "words": "个单词",
         "dueReview": "待复习",
         "newWord": "新单词",
-        "quote": "\"语言的边界就是世界的边界。\"",
+        "quote": "语言的边界就是世界的边界。",
         "author": "路德维希·维特根斯坦"
     },
     "add": {
@@ -131,7 +131,11 @@
         "dualSigninEnabled": "双重登录已启用",
         "emailVerifiedTitle": "邮箱已确认！",
         "emailVerifiedDesc": "您的账号已成功确认。现在您可以开始积累您的每日词汇了。",
-        "goToDashboard": "前往控制面板"
+        "goToDashboard": "前往控制面板",
+        "authErrorTitle": "认证错误",
+        "authErrorDesc": "认证过程中出现问题。这通常是因为链接已过期，或在不同的浏览器中打开了链接。",
+        "backToLogin": "重新登录",
+        "backToHome": "返回首页"
     },
     "settings": {
         "title": "设置",
