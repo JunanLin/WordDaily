@@ -38,9 +38,8 @@ export async function middleware(request: NextRequest) {
     // Locale detection (preserving existing logic)
     const hasLocale = request.cookies.has('NEXT_LOCALE');
     if (!hasLocale) {
-        const acceptLanguage = request.headers.get('accept-language');
-        const detectedLocale = acceptLanguage?.includes('zh') ? 'zh' : 'en';
-        response.cookies.set('NEXT_LOCALE', detectedLocale);
+        // Always default to Chinese as per user requirement
+        response.cookies.set('NEXT_LOCALE', 'zh');
     }
 
     return response

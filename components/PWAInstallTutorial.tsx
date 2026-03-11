@@ -25,7 +25,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-xl bg-[#121218] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                className="relative w-full max-w-xl bg-[var(--modal-bg)] border border-[var(--card-border)] rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
             >
                 {/* Header */}
                 <div className="p-8 pb-4 text-center space-y-2">
@@ -34,8 +34,8 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                         <p className="text-[10px] text-amber-200/80 font-black uppercase tracking-[0.2em]">{t('pwaRecommend')}</p>
                     </div>
 
-                    <h2 className="text-3xl font-black font-outfit tracking-tight text-white">{t('pwaTitle')}</h2>
-                    <p className="text-white/40 text-sm max-w-sm mx-auto">{t('pwaDesc')}</p>
+                    <h2 className="text-3xl font-black font-outfit tracking-tight text-[rgb(var(--foreground-rgb))]">{t('pwaTitle')}</h2>
+                    <p className="text-[var(--foreground-40)] text-sm max-w-sm mx-auto">{t('pwaDesc')}</p>
                 </div>
 
                 {/* Platform Selector */}
@@ -44,7 +44,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                         onClick={() => { setPlatform('safari'); setSubPlatform('mobile'); }}
                         className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl border transition-all ${platform === 'safari'
                                 ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
-                                : 'bg-white/5 border-white/5 text-white/20 hover:text-white/40'
+                                : 'bg-[var(--foreground-10)] border-[var(--card-border)] text-[var(--foreground-20)] hover:text-[var(--foreground-40)]'
                             }`}
                     >
                         <Smartphone size={20} />
@@ -54,7 +54,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                         onClick={() => { setPlatform('chrome'); setSubPlatform('mobile'); }}
                         className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl border transition-all ${platform === 'chrome'
                                 ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
-                                : 'bg-white/5 border-white/5 text-white/20 hover:text-white/40'
+                                : 'bg-[var(--foreground-10)] border-[var(--card-border)] text-[var(--foreground-20)] hover:text-[var(--foreground-40)]'
                             }`}
                     >
                         <Chrome size={20} />
@@ -67,8 +67,8 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                     <button
                         onClick={() => setSubPlatform('mobile')}
                         className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${subPlatform === 'mobile'
-                                ? 'bg-white/10 text-white border border-white/20'
-                                : 'text-white/20 hover:text-white/40'
+                                ? 'bg-[var(--foreground-20)] text-[rgb(var(--foreground-rgb))] border border-[var(--card-border)]'
+                                : 'text-[var(--foreground-20)] hover:text-[var(--foreground-40)]'
                             }`}
                     >
                         {t('pwaPlatformIPhone')}
@@ -77,8 +77,8 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                         <button
                             onClick={() => setSubPlatform('tablet')}
                             className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${subPlatform === 'tablet'
-                                    ? 'bg-white/10 text-white border border-white/20'
-                                    : 'text-white/20 hover:text-white/40'
+                                    ? 'bg-[var(--foreground-20)] text-[rgb(var(--foreground-rgb))] border border-[var(--card-border)]'
+                                    : 'text-[var(--foreground-20)] hover:text-[var(--foreground-40)]'
                                 }`}
                         >
                             {t('pwaPlatformIPad')}
@@ -87,8 +87,8 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                     <button
                         onClick={() => setSubPlatform('desktop')}
                         className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${subPlatform === 'desktop'
-                                ? 'bg-white/10 text-white border border-white/20'
-                                : 'text-white/20 hover:text-white/40'
+                                ? 'bg-[var(--foreground-20)] text-[rgb(var(--foreground-rgb))] border border-[var(--card-border)]'
+                                : 'text-[var(--foreground-20)] hover:text-[var(--foreground-40)]'
                             }`}
                     >
                         {platform === 'safari' ? t('pwaPlatformIPad') : t('pwaPlatformDesktop')}
@@ -97,7 +97,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
 
                 {/* Dynamic Content - Scrollable */}
                 <div className="flex-1 overflow-y-auto px-8 pb-8 space-y-1">
-                    <div className="bg-white/5 rounded-3xl p-6 border border-white/5 space-y-6">
+                    <div className="bg-[var(--foreground-10)] rounded-3xl p-6 border border-[var(--card-border)] space-y-6">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={`${platform}-${subPlatform}`}
@@ -125,15 +125,15 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                                         <>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">1</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaSafariIPhoneStep1')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaSafariIPhoneStep1')}</p>
                                             </div>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">2</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaSafariIPhoneStep2')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaSafariIPhoneStep2')}</p>
                                             </div>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">3</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaSafariIPhoneStep3')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaSafariIPhoneStep3')}</p>
                                             </div>
                                         </>
                                     )}
@@ -143,11 +143,11 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                                         <>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">1</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaSafariIPadStep1')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaSafariIPadStep1')}</p>
                                             </div>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">2</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaSafariIPadStep2')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaSafariIPadStep2')}</p>
                                             </div>
                                         </>
                                     )}
@@ -157,11 +157,11 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                                         <>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">1</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaChromeAndroidStep1')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaChromeAndroidStep1')}</p>
                                             </div>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">2</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaChromeAndroidStep2')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaChromeAndroidStep2')}</p>
                                             </div>
                                         </>
                                     )}
@@ -171,11 +171,11 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                                         <>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">1</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaChromeIPadStep1')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaChromeIPadStep1')}</p>
                                             </div>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">2</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaChromeIPadStep2')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaChromeIPadStep2')}</p>
                                             </div>
                                         </>
                                     )}
@@ -185,11 +185,11 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                                         <>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">1</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaChromePCStep1')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaChromePCStep1')}</p>
                                             </div>
                                             <div className="flex gap-4 items-start">
                                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">2</div>
-                                                <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaChromePCStep2')}</p>
+                                                <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaChromePCStep2')}</p>
                                             </div>
                                         </>
                                     )}
@@ -197,7 +197,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                                     {(platform === 'safari' || (platform === 'chrome' && subPlatform === 'tablet')) && (
                                         <div className="flex gap-4 items-start">
                                             <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20 text-indigo-400 text-xs font-bold">3</div>
-                                            <p className="text-sm text-white/60 leading-relaxed font-medium">{t('pwaSafariStep3')}</p>
+                                            <p className="text-sm text-[var(--foreground-60)] leading-relaxed font-medium">{t('pwaSafariStep3')}</p>
                                         </div>
                                     )}
                                 </div>

@@ -22,47 +22,47 @@ export default async function SettingsPage() {
     return (
         <div className="space-y-8 pb-20 max-w-2xl mx-auto px-6">
             <div className="space-y-1">
-                <div className="flex items-center gap-3 text-white/20 mb-2">
+                <div className="flex items-center gap-3 text-[var(--foreground-20)] mb-2">
                     <Settings size={16} />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em]">Preferences</span>
                 </div>
-                <h2 className="text-4xl font-black font-outfit tracking-tight">{t('settings.title')}</h2>
-                <p className="text-white/40 text-sm font-medium">Personalize your learning experience</p>
+                <h2 className="text-4xl font-black font-outfit tracking-tight text-[rgb(var(--foreground-rgb))]">{t('settings.title')}</h2>
+                <p className="text-[var(--foreground-40)] text-sm font-medium">Personalize your learning experience</p>
             </div>
 
             <SettingsForm profile={profile} />
 
             {/* Security Link */}
-            <Link href="/oauth/consent" className="card block hover:bg-white/[0.03] transition-colors border-white/5">
+            <Link href="/oauth/consent" className="card block hover:bg-[var(--foreground-10)] transition-colors border-[var(--card-border)]">
                 <div className="flex items-center justify-between py-4 px-2 group">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 shadow-inner">
                             <Settings size={22} className="text-indigo-400" />
                         </div>
                         <div>
-                            <p className="font-bold text-lg">{t('settings.security')}</p>
-                            <p className="text-xs text-white/30 font-medium">{t('settings.securityDesc')}</p>
+                            <p className="font-bold text-lg text-[rgb(var(--foreground-rgb))]">{t('settings.security')}</p>
+                            <p className="text-xs text-[var(--foreground-40)] font-medium">{t('settings.securityDesc')}</p>
                         </div>
                     </div>
-                    <div className="text-white/20 group-hover:text-white/40 group-hover:translate-x-1 transition-all">
+                    <div className="text-[var(--foreground-20)] group-hover:text-[var(--foreground-40)] group-hover:translate-x-1 transition-all">
                         <ArrowRight size={20} />
                     </div>
                 </div>
             </Link>
 
             {/* Tutorial Link */}
-            <Link href="/tutorial" className="card block hover:bg-white/[0.03] transition-colors border-white/5">
+            <Link href="/tutorial" className="card block hover:bg-[var(--foreground-10)] transition-colors border-[var(--card-border)]">
                 <div className="flex items-center justify-between py-4 px-2 group">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 shadow-inner">
                             <BookOpenCheck size={24} />
                         </div>
                         <div>
-                            <p className="font-bold text-lg">{t('settings.tutorial')}</p>
-                            <p className="text-xs text-white/30 font-medium">Review the app tutorial</p>
+                            <p className="font-bold text-lg text-[rgb(var(--foreground-rgb))]">{t('settings.tutorial')}</p>
+                            <p className="text-xs text-[var(--foreground-40)] font-medium">Review the app tutorial</p>
                         </div>
                     </div>
-                    <div className="text-white/20 group-hover:text-white/40 group-hover:translate-x-1 transition-all">
+                    <div className="text-[var(--foreground-20)] group-hover:text-[var(--foreground-40)] group-hover:translate-x-1 transition-all">
                         <ArrowRight size={20} />
                     </div>
                 </div>
@@ -71,14 +71,14 @@ export default async function SettingsPage() {
 
             <FeedbackForm />
 
-            <div className="card bg-white/[0.01] border-white/5">
+            <div className="card border-[var(--card-border)]">
                 <div className="flex items-center gap-5 mb-8 p-1">
-                    <div className="w-14 h-14 rounded-[1.5rem] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/10">
+                    <div className="w-14 h-14 rounded-[1.5rem] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/10 text-white">
                         {user.email?.[0]}
                     </div>
                     <div className="space-y-0.5">
-                        <p className="font-bold text-lg tracking-tight">{user.email}</p>
-                        <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest">
+                        <p className="font-bold text-lg tracking-tight text-[rgb(var(--foreground-rgb))]">{user.email}</p>
+                        <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase tracking-widest">
                             {t('common.memberSince')} {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                         </p>
                     </div>
@@ -92,7 +92,7 @@ export default async function SettingsPage() {
             </div>
 
             <div className="text-center pt-8">
-                <p className="text-[10px] text-white/20 uppercase font-bold tracking-[0.2em]">WordDaily v1.0.0</p>
+                <p className="text-[10px] text-[var(--foreground-20)] uppercase font-bold tracking-[0.2em]">WordDaily v1.0.0</p>
             </div>
         </div>
     );

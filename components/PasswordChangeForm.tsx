@@ -59,7 +59,7 @@ export default function PasswordChangeForm() {
                         <Lock size={20} />
                         <span className="font-bold uppercase tracking-widest text-[10px]">{tAuth('resetPassword')}</span>
                     </div>
-                    <p className="text-xs text-white/30">
+                    <p className="text-xs text-[var(--foreground-40)]">
                         {isGoogleUser ? tAuth('googleUserSetupPassword') : 'Set a new password for your account.'}
                     </p>
                 </div>
@@ -77,26 +77,26 @@ export default function PasswordChangeForm() {
             <form onSubmit={handleUpdate} className="space-y-4">
                 <div className="space-y-4">
                     <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground-40)]" size={18} />
                         <input
                             type="password"
                             placeholder={tAuth('newPasswordPlaceholder')}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium"
+                            className="w-full bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-xl py-3 pl-12 pr-4 text-[rgb(var(--foreground-rgb))] focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium"
                             required
                             minLength={6}
                         />
                     </div>
 
                     <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground-40)]" size={18} />
                         <input
                             type="password"
                             placeholder={tAuth('confirmPasswordPlaceholder')}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium"
+                            className="w-full bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-xl py-3 pl-12 pr-4 text-[rgb(var(--foreground-rgb))] focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-medium"
                             required
                             minLength={6}
                         />
@@ -114,7 +114,7 @@ export default function PasswordChangeForm() {
                 <button
                     type="submit"
                     disabled={loading || !password}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-500 hover:bg-indigo-600 disabled:bg-white/5 disabled:text-white/20 text-white rounded-xl transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 disabled:shadow-none"
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-500 hover:bg-indigo-600 disabled:bg-[var(--foreground-10)] disabled:text-[var(--foreground-20)] text-white rounded-xl transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 disabled:shadow-none"
                 >
                     {loading ? <Loader2 className="animate-spin" size={16} /> : (
                         <>

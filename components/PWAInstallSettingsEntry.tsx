@@ -14,7 +14,7 @@ export default function PWAInstallSettingsEntry() {
         <>
             <button
                 onClick={() => setShow(true)}
-                className="card w-full block hover:bg-white/[0.03] transition-colors border-white/5 text-left"
+                className="card w-full block hover:bg-[var(--foreground-10)] transition-colors border-[var(--card-border)] text-left"
             >
                 <div className="flex items-center justify-between py-4 px-2 group">
                     <div className="flex items-center gap-4">
@@ -22,11 +22,11 @@ export default function PWAInstallSettingsEntry() {
                             <Download size={24} />
                         </div>
                         <div>
-                            <p className="font-bold text-lg">{t('viewPwaTutorial')}</p>
-                            <p className="text-xs text-white/30 font-medium">{t('pwaTitle')}</p>
+                            <p className="font-bold text-lg text-[rgb(var(--foreground-rgb))]">{t('viewPwaTutorial')}</p>
+                            <p className="text-xs text-[var(--foreground-40)] font-medium">{t('pwaTitle')}</p>
                         </div>
                     </div>
-                    <div className="text-white/20 group-hover:text-white/40 group-hover:translate-x-1 transition-all">
+                    <div className="text-[var(--foreground-20)] group-hover:text-[var(--foreground-40)] group-hover:translate-x-1 transition-all">
                         <ArrowRight size={20} />
                     </div>
                 </div>

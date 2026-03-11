@@ -101,7 +101,7 @@ export default function Tutorial() {
     const Icon = step.icon;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a0a0c]">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[var(--background-end-rgb)]/90 backdrop-blur-md">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full" />
@@ -109,7 +109,7 @@ export default function Tutorial() {
 
             <motion.div
                 layout
-                className="relative w-full max-w-lg bg-[#121218] border border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col min-h-[500px]"
+                className="relative w-full max-w-lg bg-[var(--modal-bg)] border border-[var(--card-border)] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col min-h-[500px]"
             >
                 {/* Progress Bar */}
                 <div className="absolute top-0 left-0 right-0 h-1.5 flex gap-1 p-1">
@@ -118,7 +118,7 @@ export default function Tutorial() {
                             key={i}
                             className={cn(
                                 "flex-1 h-full rounded-full transition-all duration-500",
-                                i <= currentStep ? "bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" : "bg-white/5"
+                                i <= currentStep ? "bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" : "bg-[var(--foreground-10)]"
                             )}
                         />
                     ))}
@@ -142,23 +142,23 @@ export default function Tutorial() {
                                 <h1 className="text-3xl font-black font-outfit tracking-tight">
                                     {t(`${step.id}Title`)}
                                 </h1>
-                                <p className="text-white/40 leading-relaxed text-sm max-w-[280px] mx-auto">
+                                <p className="text-[var(--foreground-40)] leading-relaxed text-sm max-w-[280px] mx-auto">
                                     {t(`${step.id}Desc`)}
                                 </p>
                             </div>
 
                             {/* Visual Aid for Search (Step 1) */}
                             {step.id === 'search' && (
-                                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3 text-left animate-pulse">
+                                <div className="p-4 rounded-2xl bg-[var(--foreground-10)] border border-[var(--card-border)] space-y-3 text-left animate-pulse">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
                                             <Plus size={16} />
                                         </div>
-                                        <div className="h-4 w-32 bg-white/10 rounded-full" />
+                                        <div className="h-4 w-32 bg-[var(--foreground-20)] rounded-full" />
                                     </div>
                                     <div className="space-y-2">
-                                        <div className="h-2 w-full bg-white/5 rounded-full" />
-                                        <div className="h-2 w-2/3 bg-white/5 rounded-full" />
+                                        <div className="h-2 w-full bg-[var(--foreground-10)] rounded-full" />
+                                        <div className="h-2 w-2/3 bg-[var(--foreground-10)] rounded-full" />
                                     </div>
                                 </div>
                             )}
@@ -167,7 +167,7 @@ export default function Tutorial() {
                             {step.id === 'review' && (
                                 <div className="flex gap-2 justify-center">
                                     {[0, 2, 5, 8, 10].map(s => (
-                                        <div key={s} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-white/20">
+                                        <div key={s} className="w-10 h-10 rounded-xl bg-[var(--foreground-10)] border border-[var(--card-border)] flex items-center justify-center text-[10px] font-black text-[var(--foreground-40)]">
                                             {s}
                                         </div>
                                     ))}
@@ -177,14 +177,14 @@ export default function Tutorial() {
                             {/* Visual Aid for Lists (Step 4) */}
                             {step.id === 'lists' && (
                                 <div className="flex gap-3 justify-center">
-                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 scale-90 animate-pulse">
+                                    <div className="p-4 bg-[var(--foreground-10)] rounded-2xl border border-[var(--card-border)] scale-90 animate-pulse">
                                         <Shuffle size={24} className="text-amber-400" />
                                     </div>
                                     <div className="p-4 bg-amber-400/20 rounded-2xl border border-amber-400/20 scale-100">
                                         <Plus size={24} className="text-amber-400" />
                                     </div>
-                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 scale-90 opacity-50">
-                                        <CheckCircle2 size={24} className="text-white/20" />
+                                    <div className="p-4 bg-[var(--foreground-10)] rounded-2xl border border-[var(--card-border)] scale-90 opacity-50">
+                                        <CheckCircle2 size={24} className="text-[var(--foreground-40)]" />
                                     </div>
                                 </div>
                             )}
@@ -197,7 +197,7 @@ export default function Tutorial() {
                     <button
                         onClick={handleBack}
                         className={cn(
-                            "p-4 rounded-2xl text-white/20 hover:text-white hover:bg-white/5 transition-all",
+                            "p-4 rounded-2xl text-[var(--foreground-40)] hover:text-[rgb(var(--foreground-rgb))] hover:bg-[var(--foreground-10)] transition-all",
                             currentStep === 0 && "opacity-0 pointer-events-none"
                         )}
                     >

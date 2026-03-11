@@ -74,10 +74,10 @@ export default function WordListCard({ list }: WordListCardProps) {
                         </div>
                     </div>
 
-                    <h3 className="text-2xl font-black font-outfit text-white mb-2 group-hover:text-indigo-400 transition-colors uppercase tracking-tight truncate">
+                    <h3 className="text-2xl font-black font-outfit text-[rgb(var(--foreground-rgb))] mb-2 group-hover:text-indigo-400 transition-colors uppercase tracking-tight truncate">
                         {localizedName}
                     </h3>
-                    <p className="text-white/40 text-sm line-clamp-2 mb-6 font-medium leading-relaxed">
+                    <p className="text-[var(--foreground-40)] text-sm line-clamp-2 mb-6 font-medium leading-relaxed">
                         {list.description}
                     </p>
                 </div>
@@ -85,16 +85,16 @@ export default function WordListCard({ list }: WordListCardProps) {
                 <div className="mt-auto space-y-4">
                     <div className="flex justify-between items-end">
                         <div className="space-y-0.5">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-white/20">{t('wordsInReview')}</p>
-                            <span className="text-sm font-bold text-white/60">
-                                {progress.current_position} <span className="text-white/20">/</span> {list.total_words}
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground-20)]">{t('wordsInReview')}</p>
+                            <span className="text-sm font-bold text-[var(--foreground-60)]">
+                                {progress.current_position} <span className="text-[var(--foreground-20)]">/</span> {list.total_words}
                             </span>
                         </div>
                         <span className="text-lg font-black font-outfit text-indigo-400">
                             {percentage}%
                         </span>
                     </div>
-                    <div className="relative w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div className="relative w-full h-1.5 bg-[var(--foreground-10)] rounded-full overflow-hidden">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${percentage}%` }}

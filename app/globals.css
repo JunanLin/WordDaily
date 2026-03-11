@@ -4,15 +4,40 @@
 
 :root {
   --foreground-rgb: 240, 240, 240;
+  --foreground-80: rgba(240, 240, 240, 0.8);
+  --foreground-60: rgba(240, 240, 240, 0.6);
+  --foreground-40: rgba(240, 240, 240, 0.4);
+  --foreground-20: rgba(240, 240, 240, 0.2);
+  --foreground-10: rgba(240, 240, 240, 0.1);
   --background-start-rgb: 10, 10, 15;
   --background-end-rgb: 0, 0, 0;
+  --card-bg: rgba(255, 255, 255, 0.1);
+  --card-border: rgba(255, 255, 255, 0.2);
+  --modal-bg: #121218;
+  --indigo-text: #818cf8; /* indigo-400 */
+}
 
-  --primary: 99, 102, 241;
-  --secondary: 168, 85, 247;
-  --accent: 236, 72, 153;
+.light-theme {
+  --foreground-rgb: 30, 30, 40;
+  --foreground-80: rgba(30, 30, 40, 0.85);
+  --foreground-60: rgba(30, 30, 40, 0.7);
+  --foreground-40: rgba(30, 30, 40, 0.55);
+  --foreground-20: rgba(30, 30, 40, 0.3);
+  --foreground-10: rgba(30, 30, 40, 0.15);
+  --background-start-rgb: 245, 247, 250;
+  --background-end-rgb: 235, 238, 242;
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --card-border: rgba(0, 0, 0, 0.1);
+  --modal-bg: #ffffff;
+  --indigo-text: #4f46e5; /* indigo-600 */
+}
 
-  --muted: 156, 163, 175;
-  /* gray-400 */
+.font-large {
+  font-size: 110%;
+}
+
+.font-large body {
+  font-size: 1.15rem;
 }
 
 /* For now, we force a premium dark aesthetic to ensure visibility and "WOW" effect as requested */
@@ -30,7 +55,8 @@ body {
 
 @layer components {
   .card {
-    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-xl;
+    background-color: var(--card-bg);
+    @apply backdrop-blur-md border border-[var(--card-border)] rounded-2xl p-6 shadow-xl;
   }
 
   .btn-primary {
@@ -38,10 +64,12 @@ body {
   }
 
   .btn-secondary {
-    @apply bg-white/20 hover:bg-white/30 text-white py-3 px-6 rounded-xl transition-all active:scale-95;
+    background-color: var(--card-bg);
+    @apply hover:opacity-80 text-[rgb(var(--foreground-rgb))] py-3 px-6 rounded-xl transition-all active:scale-95;
   }
 
   .glass-panel {
-    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl overflow-hidden;
+    background-color: var(--card-bg);
+    @apply backdrop-blur-lg border border-[var(--card-border)] rounded-3xl overflow-hidden;
   }
 }

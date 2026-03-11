@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { lookupWord, addWordToUserList } from '@/lib/actions/word-ingestion';
 import { Search, Plus, Loader2, Volume2, CheckCircle2, XCircle, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -40,6 +40,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
             const res = await lookupWord(word.trim(), shouldLemmatize);
             if (res.success) {
                 setResult(res);
+                setWord(''); // Clear input after successful lookup
             } else {
                 if (res.error === 'word_not_found') {
                     setError(t('wordNotFound'));
@@ -120,17 +121,17 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                         value={word}
                         onChange={(e) => setWord(e.target.value)}
                         placeholder={t('placeholder')}
-                        className="w-full bg-white/5 border border-white/10 rounded-[1.5rem] py-5 px-14 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/20 shadow-inner"
+                        className="w-full bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-[1.5rem] py-5 px-14 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-[var(--foreground-40)] shadow-inner text-[rgb(var(--foreground-rgb))]"
                     />
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-indigo-400 transition-colors" size={22} />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground-40)] group-focus-within:text-indigo-400 transition-colors" size={22} />
 
                     <button
                         type="submit"
                         disabled={loading || !word.trim()}
-                        className="absolute right-2 top-2 bottom-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:bg-white/5 disabled:text-white/10 text-white px-6 rounded-[1.1rem] font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
+                        className="absolute right-2 top-2 bottom-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:bg-[var(--foreground-10)] disabled:text-[var(--foreground-10)] text-white px-6 rounded-[1.1rem] font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
                     >
                         {loading ? (
-                            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                            <div className="w-5 h-5 border-2 border-[var(--foreground-20)] border-t-[rgb(var(--foreground-rgb))] rounded-full animate-spin" />
                         ) : (
                             <>
                                 <span className="hidden sm:inline">{t('search')}</span>
@@ -149,10 +150,10 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                 onChange={(e) => setShouldLemmatize(e.target.checked)}
                                 className="peer sr-only"
                             />
-                            <div className="w-9 h-5 bg-white/10 rounded-full peer-checked:bg-indigo-600 transition-colors border border-white/5" />
+                            <div className="w-9 h-5 bg-[var(--foreground-20)] rounded-full peer-checked:bg-indigo-600 transition-colors border border-[var(--card-border)]" />
                             <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm" />
                         </div>
-                        <span className="text-xs font-bold text-white/40 group-hover/label:text-white/60 transition-colors">
+                        <span className="text-xs font-bold text-[var(--foreground-40)] group-hover/label:text-[var(--foreground-rgb)] transition-colors">
                             {t('lemmatizeLabel')}
                         </span>
                     </label>
@@ -163,7 +164,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                             onMouseEnter={() => setShowTip(true)}
                             onMouseLeave={() => setShowTip(false)}
                             onClick={() => setShowTip(!showTip)}
-                            className="text-white/20 hover:text-indigo-400 transition-colors"
+                            className="text-[var(--foreground-40)] hover:text-indigo-400 transition-colors"
                         >
                             <HelpCircle size={14} />
                         </button>
@@ -174,16 +175,16 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute left-auto right-0 sm:left-0 bottom-full mb-3 w-64 p-4 rounded-2xl bg-[#1a1a24] border border-white/10 shadow-2xl z-50 text-xs pointer-events-none"
+                                    className="absolute left-auto right-0 sm:left-0 bottom-full mb-3 w-64 p-4 rounded-2xl bg-[var(--modal-bg)] border border-[var(--card-border)] shadow-2xl z-50 text-xs pointer-events-none"
                                 >
-                                    <p className="font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <div className="font-black text-[var(--indigo-text)] uppercase tracking-widest mb-2 flex items-center gap-2">
                                         <div className="w-1 h-1 rounded-full bg-indigo-500" />
                                         {t('proTipTitle')}
-                                    </p>
-                                    <p className="text-white/60 leading-relaxed text-[11px]">
+                                    </div>
+                                    <div className="text-[var(--foreground-40)] leading-relaxed text-[11px]">
                                         {t('proTipDesc')}
-                                    </p>
-                                    <div className="absolute right-2 sm:right-auto sm:left-4 top-full w-2 h-2 bg-[#1a1a24] border-r border-b border-white/10 rotate-45 -translate-y-1" />
+                                    </div>
+                                    <div className="absolute right-2 sm:right-auto sm:left-4 top-full w-2 h-2 bg-[var(--modal-bg)] border-r border-b border-[var(--card-border)] rotate-45 -translate-y-1" />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -220,19 +221,19 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-xl bg-[#121218] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                            className="relative w-full max-w-xl bg-[var(--modal-bg)] border border-[var(--card-border)] rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                         >
                             {/* Modal Header */}
                             <div className="p-6 pb-0 flex justify-between items-start z-10">
                                 <div className="space-y-1">
-                                    <h3 className={cn("text-4xl font-black font-outfit tracking-tight text-white", useCapitalCase ? "uppercase" : "lowercase")}>
+                                    <h3 className={cn("text-4xl font-black font-outfit tracking-tight text-[rgb(var(--foreground-rgb))]", useCapitalCase ? "uppercase" : "lowercase")}>
                                         {formatWord(result.word, useCapitalCase)}
                                     </h3>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-white/40 font-mono italic text-sm">{result.phonetic || '/.../'}</p>
+                                        <p className="text-[var(--foreground-40)] font-mono italic text-sm">{result.phonetic || '/.../'}</p>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); playAudio(); }}
-                                            className="p-1.5 bg-indigo-500/10 rounded-full text-indigo-400 hover:bg-indigo-500/20 transition-colors"
+                                            className="p-1.5 bg-indigo-500/10 rounded-full text-[var(--indigo-text)] hover:bg-indigo-500/20 transition-colors"
                                         >
                                             <Volume2 size={16} />
                                         </button>
@@ -241,7 +242,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
 
                                 <button
                                     onClick={() => setResult(null)}
-                                    className="p-3 bg-white/5 rounded-2xl text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                                    className="p-3 bg-[var(--foreground-10)] rounded-2xl text-[var(--foreground-40)] hover:text-[rgb(var(--foreground-rgb))] hover:bg-[var(--foreground-20)] transition-all"
                                 >
                                     <XCircle size={24} />
                                 </button>
@@ -252,15 +253,15 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                 <div className="space-y-4">
                                     {/* exchange info */}
                                     {result.exchange && (
-                                        <div className="p-3 px-5 rounded-2xl bg-white/[0.03] border border-white/5">
-                                            <p className="text-[10px] font-black uppercase py-0.5 px-2 rounded-full border border-white/10 text-white/40 mb-2 w-fit">
+                                        <div className="p-3 px-5 rounded-2xl bg-[var(--foreground-10)] border border-[var(--card-border)]">
+                                            <p className="text-[10px] font-black uppercase py-0.5 px-2 rounded-full border border-[var(--card-border)] text-[var(--foreground-40)] mb-2 w-fit">
                                                 Inflections
                                             </p>
                                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                                                 {parseExchange(result.exchange).map((ex, idx) => (
                                                     <div key={idx} className="flex gap-2">
-                                                        <span className="text-white/30">{ex.label}:</span>
-                                                        <span className="text-indigo-400 font-medium">{formatWord(ex.value, useCapitalCase)}</span>
+                                                        <span className="text-[var(--foreground-40)]">{ex.label}:</span>
+                                                        <span className="text-[var(--indigo-text)] font-medium">{formatWord(ex.value, useCapitalCase)}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -270,13 +271,13 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     {/* Stats & Metadata Section */}
                                     {(result.tags || result.posDist || result.bnc || result.frq) && (
                                         <div className="p-5 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-4">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400/60">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--indigo-text)] opacity-60">
                                                 {tReview('wordStats')}
                                             </p>
 
                                             <div className="flex flex-wrap gap-2">
                                                 {result.tags?.split(' ').filter(Boolean).map((tag: string) => (
-                                                    <span key={tag} className="px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-300">
+                                                    <span key={tag} className="px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-[var(--indigo-text)]">
                                                         {tReview(`tag_${tag}`)}
                                                     </span>
                                                 ))}
@@ -285,20 +286,20 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                             <div className="grid grid-cols-2 gap-4 pt-2">
                                                 {result.posDist && (
                                                     <div className="space-y-1">
-                                                        <p className="text-[10px] text-white/40 font-bold uppercase">{tReview('posDistribution')}</p>
-                                                        <p className="text-xs text-indigo-200/80 font-mono">{result.posDist}</p>
+                                                        <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase">{tReview('posDistribution')}</p>
+                                                        <p className="text-xs text-[var(--indigo-text)] font-mono">{result.posDist}</p>
                                                     </div>
                                                 )}
                                                 {(result.bnc || result.frq) && (
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-1 relative">
-                                                            <p className="text-[10px] text-white/40 font-bold uppercase">{tReview('frequency')}</p>
+                                                            <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase">{tReview('frequency')}</p>
                                                             <button
                                                                 type="button"
                                                                 onMouseEnter={() => setShowFreqTip(true)}
                                                                 onMouseLeave={() => setShowFreqTip(false)}
                                                                 onClick={(e) => { e.stopPropagation(); setShowFreqTip(!showFreqTip); }}
-                                                                className="text-white/20 hover:text-indigo-400 transition-colors"
+                                                                className="text-[var(--foreground-40)] hover:text-indigo-400 transition-colors"
                                                             >
                                                                 <HelpCircle size={10} />
                                                             </button>
@@ -308,23 +309,23 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                                                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                                                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                                                        className="absolute left-0 bottom-full mb-3 w-72 sm:w-80 p-4 rounded-2xl bg-[#1a1a24] border border-white/10 shadow-2xl z-[110] text-[10px] pointer-events-none"
+                                                                        className="absolute left-0 bottom-full mb-3 w-72 sm:w-80 p-4 rounded-2xl bg-[var(--modal-bg)] border border-[var(--card-border)] shadow-2xl z-[110] text-[10px] pointer-events-none"
                                                                     >
-                                                                        <p className="font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                                        <div className="font-black text-[var(--indigo-text)] uppercase tracking-widest mb-2 flex items-center gap-2">
                                                                             <div className="w-1 h-1 rounded-full bg-indigo-500" />
                                                                             {tReview('frequencyHelpTitle')}
-                                                                        </p>
-                                                                        <div className="space-y-2 text-white/60 leading-relaxed">
-                                                                            <p><span className="text-white/80 font-bold underline decoration-indigo-500/50">BNC:</span> {tReview('bncDescription')}</p>
-                                                                            <p><span className="text-white/80 font-bold underline decoration-indigo-500/50">FRQ:</span> {tReview('frqDescription')}</p>
-                                                                            <p className="pt-1 text-indigo-300/80 italic font-medium">{tReview('frequencyCombined')}</p>
                                                                         </div>
-                                                                        <div className="absolute left-16 sm:left-20 top-full w-2 h-2 bg-[#1a1a24] border-r border-b border-white/10 rotate-45 -translate-y-1" />
+                                                                        <div className="space-y-2 text-[var(--foreground-40)] leading-relaxed">
+                                                                            <div className="flex gap-1"><span className="text-[rgb(var(--foreground-rgb))] font-bold underline decoration-indigo-500/50">BNC:</span> {tReview('bncDescription')}</div>
+                                                                            <div className="flex gap-1"><span className="text-[rgb(var(--foreground-rgb))] font-bold underline decoration-indigo-500/50">FRQ:</span> {tReview('frqDescription')}</div>
+                                                                            <div className="pt-1 text-[var(--indigo-text)] italic font-medium">{tReview('frequencyCombined')}</div>
+                                                                        </div>
+                                                                        <div className="absolute left-16 sm:left-20 top-full w-2 h-2 bg-[var(--modal-bg)] border-r border-b border-[var(--card-border)] rotate-45 -translate-y-1" />
                                                                     </motion.div>
                                                                 )}
                                                             </AnimatePresence>
                                                         </div>
-                                                        <div className="flex gap-3 text-xs text-indigo-200/80 font-mono">
+                                                        <div className="flex gap-3 text-xs text-[var(--indigo-text)] font-mono">
                                                             {result.bnc && <span>BNC #{result.bnc}</span>}
                                                             {result.frq && <span>FRQ #{result.frq}</span>}
                                                         </div>
@@ -335,24 +336,24 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     )}
 
                                     {result.meanings.map((m: any, i: number) => (
-                                        <div key={i} className="p-5 rounded-3xl bg-white/[0.03] border border-white/5 space-y-3 group hover:bg-white/[0.05] transition-colors">
+                                        <div key={i} className="p-5 rounded-3xl bg-[var(--foreground-10)] border border-[var(--card-border)] space-y-3 group hover:bg-indigo-500/5 transition-colors">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black uppercase py-0.5 px-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
+                                                <span className="text-[10px] font-black uppercase py-0.5 px-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-[var(--indigo-text)]">
                                                     {m.part_of_speech || 'N/A'}
                                                 </span>
-                                                <p className="font-bold text-xl text-indigo-100">{m.chinese_meaning}</p>
+                                                <p className="font-bold text-xl text-[rgb(var(--foreground-rgb))]">{m.chinese_meaning}</p>
                                             </div>
                                         </div>
                                     ))}
 
                                     {result.examples && result.examples.length > 0 && (
-                                        <div className="mt-4 space-y-4 pt-4 border-t border-white/5">
-                                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">{tReview('contextualUsage')}</p>
+                                        <div className="mt-2 space-y-4">
+                                            <p className="text-[10px] font-black text-[var(--indigo-text)] uppercase tracking-[0.2em] px-2">{tReview('contextualUsage')}</p>
                                             {result.examples.map((ex: any, ei: number) => (
-                                                <div key={ei} className="text-sm bg-black/20 p-4 rounded-[2rem] border border-white/5">
-                                                    <p className="text-white/80 italic font-medium leading-relaxed">&quot;{ex.en}&quot;</p>
-                                                    <div className="h-px bg-white/5 w-8 my-2" />
-                                                    <p className="text-indigo-400/60 text-xs font-medium">{ex.zh}</p>
+                                                <div key={ei} className="text-sm bg-[var(--foreground-10)] p-4 rounded-[1.5rem] border border-[var(--card-border)]">
+                                                    <p className="text-[rgb(var(--foreground-rgb))] opacity-80 italic font-medium leading-relaxed">&quot;{ex.en}&quot;</p>
+                                                    <div className="h-px bg-[var(--card-border)] w-8 my-2" />
+                                                    <p className="text-[var(--indigo-text)] opacity-60 text-xs font-medium">{ex.zh}</p>
                                                 </div>
                                             ))}
                                         </div>
@@ -361,7 +362,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="p-6 bg-white/[0.02] border-t border-white/5 flex gap-4">
+                            <div className="p-6 bg-[var(--foreground-10)] border-t border-[var(--card-border)] flex gap-4">
                                 <button
                                     onClick={handleAdd}
                                     disabled={adding || isAdded}

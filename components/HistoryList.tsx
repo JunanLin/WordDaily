@@ -234,10 +234,10 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
     const getHeatmapColor = (date: Date) => {
         const dateStr = format(date, 'yyyy-MM-dd');
         const count = groupedHistory[dateStr]?.length || 0;
-        if (count === 0) return 'bg-white/5 opacity-20';
+        if (count === 0) return 'bg-[var(--foreground-10)] opacity-20';
         if (count < 3) return 'bg-emerald-500/20 text-emerald-300';
         if (count < 7) return 'bg-emerald-500/40 text-emerald-200';
-        return 'bg-emerald-500/70 text-white';
+        return "bg-emerald-500/70 text-[rgb(var(--foreground-rgb))]";
     };
 
     return (
@@ -254,13 +254,13 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                                    className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                                    className="p-2 bg-[var(--foreground-10)] rounded-lg hover:bg-[var(--foreground-20)] transition-colors"
                                 >
                                     <ChevronLeft size={20} />
                                 </button>
                                 <button
                                     onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                                    className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                                    className="p-2 bg-[var(--foreground-10)] rounded-lg hover:bg-[var(--foreground-20)] transition-colors"
                                 >
                                     <ChevronRight size={20} />
                                 </button>
@@ -270,7 +270,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                         {/* Calendar Grid */}
                         <div className="grid grid-cols-7 gap-2">
                             {weekdays.map((day) => (
-                                <div key={day} className="text-[10px] font-black text-white/20 text-center uppercase py-1">
+                                <div key={day} className="text-[10px] font-black text-[var(--foreground-20)] text-center uppercase py-1">
                                     {day}
                                 </div>
                             ))}
@@ -288,13 +288,13 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                             "aspect-square rounded-lg flex flex-col items-center justify-center text-xs font-bold transition-all relative group",
                                             getHeatmapColor(day),
                                             !isCurrentMonth && "opacity-0 pointer-events-none",
-                                            hasWords && "hover:ring-2 hover:ring-white/20 active:scale-90 cursor-pointer"
+                                            hasWords && "hover:ring-2 hover:ring-[var(--foreground-20)] active:scale-90 cursor-pointer"
                                         )}
                                     >
                                         {format(day, 'd')}
                                         {hasWords && (
                                             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                                <span className="bg-black text-[8px] py-1 px-2 rounded-full border border-white/10 uppercase font-black">
+                                                <span className="bg-[var(--modal-bg)] text-[rgb(var(--foreground-rgb))] text-[8px] py-1 px-2 rounded-full border border-[var(--card-border)] uppercase font-black">
                                                     {t('wordsCount', { count: groupedHistory[dateStr].length })}
                                                 </span>
                                             </div>
@@ -307,7 +307,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
 
                     <div className="space-y-4">
                         <div className="px-2">
-                            <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">Recent Searches</h3>
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--foreground-40)]">Recent Searches</h3>
                         </div>
                         <div className="flex flex-wrap gap-2 px-2">
                             {recentLookups && recentLookups.length > 0 ? (
@@ -320,19 +320,19 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                             next_review_at: '',
                                             dictionary: lookup.dictionary
                                         })}
-                                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm hover:bg-white/10 transition-colors"
+                                        className="px-4 py-2 bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-xl text-sm hover:bg-[var(--foreground-20)] transition-colors"
                                     >
                                         {formatWord(lookup.dictionary.word, useCapitalCase)}
                                     </button>
                                 ))
                             ) : (
-                                <p className="text-xs text-white/20 italic px-2">No recent searches</p>
+                                <p className="text-xs text-[var(--foreground-20)] italic px-2">No recent searches</p>
                             )}
                         </div>
                     </div>
 
                     <div className="space-y-0.5 px-2 pt-4">
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-white/30">{t('recentSessions')}</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--foreground-40)]">{t('recentSessions')}</h3>
                     </div>
 
                     <div className="space-y-3">
@@ -350,12 +350,12 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                         <h4 className="font-bold text-lg">
                                             {isSameDay(parseISO(date), new Date()) ? t('todaysWords') : format(parseISO(date), 'PP', { locale: dateLocale })}
                                         </h4>
-                                        <p className="text-xs text-white/30 font-bold uppercase tracking-widest pt-0.5">
+                                        <p className="text-xs text-[var(--foreground-40)] font-bold uppercase tracking-widest pt-0.5">
                                             {t('wordsCount', { count: groupedHistory[date].length })}
                                         </p>
                                     </div>
                                 </div>
-                                <ChevronRight size={20} className="text-white/20 group-hover:text-white/60 transition-colors" />
+                                <ChevronRight size={20} className="text-[var(--foreground-20)] group-hover:text-[var(--foreground-60)] transition-colors" />
                             </button>
                         ))}
                     </div>
@@ -363,7 +363,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                     {dates.length > visibleDaysCount && (
                         <button
                             onClick={() => setVisibleDaysCount(prev => prev + 10)}
-                            className="w-full py-4 text-xs font-bold uppercase tracking-[0.2em] text-white/30 hover:text-white/60 transition-colors bg-white/5 rounded-2xl border border-dashed border-white/10"
+                            className="w-full py-4 text-xs font-bold uppercase tracking-[0.2em] text-[var(--foreground-40)] hover:text-[rgb(var(--foreground-rgb))] transition-colors bg-[var(--foreground-10)] rounded-2xl border border-dashed border-[var(--card-border)]"
                         >
                             {t('showMore', { count: dates.length - visibleDaysCount })}
                         </button>
@@ -385,25 +385,25 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                         <h3 className="text-3xl font-black font-outfit text-indigo-400">
                             {format(parseISO(selectedDate), 'MMMM do', { locale: dateLocale })}
                         </h3>
-                        <p className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-black">{t('vocabularyArchive')}</p>
+                        <p className="text-[var(--foreground-40)] text-[10px] uppercase tracking-[0.2em] font-black">{t('vocabularyArchive')}</p>
                     </div>
 
                     <div className="space-y-3">
                         {groupedHistory[selectedDate] ? (
                             groupedHistory[selectedDate].map((uw) => (
-                                <div key={uw.id} className="card py-4 px-5 flex items-center justify-between group cursor-pointer hover:bg-white/[0.07] transition-all" onClick={() => setSelectedWord(uw)}>
+                                <div key={uw.id} className="card py-4 px-5 flex items-center justify-between group cursor-pointer hover:bg-[var(--foreground-10)] transition-all" onClick={() => setSelectedWord(uw)}>
                                     <div className="space-y-0.5">
                                         <h4 className="text-lg font-bold">{formatWord(uw.dictionary.word, useCapitalCase)}</h4>
                                         <div className="flex items-center gap-2">
-                                            <p className="text-xs text-white/40 italic">{uw.dictionary.phonetic || '/.../'}</p>
-                                            <p className="text-xs text-white/60 line-clamp-1">{uw.dictionary.translation}</p>
+                                            <p className="text-xs text-[var(--foreground-40)] italic">{uw.dictionary.phonetic || '/.../'}</p>
+                                            <p className="text-xs text-[var(--foreground-60)] line-clamp-1">{uw.dictionary.translation}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={(e) => handleDelete(uw.id, e)}
                                             disabled={isDeleting === uw.id}
-                                            className="p-2 text-white/10 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                            className="p-2 text-[var(--foreground-10)] hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                                         >
                                             {isDeleting === uw.id ? (
                                                 <div className="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
@@ -411,13 +411,13 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                                 <Trash2 size={18} />
                                             )}
                                         </button>
-                                        <ChevronRight size={18} className="text-white/10" />
+                                        <ChevronRight size={18} className="text-[var(--foreground-10)]" />
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <div className="py-12 bg-white/5 rounded-3xl border border-dashed border-white/10 text-center">
-                                <p className="text-white/40 text-sm">{t('noWordsDate')}</p>
+                            <div className="py-12 bg-[var(--foreground-10)] rounded-3xl border border-dashed border-[var(--card-border)] text-center">
+                                <p className="text-[var(--foreground-40)] text-sm">{t('noWordsDate')}</p>
                             </div>
                         )}
                     </div>
@@ -432,23 +432,23 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className="w-full max-w-md bg-[#121218] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
+                            className="w-full max-w-md bg-[var(--modal-bg)] border border-[var(--card-border)] rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
                         >
                             <div className="p-6 space-y-6 flex flex-col h-full overflow-hidden">
                                 <div className="flex justify-between items-start flex-shrink-0">
                                     <div className="space-y-1">
                                         <h2 className="text-4xl font-black font-outfit">{formatWord(selectedWord.dictionary.word, useCapitalCase)}</h2>
-                                        <p className="text-white/40 font-mono italic text-sm">{selectedWord.dictionary.phonetic || '/.../'}</p>
+                                        <p className="text-[var(--foreground-40)] font-mono italic text-sm">{selectedWord.dictionary.phonetic || '/.../'}</p>
                                     </div>
                                     <button
                                         onClick={() => setSelectedWord(null)}
-                                        className="p-2 bg-white/5 rounded-full hover:bg-white/10"
+                                        className="p-2 bg-[var(--foreground-10)] rounded-full hover:bg-[var(--foreground-20)]"
                                     >
                                         <X size={20} />
                                     </button>
                                 </div>
 
-                                <div className="space-y-4 overflow-y-auto pr-2 flex-grow scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                <div className="space-y-4 overflow-y-auto pr-2 flex-grow scrollbar-thin scrollbar-thumb-[var(--foreground-10)] scrollbar-track-transparent">
                                     <div className="flex justify-center py-2">
                                         <button
                                             onClick={() => playAudio(selectedWord.dictionary.word, selectedWord.dictionary.audio)}
@@ -460,12 +460,12 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
 
                                     {/* Exchange / Inflections */}
                                     {selectedWord.dictionary.exchange && (
-                                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                                            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">Inflections</p>
+                                        <div className="p-3 rounded-xl bg-[var(--foreground-10)] border border-[var(--card-border)]">
+                                            <p className="text-[10px] font-bold text-[var(--foreground-40)] uppercase tracking-widest mb-1">Inflections</p>
                                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
                                                 {parseExchange(selectedWord.dictionary.exchange).map((ex: any, idx: number) => (
                                                     <div key={idx} className="flex gap-2">
-                                                        <span className="text-white/30">{ex.label}:</span>
+                                                        <span className="text-[var(--foreground-40)]">{ex.label}:</span>
                                                         <span className="text-indigo-400 font-medium">{ex.value}</span>
                                                     </div>
                                                 ))}
@@ -491,20 +491,20 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                             <div className="grid grid-cols-2 gap-4 pt-2">
                                                 {selectedWord.dictionary.pos && (
                                                     <div className="space-y-1">
-                                                        <p className="text-[10px] text-white/40 font-bold uppercase">{tReview('posDistribution')}</p>
+                                                        <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase">{tReview('posDistribution')}</p>
                                                         <p className="text-xs text-indigo-200/80 font-mono">{selectedWord.dictionary.pos}</p>
                                                     </div>
                                                 )}
                                                 {(selectedWord.dictionary.bnc || selectedWord.dictionary.frq) && (
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-1 relative">
-                                                            <p className="text-[10px] text-white/40 font-bold uppercase">{tReview('frequency')}</p>
+                                                            <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase">{tReview('frequency')}</p>
                                                             <button
                                                                 type="button"
                                                                 onMouseEnter={() => setShowFreqTip(true)}
                                                                 onMouseLeave={() => setShowFreqTip(false)}
                                                                 onClick={(e) => { e.stopPropagation(); setShowFreqTip(!showFreqTip); }}
-                                                                className="text-white/20 hover:text-indigo-400 transition-colors"
+                                                                className="text-[var(--foreground-20)] hover:text-indigo-400 transition-colors"
                                                             >
                                                                 <HelpCircle size={10} />
                                                             </button>
@@ -514,18 +514,18 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                                                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                                                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                                                        className="absolute left-0 bottom-full mb-3 w-72 sm:w-80 p-4 rounded-2xl bg-[#1a1a24] border border-white/10 shadow-2xl z-[110] text-[10px] pointer-events-none"
+                                                                        className="absolute left-0 bottom-full mb-3 w-72 sm:w-80 p-4 rounded-2xl bg-[var(--modal-bg)] border border-[var(--card-border)] shadow-2xl z-[110] text-[10px] pointer-events-none"
                                                                     >
                                                                         <p className="font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                                                                             <div className="w-1 h-1 rounded-full bg-indigo-500" />
                                                                             {tReview('frequencyHelpTitle')}
                                                                         </p>
-                                                                        <div className="space-y-2 text-white/60 leading-relaxed">
-                                                                            <p><span className="text-white/80 font-bold underline decoration-indigo-500/50">BNC:</span> {tReview('bncDescription')}</p>
-                                                                            <p><span className="text-white/80 font-bold underline decoration-indigo-500/50">FRQ:</span> {tReview('frqDescription')}</p>
+                                                                        <div className="space-y-2 text-[var(--foreground-60)] leading-relaxed">
+                                                                            <p><span className="text-[var(--foreground-80)] font-bold underline decoration-indigo-500/50">BNC:</span> {tReview('bncDescription')}</p>
+                                                                            <p><span className="text-[var(--foreground-80)] font-bold underline decoration-indigo-500/50">FRQ:</span> {tReview('frqDescription')}</p>
                                                                             <p className="pt-1 text-indigo-300/80 italic font-medium">{tReview('frequencyCombined')}</p>
                                                                         </div>
-                                                                        <div className="absolute left-16 sm:left-20 top-full w-2 h-2 bg-[#1a1a24] border-r border-b border-white/10 rotate-45 -translate-y-1" />
+                                                                        <div className="absolute left-16 sm:left-20 top-full w-2 h-2 bg-[var(--modal-bg)] border-r border-b border-[var(--card-border)] rotate-45 -translate-y-1" />
                                                                     </motion.div>
                                                                 )}
                                                             </AnimatePresence>
@@ -542,12 +542,12 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
 
                                     {/* Meanings */}
                                     {parseMeanings(selectedWord.dictionary.translation || '', selectedWord.dictionary.pos).map((m: any, i: number) => (
-                                        <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2">
+                                        <div key={i} className="p-4 rounded-2xl bg-[var(--foreground-10)] border border-[var(--card-border)] space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border leading-none", getPOSColor(m.part_of_speech))}>
                                                     {m.part_of_speech || 'N/A'}
                                                 </span>
-                                                <p className="text-xl font-bold text-white/90">{m.chinese_meaning?.replace(/\r?\n|\\n/g, '  ')}</p>
+                                                <p className="text-xl font-bold text-[rgb(var(--foreground-rgb))]">{m.chinese_meaning?.replace(/\r?\n|\\n/g, '  ')}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -561,8 +561,8 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                             </div>
                                             {parseExamples(selectedWord.dictionary.detail).map((ex: any, ei: number) => (
                                                 <div key={ei} className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-1 hover:bg-indigo-500/10 transition-colors">
-                                                    <p className="text-sm text-white/80 leading-relaxed italic">&quot;{ex.en || ex.example_en}&quot;</p>
-                                                    <p className="text-xs text-white/40">{ex.zh || ex.example_zh}</p>
+                                                    <p className="text-sm text-[var(--foreground-80)] leading-relaxed italic">&quot;{ex.en || ex.example_en}&quot;</p>
+                                                    <p className="text-xs text-[var(--foreground-40)]">{ex.zh || ex.example_zh}</p>
                                                 </div>
                                             ))}
                                         </div>

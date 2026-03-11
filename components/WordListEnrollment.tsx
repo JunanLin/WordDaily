@@ -67,7 +67,7 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="w-full max-w-md bg-[#121218] border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+                className="w-full max-w-md bg-[var(--modal-bg)] border border-[var(--card-border)] rounded-3xl overflow-hidden shadow-2xl"
             >
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
@@ -76,7 +76,7 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                 ? (allRemaining ? t('title') : t('enrollSuccess', { count: enrolledCount }))
                                 : t('enrollmentTitle', { name: listName })}
                         </h2>
-                        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                        <button onClick={onClose} className="p-2 hover:bg-[var(--foreground-10)] rounded-full transition-colors">
                             <X size={20} />
                         </button>
                     </div>
@@ -95,8 +95,8 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                         <Shuffle size={24} />
                                     </div>
                                     <div className="space-y-1">
-                                        <h3 className="font-bold text-indigo-300">{t('randomSystemTitle')}</h3>
-                                        <p className="text-sm text-white/40 leading-relaxed">
+                                        <h3 className="font-bold text-[var(--indigo-text)]">{t('randomSystemTitle')}</h3>
+                                        <p className="text-sm text-[var(--foreground-40)] leading-relaxed">
                                             {t('randomSystemDesc')}
                                         </p>
                                     </div>
@@ -108,9 +108,9 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                         id="dontShow"
                                         checked={dontShowAgain}
                                         onChange={(e) => setDontShowAgain(e.target.checked)}
-                                        className="w-4 h-4 rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-indigo-500"
+                                        className="w-4 h-4 rounded border-[var(--card-border)] bg-[var(--foreground-10)] text-indigo-500 focus:ring-indigo-500"
                                     />
-                                    <label htmlFor="dontShow" className="text-sm text-white/40 cursor-pointer">
+                                    <label htmlFor="dontShow" className="text-sm text-[var(--foreground-40)] cursor-pointer">
                                         {t('doNotShowAgain')}
                                     </label>
                                 </div>
@@ -133,7 +133,7 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                 className="space-y-6"
                             >
                                 <div className="space-y-4">
-                                    <label className="text-sm font-bold text-white/40 uppercase tracking-widest block px-1">
+                                    <label className="text-sm font-bold text-[var(--foreground-40)] uppercase tracking-widest block px-1">
                                         {t('howManyWords')}
                                     </label>
                                     <input
@@ -149,14 +149,14 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                         }}
                                         min={1}
                                         max={500}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-2xl font-black font-outfit text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
+                                        className="w-full bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-2xl p-4 text-2xl font-black font-outfit text-[var(--indigo-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
                                     />
                                     <div className="grid grid-cols-4 gap-2">
                                         {[10, 20, 50, 100].map(val => (
                                             <button
                                                 key={val}
                                                 onClick={() => setWordCount(val)}
-                                                className={`py-2 rounded-xl text-xs font-bold transition-all ${wordCount === val ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 border border-white/5 text-white/40 hover:bg-white/10'}`}
+                                                className={`py-2 rounded-xl text-xs font-bold transition-all ${wordCount === val ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-[var(--foreground-10)] border border-[var(--card-border)] text-[var(--foreground-40)] hover:bg-[var(--foreground-20)]'}`}
                                             >
                                                 {val}
                                             </button>
@@ -195,7 +195,7 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                         {allRemaining ? t('allRemainingSuccess') : t('enrollSuccess', { count: enrolledCount })}
                                     </h3>
                                     {!allRemaining && (
-                                        <p className="text-sm text-white/40">
+                                        <p className="text-sm text-[var(--foreground-40)]">
                                             {t('successMessage', { defaultValue: 'Your selected words are now in your Review tab. Start learning them now to boost your memory!' })}
                                         </p>
                                     )}
@@ -209,7 +209,7 @@ export default function WordListEnrollment({ listId, listName, onClose, onSucces
                                     </button>
                                     <button
                                         onClick={onClose}
-                                        className="w-full py-4 text-xs font-bold text-white/20 hover:text-white transition-colors"
+                                        className="w-full py-4 text-xs font-bold text-[var(--foreground-40)] hover:text-[rgb(var(--foreground-rgb))] transition-colors"
                                     >
                                         Back to Lists
                                     </button>

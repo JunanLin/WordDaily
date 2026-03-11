@@ -166,7 +166,14 @@
         "casePreference": "Case Preference",
         "casePreferenceDesc": "Toggle between CAPITAL or lower-case spelling for words.",
         "capitalCase": "CAPITAL",
-        "lowerCase": "lower-case"
+        "lowerCase": "lower-case",
+        "appearance": "Appearance",
+        "theme": "Theme",
+        "lightTheme": "Light",
+        "darkTheme": "Dark",
+        "fontSize": "Font Size",
+        "fontSizeStandard": "Standard",
+        "fontSizeLarge": "Large"
     },
     "buttons": {
         "save": "Save",

@@ -71,9 +71,9 @@ export default function TodayListClient({ initialWords, useCapitalCase = false }
 
     if (words.length === 0) {
         return (
-            <div className="text-center py-20 bg-white/5 rounded-2xl border border-dashed border-white/10">
-                <BookOpen className="mx-auto text-white/20 mb-4" size={48} />
-                <p className="text-white/40">No words added yet today.</p>
+            <div className="text-center py-20 bg-[var(--foreground-10)] rounded-2xl border border-dashed border-[var(--card-border)]">
+                <BookOpen className="mx-auto text-[var(--foreground-20)] mb-4" size={48} />
+                <p className="text-[var(--foreground-40)]">No words added yet today.</p>
             </div>
         );
     }
@@ -85,8 +85,8 @@ export default function TodayListClient({ initialWords, useCapitalCase = false }
                     <div className="space-y-0.5">
                         <h4 className="text-lg font-bold">{formatWord(uw.dictionary.word, useCapitalCase)}</h4>
                         <div className="flex items-center gap-2">
-                            <p className="text-xs text-white/40 italic">{uw.dictionary.phonetic || '/.../'}</p>
-                            <p className="text-xs text-white/60 line-clamp-1">{parseMeanings(uw.dictionary.translation || '')}</p>
+                            <p className="text-xs text-[var(--foreground-40)] italic">{uw.dictionary.phonetic || '/.../'}</p>
+                            <p className="text-xs text-[var(--foreground-60)] line-clamp-1">{parseMeanings(uw.dictionary.translation || '')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -104,7 +104,7 @@ export default function TodayListClient({ initialWords, useCapitalCase = false }
                         <button
                             onClick={() => handleDelete(uw.id)}
                             disabled={isDeleting === uw.id}
-                            className="p-2 text-white/10 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                            className="p-2 text-[var(--foreground-20)] hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                         >
                             {isDeleting === uw.id ? (
                                 <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />

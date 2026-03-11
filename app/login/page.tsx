@@ -72,20 +72,20 @@ export default function LoginPage() {
                 <h2 className="text-4xl font-black font-outfit bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                     {isSignUp ? t('join') : t('welcomeBack')}
                 </h2>
-                <p className="text-white/40 font-medium">{t('subtitle')}</p>
+                <p className="text-[var(--foreground-40)] font-medium">{t('subtitle')}</p>
             </div>
 
             {/* Tabs */}
-            <div className="flex w-full bg-white/5 p-1 rounded-2xl border border-white/5">
+            <div className="flex w-full bg-[var(--foreground-10)] p-1 rounded-2xl border border-[var(--card-border)]">
                 <button
                     onClick={() => setIsSignUp(false)}
-                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${!isSignUp ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white/60'}`}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${!isSignUp ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-[var(--foreground-40)] hover:text-[var(--foreground-60)]'}`}
                 >
                     {t('signIn')}
                 </button>
                 <button
                     onClick={() => setIsSignUp(true)}
-                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${isSignUp ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white/60'}`}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${isSignUp ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-[var(--foreground-40)] hover:text-[var(--foreground-60)]'}`}
                 >
                     {t('createAccount')}
                 </button>
@@ -94,25 +94,25 @@ export default function LoginPage() {
             <form onSubmit={handleAuth} className="w-full space-y-4">
                 <div className="space-y-4">
                     <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground-40)]" size={20} />
                         <input
                             type="email"
                             placeholder={t('emailPlaceholder')}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/30"
+                            className="w-full bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-2xl py-4 pl-12 pr-4 text-[rgb(var(--foreground-rgb))] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-[var(--foreground-40)]"
                             required
                         />
                     </div>
                     <div className="space-y-2">
                         <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground-40)]" size={20} />
                             <input
                                 type="password"
                                 placeholder={t('passwordPlaceholder')}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/30"
+                                className="w-full bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-2xl py-4 pl-12 pr-4 text-[rgb(var(--foreground-rgb))] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-[var(--foreground-40)]"
                                 required
                             />
                         </div>
@@ -146,15 +146,15 @@ export default function LoginPage() {
             </form>
 
             <div className="w-full flex items-center gap-4 py-2">
-                <div className="h-px flex-1 bg-white/5" />
-                <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">or</span>
-                <div className="h-px flex-1 bg-white/5" />
+                <div className="h-px flex-1 bg-[var(--card-border)]" />
+                <span className="text-[10px] text-[var(--foreground-20)] font-bold uppercase tracking-widest">or</span>
+                <div className="h-px flex-1 bg-[var(--card-border)]" />
             </div>
 
             <button
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold hover:bg-white/10 transition-all active:scale-[0.98]"
+                className="w-full flex items-center justify-center gap-3 py-4 bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-2xl text-[rgb(var(--foreground-rgb))] font-bold hover:bg-[var(--foreground-20)] transition-all active:scale-[0.98]"
             >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -166,7 +166,7 @@ export default function LoginPage() {
             </button>
 
             <div className="pt-8 text-center">
-                <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest">
+                <p className="text-[10px] text-[var(--foreground-20)] uppercase font-bold tracking-widest">
                     {t('securedBy')}
                 </p>
             </div>

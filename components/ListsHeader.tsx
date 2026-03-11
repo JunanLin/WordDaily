@@ -16,15 +16,15 @@ export default function ListsHeader() {
                 <div className="flex items-center gap-5">
                     <Link
                         href="/"
-                        className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all active:scale-95"
+                        className="p-3 bg-[var(--foreground-10)] hover:bg-[var(--foreground-20)] border border-[var(--card-border)] rounded-2xl transition-all active:scale-95"
                     >
                         <ArrowLeft size={24} />
                     </Link>
                     <div>
-                        <h1 className="text-4xl font-black font-outfit uppercase tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+                        <h1 className="text-4xl font-black font-outfit uppercase tracking-tight text-[rgb(var(--foreground-rgb))]">
                             {t('title')}
                         </h1>
-                        <p className="text-white/30 text-xs font-bold uppercase tracking-[0.2em] pt-1">{t('subtitle')}</p>
+                        <p className="text-[var(--foreground-40)] text-xs font-bold uppercase tracking-[0.2em] pt-1">{t('subtitle')}</p>
                     </div>
                 </div>
 
@@ -43,14 +43,14 @@ export default function ListsHeader() {
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className="w-full max-w-md bg-[#121218] border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+                            className="w-full max-w-md bg-[var(--modal-bg)] border border-[var(--card-border)] rounded-3xl overflow-hidden shadow-2xl"
                         >
                             <div className="p-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-xl font-bold font-outfit uppercase tracking-tight">
                                         {t('randomSystemTitle')}
                                     </h2>
-                                    <button onClick={() => setShowHelp(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                                    <button onClick={() => setShowHelp(false)} className="p-2 hover:bg-[var(--foreground-10)] rounded-full transition-colors">
                                         <X size={20} />
                                     </button>
                                 </div>
@@ -60,7 +60,7 @@ export default function ListsHeader() {
                                             <Shuffle size={24} />
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-sm text-white/60 leading-relaxed">
+                                            <p className="text-sm text-[var(--foreground-60)] leading-relaxed">
                                                 {t('randomSystemDesc')}
                                             </p>
                                         </div>
@@ -69,7 +69,7 @@ export default function ListsHeader() {
                                         onClick={() => setShowHelp(false)}
                                         className="btn-primary w-full py-4 uppercase tracking-widest text-sm"
                                     >
-                                        Got it
+                                        OK
                                     </button>
                                 </div>
                             </div>

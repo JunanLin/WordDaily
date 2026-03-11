@@ -7,6 +7,9 @@ import TimezoneUpdater from "@/components/TimezoneUpdater";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
+import { cookies as requestCookies } from 'next/headers';
+import { cn } from '@/lib/utils';
+
 export const metadata: Metadata = {
   title: "WordDaily | Master Your Vocabulary",
   description: "Spaced-repetition vocabulary learning app.",
@@ -56,8 +59,16 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
+  // Read theme and font size from cookies
+  const cookieStore = requestCookies();
+  const theme = cookieStore.get('NEXT_THEME')?.value || 'dark';
+  const fontSize = cookieStore.get('NEXT_FONT_SIZE')?.value || 'standard';
+
   return (
-    <html lang={locale}>
+    <html lang={locale} className={cn(
+      theme === 'light' ? 'light-theme' : '',
+      fontSize === 'large' ? 'font-large' : ''
+    )}>
       <body className={`${inter.variable} ${outfit.variable} font-inter antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <div className="flex flex-col min-height-screen max-w-md mx-auto relative px-4 pb-24 pt-8">

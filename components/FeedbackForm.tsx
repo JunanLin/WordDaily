@@ -49,15 +49,15 @@ export default function FeedbackForm() {
 
     return (
         <section className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex items-center gap-3 text-white/20 px-2">
+            <div className="flex items-center gap-3 text-[var(--foreground-20)] px-2">
                 <MessageSquare size={16} />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">{t('title')}</span>
             </div>
 
-            <form onSubmit={handleSubmit} className="card space-y-6 bg-white/[0.02] border-white/5">
+            <form onSubmit={handleSubmit} className="card space-y-6 border-[var(--card-border)]">
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest px-1">
+                        <label className="text-[10px] font-bold text-[var(--foreground-40)] uppercase tracking-widest px-1">
                             {t('messageLabel')}
                         </label>
                         <textarea
@@ -66,26 +66,26 @@ export default function FeedbackForm() {
                             placeholder={t('messagePlaceholder')}
                             rows={4}
                             required
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/20 resize-none"
+                            className="w-full bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-[var(--foreground-20)] resize-none"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest px-1">
+                        <label className="text-[10px] font-bold text-[var(--foreground-40)] uppercase tracking-widest px-1">
                             {t('pageLabel')}
                         </label>
                         <div className="relative group">
                             <select
                                 value={page}
                                 onChange={(e) => setPage(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-white/60 cursor-pointer"
+                                className="w-full bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-xl px-4 py-3 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-[var(--foreground-60)] cursor-pointer"
                             >
-                                <option value="" className="bg-[#121218]">{t('notPageSpecific')}</option>
+                                <option value="" className="bg-[var(--modal-bg)] text-[rgb(var(--foreground-rgb))]">{t('notPageSpecific')}</option>
                                 {pages.map(p => (
-                                    <option key={p.id} value={p.id} className="bg-[#121218]">{p.label}</option>
+                                    <option key={p.id} value={p.id} className="bg-[var(--modal-bg)] text-[rgb(var(--foreground-rgb))]">{p.label}</option>
                                 ))}
                             </select>
-                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none group-focus-within:text-indigo-400 transition-colors" />
+                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--foreground-20)] pointer-events-none group-focus-within:text-indigo-400 transition-colors" />
                         </div>
                     </div>
                 </div>

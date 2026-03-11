@@ -62,7 +62,7 @@ export default function Navigation() {
                                 href={href}
                                 className={cn(
                                     "flex flex-col items-center gap-1 transition-all duration-300",
-                                    isActive ? "text-indigo-500 scale-110" : "text-white/40 hover:text-white/70"
+                                    isActive ? "text-indigo-500 scale-110" : "text-[var(--foreground-40)] hover:text-[rgb(var(--foreground-rgb))]"
                                 )}
                             >
                                 <div className="relative">

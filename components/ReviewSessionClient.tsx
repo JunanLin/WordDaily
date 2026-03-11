@@ -100,7 +100,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                     <CheckCircle2 size={40} />
                 </div>
                 <h2 className="text-2xl font-bold">{t('allCaughtUp')}</h2>
-                <p className="text-white/40">{t('noWordsDue')}</p>
+                <p className="text-[var(--foreground-40)]">{t('noWordsDue')}</p>
             </div>
         );
     }
@@ -116,7 +116,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                     <CheckCircle2 size={48} />
                 </motion.div>
                 <h2 className="text-3xl font-bold font-outfit">{t('sessionComplete')}</h2>
-                <p className="text-white/40">{t('mastered')}</p>
+                <p className="text-[var(--foreground-40)]">{t('mastered')}</p>
                 <button
                     onClick={() => router.push('/')}
                     className="btn-primary mt-4"
@@ -131,7 +131,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
                 <Loader2 className="animate-spin text-indigo-500" size={40} />
-                <p className="text-white/40">{t('loading') || 'Loading...'}</p>
+                <p className="text-[var(--foreground-40)]">{t('loading') || 'Loading...'}</p>
             </div>
         );
     }
@@ -224,12 +224,12 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
     return (
         <div className="flex flex-col h-full min-h-[70vh] items-center space-y-6">
             {/* Progress */}
-            <div className="w-full flex justify-between items-center text-xs font-bold text-white/30 uppercase tracking-widest px-2">
+            <div className="w-full flex justify-between items-center text-xs font-bold text-[var(--foreground-40)] uppercase tracking-widest px-2">
                 <span>{t('sessionProgress')}</span>
                 <span>{currentIndex + 1} / {total}</span>
             </div>
 
-            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="w-full h-1 bg-[var(--foreground-10)] rounded-full overflow-hidden">
                 <motion.div
                     className="h-full bg-indigo-500"
                     initial={{ width: 0 }}
@@ -247,7 +247,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                     transition={{ duration: 0.2 }}
                     className="w-full h-[450px]"
                 >
-                    <div className="card w-full h-full flex flex-col items-center justify-start text-center p-8 relative overflow-y-auto ring-1 ring-white/10 shadow-2xl bg-[#121218] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                    <div className="card w-full h-full flex flex-col items-center justify-start text-center p-8 relative overflow-y-auto ring-1 ring-[var(--card-border)] shadow-2xl bg-[var(--modal-bg)] scrollbar-thin scrollbar-thumb-[var(--foreground-10)] scrollbar-track-transparent">
                         {step === 'STUDY' && (
                             <div className="space-y-8 my-auto py-4">
                                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em]">{t('englishOrigin')}</span>
@@ -255,7 +255,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                     <h2 className={cn("font-black font-outfit tracking-tight break-words", getWordSizeClass(currentWord.dictionary.word))}>
                                         {formatWord(currentWord.dictionary.word, useCapitalCase)}
                                     </h2>
-                                    <p className="text-white/20 font-mono text-sm tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
+                                    <p className="text-[var(--foreground-20)] font-mono text-sm tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
                                 </div>
                                 <button
                                     onClick={playAudio}
@@ -273,7 +273,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                         {formatWord(currentWord.dictionary.word, useCapitalCase)}
                                     </h2>
                                     <div className="flex items-center justify-center gap-3">
-                                        <p className="text-white/20 font-mono text-xs tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
+                                        <p className="text-[var(--foreground-20)] font-mono text-xs tracking-widest">{currentWord.dictionary.phonetic || '/.../'}</p>
                                         <button
                                             onClick={playAudio}
                                             className="p-1.5 bg-indigo-500/10 rounded-full text-indigo-400 hover:bg-indigo-500/20 transition-colors"
@@ -297,7 +297,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                             <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center text-[10px]">
                                                 {parseExchange(currentWord.dictionary.exchange).map((ex: any, idx: number) => (
                                                     <div key={idx} className="flex gap-1.5">
-                                                        <span className="text-white/20 uppercase font-black">{ex.label}</span>
+                                                        <span className="text-[var(--foreground-20)] uppercase font-black">{ex.label}</span>
                                                         <span className="text-indigo-400 font-bold">{formatWord(ex.value, useCapitalCase)}</span>
                                                     </div>
                                                 ))}
@@ -305,7 +305,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                         )}
                                         {currentWord.dictionary.pos && (
                                             <div className="pt-2 border-t border-indigo-500/10">
-                                                <p className="text-[10px] text-white/40 font-bold uppercase mb-1">{t('posDistribution')}</p>
+                                                <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase mb-1">{t('posDistribution')}</p>
                                                 <p className="text-xs text-indigo-200/80 font-mono italic">{currentWord.dictionary.pos}</p>
                                             </div>
                                         )}
@@ -314,13 +314,26 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
 
                                 <div className="space-y-3 text-left">
                                     {parseMeanings(currentWord.dictionary.translation || '', currentWord.dictionary.pos).map((m: any, i: number) => (
-                                        <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3">
+                                        <div key={i} className="p-4 rounded-xl bg-[var(--foreground-10)] border border-[var(--card-border)] flex items-center gap-3">
                                             <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border", getPOSColor(m.part_of_speech))}>
                                                 {m.part_of_speech || 'N/A'}
                                             </span>
-                                            <p className="text-lg font-bold text-white/90">{m.chinese_meaning}</p>
+                                            <p className="text-lg font-bold text-[rgb(var(--foreground-rgb))]">{m.chinese_meaning}</p>
                                         </div>
                                     ))}
+
+                                    {parseExamples(currentWord.dictionary.detail).length > 0 && (
+                                        <div className="mt-4 space-y-4">
+                                            <p className="text-[10px] font-black text-[var(--indigo-text)] uppercase tracking-[0.2em] px-2">{t('contextualUsage')}</p>
+                                            {parseExamples(currentWord.dictionary.detail).map((ex: any, ei: number) => (
+                                                <div key={ei} className="text-sm bg-[var(--foreground-10)] p-4 rounded-[1.5rem] border border-[var(--card-border)]">
+                                                    <p className="text-[rgb(var(--foreground-rgb))] opacity-80 italic font-medium leading-relaxed">&quot;{ex.en || ex.example_en}&quot;</p>
+                                                    <div className="h-px bg-[var(--card-border)] w-8 my-2" />
+                                                    <p className="text-[var(--indigo-text)] opacity-60 text-xs font-medium">{ex.zh || ex.example_zh}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -332,22 +345,22 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                     <h3 className={cn("font-black font-outfit break-words", getRevealWordSizeClass(currentWord.dictionary.word))}>
                                         {formatWord(currentWord.dictionary.word, useCapitalCase)}
                                     </h3>
-                                    <div className="text-white/40 text-sm">{t('howEasy')}</div>
+                                    <div className="text-[var(--foreground-40)] text-sm">{t('howEasy')}</div>
                                 </div>
 
-                                <div className="space-y-6 pt-6 bg-white/5 p-6 rounded-2xl border border-white/5">
+                                <div className="space-y-6 pt-6 bg-[var(--foreground-10)] p-6 rounded-2xl border border-[var(--card-border)]">
                                     <div className="flex justify-between items-end">
                                         <div className="text-left">
-                                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">{t('forgotten')}</div>
-                                            <span className={cn("text-xl font-bold transition-colors", score < 4 ? "text-red-400" : "text-white/10")}>0</span>
+                                            <div className="text-[10px] font-bold text-[var(--foreground-20)] uppercase tracking-widest mb-1">{t('forgotten')}</div>
+                                            <span className={cn("text-xl font-bold transition-colors", score < 4 ? "text-red-400" : "text-[var(--foreground-10)]")}>0</span>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">{t('score')}</div>
-                                            <span className="text-4xl font-black text-white">{score}</span>
+                                            <div className="text-[10px] font-bold text-[var(--indigo-text)] uppercase tracking-widest mb-1">{t('score')}</div>
+                                            <span className="text-4xl font-black text-[rgb(var(--foreground-rgb))]">{score}</span>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-1">{t('perfect')}</div>
-                                            <span className={cn("text-xl font-bold transition-colors", score === 10 ? "text-green-400" : "text-white/10")}>10</span>
+                                            <div className="text-[10px] font-bold text-[var(--foreground-20)] uppercase tracking-widest mb-1">{t('perfect')}</div>
+                                            <span className={cn("text-xl font-bold transition-colors", score === 10 ? "text-green-400" : "text-[var(--foreground-10)]")}>10</span>
                                         </div>
                                     </div>
                                     <input
@@ -357,7 +370,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                         step="1"
                                         value={score}
                                         onChange={(e) => setScore(parseInt(e.target.value))}
-                                        className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-500"
+                                        className="w-full h-3 bg-[var(--foreground-20)] rounded-full appearance-none cursor-pointer accent-indigo-500"
                                     />
 
                                     <div className="h-10 flex items-center justify-center">
@@ -375,6 +388,19 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                         </AnimatePresence>
                                     </div>
                                 </div>
+
+                                {parseExamples(currentWord.dictionary.detail).length > 0 && (
+                                    <div className="mt-6 space-y-4 text-left">
+                                        <p className="text-[10px] font-black text-[var(--indigo-text)] uppercase tracking-[0.2em] px-2">{t('contextualUsage')}</p>
+                                        {parseExamples(currentWord.dictionary.detail).map((ex: any, ei: number) => (
+                                            <div key={ei} className="text-sm bg-[var(--foreground-10)] p-4 rounded-[1.5rem] border border-[var(--card-border)]">
+                                                <p className="text-[rgb(var(--foreground-rgb))] opacity-80 italic font-medium leading-relaxed">&quot;{ex.en || ex.example_en}&quot;</p>
+                                                <div className="h-px bg-[var(--card-border)] w-8 my-2" />
+                                                <p className="text-[var(--indigo-text)] opacity-60 text-xs font-medium">{ex.zh || ex.example_zh}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -420,36 +446,6 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                     </button>
                 )}
             </div>
-
-            {/* Examples Preview in Scores/Reveal Steps */}
-            {step !== 'STUDY' && (
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full space-y-4 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10"
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
-                            <CheckCircle2 size={16} />
-                        </div>
-                        <span className="text-xs font-bold text-indigo-300/60 uppercase tracking-[0.2em]">{t('contextualUsage')}</span>
-                    </div>
-                    <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-none">
-                        {parseExamples(currentWord.dictionary.detail).length > 0 ? (
-                            parseExamples(currentWord.dictionary.detail).map((ex: any, ei: number) => (
-                                <div key={ei} className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                                    <p className="text-sm text-white/80 leading-relaxed italic">
-                                        &quot;{ex.en || ex.example_en}&quot;
-                                    </p>
-                                    <p className="text-xs text-white/40 mt-1">{ex.zh || ex.example_zh}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-center py-8 text-white/20 text-xs italic">{t('noExamples')}</p>
-                        )}
-                    </div>
-                </motion.div>
-            )}
         </div>
     );
 }

@@ -10,7 +10,7 @@
         "welcome": "欢迎来到 WordDaily",
         "signInDesc": "登录以开始您的词汇之旅。",
         "signInButton": "登录",
-        "todaysWords": "今日添加单词",
+        "todaysWords": "今日添加",
         "words": "个单词",
         "dueReview": "待复习",
         "newWord": "新单词",
@@ -166,7 +166,14 @@
         "casePreference": "字母大小写",
         "casePreferenceDesc": "切换单词拼写显示为 大写 或 小写。",
         "capitalCase": "大写",
-        "lowerCase": "小写"
+        "lowerCase": "小写",
+        "appearance": "外观设置",
+        "theme": "颜色主题",
+        "lightTheme": "浅色模式",
+        "darkTheme": "深色模式",
+        "fontSize": "字体大小",
+        "fontSizeStandard": "标准",
+        "fontSizeLarge": "加大"
     },
     "buttons": {
         "save": "保存",

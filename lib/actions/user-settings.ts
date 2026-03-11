@@ -13,9 +13,12 @@ export async function updateUserSettings(data: {
 }) {
     const { user, supabase } = await validateSession();
 
+    // Filter out appearance settings that are stored in cookies, not DB
+    const { theme, fontSize, ...dbData } = data as any;
+
     const { error } = await supabase
         .from('users')
-        .update(data)
+        .update(dbData)
         .eq('id', user.id);
 
     if (error) throw error;

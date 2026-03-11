@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Bell, Clock, Globe, Save, Loader2, SendHorizonal } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Bell, Clock, Globe, Save, Loader2, SendHorizonal, Sun, Moon, Type } from 'lucide-react';
 import { updateUserSettings, savePushSubscription, deletePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
 import { subscribeToPush, unsubscribeFromPush } from '@/lib/push-notifications';
@@ -29,7 +29,23 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
         day_reminder_time: profile.day_reminder_time,
         review_reminder_time: profile.review_reminder_time,
         use_capital_case: profile.use_capital_case,
+        theme: 'dark', // Default for server render
+        fontSize: 'standard', // Default for server render
     });
+
+    useEffect(() => {
+        const theme = document.cookie.match(/(^|;)\s*NEXT_THEME\s*=\s*([^;]+)/)?.[2] || 'dark';
+        const fontSize = document.cookie.match(/(^|;)\s*NEXT_FONT_SIZE\s*=\s*([^;]+)/)?.[2] || 'standard';
+        setForm(prev => ({ ...prev, theme, fontSize }));
+    }, []);
+
+    const updateAppearance = (key: 'theme' | 'fontSize', value: string) => {
+        setForm(prev => ({ ...prev, [key]: value }));
+        const cookieName = key === 'theme' ? 'NEXT_THEME' : 'NEXT_FONT_SIZE';
+        document.cookie = `${cookieName}=${value}; path=/; max-age=31536000`;
+        // Refresh to apply classes in layout.tsx
+        window.location.reload();
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,10 +53,19 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
         setStatus(null);
 
         try {
-            await updateUserSettings(form);
-            setStatus({ type: 'success', message: t('success') });
+            // Persist appearance settings in cookies (client-side state)
+            document.cookie = `NEXT_THEME=${form.theme}; path=/; max-age=31536000`;
+            document.cookie = `NEXT_FONT_SIZE=${form.fontSize}; path=/; max-age=31536000`;
+
+            const res = await updateUserSettings(form);
+            if (res.success) {
+                setStatus({ type: 'success', message: t('success') });
+                // We don't necessarily need to reload here because updating appearance 
+                // toggles already calls reload(), but this ensures consistency 
+                // for other settings as well.
+            }
         } catch (error) {
-            console.error(error);
+            console.error('Settings save error:', error);
             setStatus({ type: 'error', message: t('error') });
         } finally {
             setLoading(false);
@@ -80,7 +105,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                     </div>
                 </div>
 
-                <div className="h-px bg-white/5" />
+                <div className="h-px bg-[var(--foreground-10)]" />
 
                 {/* Case Preference */}
                 <div className="space-y-4">
@@ -90,7 +115,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                             <span className="font-bold uppercase tracking-widest text-[10px]">{t('casePreference')}</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", !form.use_capital_case ? "text-indigo-400" : "text-white/20")}>
+                            <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", !form.use_capital_case ? "text-[var(--indigo-text)]" : "text-[var(--foreground-very-muted)]")}>
                                 {t('lowerCase')}
                             </span>
                             <button
@@ -98,7 +123,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                 onClick={() => setForm({ ...form, use_capital_case: !form.use_capital_case })}
                                 className={cn(
                                     "w-11 h-6 rounded-full transition-colors relative",
-                                    form.use_capital_case ? "bg-indigo-500" : "bg-white/10"
+                                    form.use_capital_case ? "bg-indigo-500" : "bg-[var(--foreground-20)]"
                                 )}
                             >
                                 <div className={cn(
@@ -106,15 +131,85 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                     form.use_capital_case ? "right-1" : "left-1"
                                 )} />
                             </button>
-                            <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", form.use_capital_case ? "text-indigo-400" : "text-white/20")}>
+                            <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", form.use_capital_case ? "text-[var(--indigo-text)]" : "text-[var(--foreground-very-muted)]")}>
                                 {t('capitalCase')}
                             </span>
                         </div>
                     </div>
-                    <p className="text-xs text-white/30">{t('casePreferenceDesc')}</p>
+                    <p className="text-xs text-[var(--foreground-muted)] opacity-60">{t('casePreferenceDesc')}</p>
                 </div>
 
-                <div className="h-px bg-white/5" />
+                <div className="h-px bg-[var(--foreground-10)]" />
+
+                {/* Appearance Section */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 text-[var(--indigo-text)]">
+                        <Type size={20} />
+                        <span className="font-bold uppercase tracking-widest text-[10px]">{t('appearance')}</span>
+                    </div>
+
+                    {/* Theme Toggle */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-[var(--foreground-muted)]">
+                            {form.theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                            <span className="text-sm font-medium">{t('theme')}</span>
+                        </div>
+                        <div className="flex bg-[var(--foreground-very-muted)] rounded-xl p-1 border border-[var(--card-border)]">
+                            <button
+                                type="button"
+                                onClick={() => updateAppearance('theme', 'light')}
+                                className={cn(
+                                    "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                                    form.theme === 'light' ? "bg-indigo-600 text-white shadow-lg" : "text-[var(--foreground-muted)] hover:text-[rgb(var(--foreground-rgb))]"
+                                )}
+                            >
+                                {t('lightTheme')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => updateAppearance('theme', 'dark')}
+                                className={cn(
+                                    "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                                    form.theme === 'dark' ? "bg-[var(--foreground-20)] text-[rgb(var(--foreground-rgb))] shadow-lg" : "text-[var(--foreground-muted)] hover:text-[rgb(var(--foreground-rgb))]"
+                                )}
+                            >
+                                {t('darkTheme')}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Font Size Toggle */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-[var(--foreground-muted)]">
+                            <Type size={18} />
+                            <span className="text-sm font-medium">{t('fontSize')}</span>
+                        </div>
+                        <div className="flex bg-[var(--foreground-very-muted)] rounded-xl p-1 border border-[var(--card-border)]">
+                            <button
+                                type="button"
+                                onClick={() => updateAppearance('fontSize', 'standard')}
+                                className={cn(
+                                    "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                                    form.fontSize === 'standard' ? "bg-indigo-600 text-white shadow-lg" : "text-[var(--foreground-muted)] hover:text-[rgb(var(--foreground-rgb))]"
+                                )}
+                            >
+                                {t('fontSizeStandard')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => updateAppearance('fontSize', 'large')}
+                                className={cn(
+                                    "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                                    form.fontSize === 'large' ? "bg-[var(--foreground-20)] text-[rgb(var(--foreground-rgb))] shadow-lg" : "text-[var(--foreground-muted)] hover:text-[rgb(var(--foreground-rgb))]"
+                                )}
+                            >
+                                {t('fontSizeLarge')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="h-px bg-[var(--foreground-10)]" />
 
                 {/* Notifications */}
                 <div className="space-y-4">
@@ -164,7 +259,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                             }}
                             className={cn(
                                 "w-11 h-6 rounded-full transition-colors relative",
-                                form.notifications_enabled ? "bg-emerald-500" : "bg-white/10"
+                                form.notifications_enabled ? "bg-emerald-500" : "bg-[var(--foreground-20)]"
                             )}
                         >
                             <div className={cn(
@@ -178,7 +273,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2 flex flex-col items-center sm:items-start text-center sm:text-left">
-                                    <div className="flex items-center gap-2 text-white/40">
+                                    <div className="flex items-center gap-2 text-[var(--foreground-muted)]">
                                         <Clock size={14} />
                                         <label className="text-[10px] font-bold uppercase tracking-wider">{t('newWords')}</label>
                                     </div>
@@ -186,11 +281,11 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         type="time"
                                         value={form.day_reminder_time}
                                         onChange={(e) => setForm({ ...form, day_reminder_time: e.target.value })}
-                                        className="w-full max-w-[140px] sm:max-w-none bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium text-center sm:text-left"
+                                        className="w-full max-w-[140px] sm:max-w-none bg-[var(--foreground-very-muted)] border border-[var(--card-border)] rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium text-center sm:text-left text-[rgb(var(--foreground-rgb))]"
                                     />
                                 </div>
                                 <div className="space-y-2 flex flex-col items-center sm:items-start text-center sm:text-left">
-                                    <div className="flex items-center gap-2 text-white/40">
+                                    <div className="flex items-center gap-2 text-[var(--foreground-muted)]">
                                         <Clock size={14} />
                                         <label className="text-[10px] font-bold uppercase tracking-wider">{t('reviewSession')}</label>
                                     </div>
@@ -198,15 +293,15 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                         type="time"
                                         value={form.review_reminder_time}
                                         onChange={(e) => setForm({ ...form, review_reminder_time: e.target.value })}
-                                        className="w-full max-w-[140px] sm:max-w-none bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium text-center sm:text-left"
+                                        className="w-full max-w-[140px] sm:max-w-none bg-[var(--foreground-very-muted)] border border-[var(--card-border)] rounded-xl px-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none font-medium text-center sm:text-left text-[rgb(var(--foreground-rgb))]"
                                     />
                                 </div>
                             </div>
 
                             <div className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 flex items-center gap-3">
-                                < Globe size={16} className="text-indigo-400 shrink-0" />
-                                <div className="text-[10px] text-white/40 leading-tight">
-                                    <p className="font-bold text-white/60 mb-0.5 uppercase tracking-wider">{t('timezone')}</p>
+                                < Globe size={16} className="text-[var(--indigo-text)] shrink-0" />
+                                <div className="text-[10px] text-[var(--foreground-muted)] leading-tight">
+                                    <p className="font-bold opacity-80 mb-0.5 uppercase tracking-wider text-[rgb(var(--foreground-rgb))]">{t('timezone')}</p>
                                     <p>Automatic: {profile.timezone || 'Detecting...'}</p>
                                 </div>
                             </div>
@@ -223,7 +318,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                             </button>
                         </div>
                     )}
-                    <p className="text-xs text-white/30">{t('notificationsDesc')}</p>
+                    <p className="text-xs text-[var(--foreground-muted)] opacity-60">{t('notificationsDesc')}</p>
                 </div>
             </div>
 

@@ -34,7 +34,7 @@ export default function OAuthConsentPage() {
             <div className="flex items-center justify-between pt-4">
                 <Link
                     href="/settings"
-                    className="flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors font-bold text-sm uppercase tracking-widest group"
+                    className="flex items-center gap-2 text-[var(--foreground-40)] hover:text-[rgb(var(--foreground-rgb))] transition-colors font-bold text-sm uppercase tracking-widest group"
                 >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     {tSettings('title')}
@@ -48,12 +48,12 @@ export default function OAuthConsentPage() {
                         <span className="font-black uppercase tracking-[0.2em] text-xs">{tAuth('securityAndIdentity')}</span>
                     </div>
                     <h1 className="text-4xl font-black font-outfit tracking-tight">{tAuth('manageAccount')}</h1>
-                    <p className="text-white/40 font-medium">{tAuth('manageAccountDesc')}</p>
+                    <p className="text-[var(--foreground-40)] font-medium">{tAuth('manageAccountDesc')}</p>
                 </div>
 
                 {/* Identity Card */}
-                <div className="card bg-white/[0.03] border-white/5 p-8 flex flex-col sm:flex-row items-center gap-6">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/20">
+                <div className="card bg-[var(--foreground-10)] border-[var(--card-border)] p-8 flex flex-col sm:flex-row items-center gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/20 text-white">
                         {userEmail?.[0]?.toUpperCase()}
                     </div>
                     <div className="text-center sm:text-left space-y-1">
@@ -73,11 +73,11 @@ export default function OAuthConsentPage() {
                     </div>
                 </div>
 
-                <div className="h-px w-full bg-white/5 my-4" />
+                <div className="h-px w-full bg-[var(--card-border)] my-4" />
 
                 {/* Password Section */}
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 px-1 text-white/20">
+                    <div className="flex items-center gap-3 px-1 text-[var(--foreground-20)]">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em]">{tSettings('security')}</span>
                     </div>
                     <PasswordChangeForm />
@@ -85,7 +85,7 @@ export default function OAuthConsentPage() {
             </div>
 
             <footer className="pt-12 text-center">
-                <p className="text-[10px] text-white/20 uppercase font-bold tracking-[0.2em]">{tAuth('securedBy')}</p>
+                <p className="text-[10px] text-[var(--foreground-20)] uppercase font-bold tracking-[0.2em]">{tAuth('securedBy')}</p>
             </footer>
         </div>
     );
