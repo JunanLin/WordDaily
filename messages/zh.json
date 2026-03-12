@@ -29,7 +29,18 @@
         "proTipTitle": "小贴士",
         "proTipDesc": "启用后，单词会自动还原为原形。例如，添加 'developing' 将会保存 'develop'。",
         "wordNotFound": "抱歉，我们在字典中没有找到这个单词。",
-        "search": "搜索"
+        "search": "搜索",
+        "lexiconStored": "已加入词库",
+        "archiving": "归档中...",
+        "addToCollection": "加入个人词库",
+        "inflections": "词形变化",
+        "usageContext": "语境用法",
+        "pastTense": "过去式",
+        "pastParticiple": "过去分词",
+        "presentParticiple": "现在分词",
+        "thirdPersonSingle": "第三人称单数",
+        "comparative": "比较级",
+        "superlative": "最高级"
     },
     "review": {
         "title": "复习",
@@ -169,8 +180,8 @@
         "lowerCase": "小写",
         "appearance": "外观设置",
         "theme": "颜色主题",
-        "lightTheme": "浅色模式",
-        "darkTheme": "深色模式",
+        "lightTheme": "浅色",
+        "darkTheme": "深色",
         "fontSize": "字体大小",
         "fontSizeStandard": "标准",
         "fontSizeLarge": "加大"

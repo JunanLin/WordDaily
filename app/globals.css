@@ -69,11 +69,11 @@
 }
 
 .font-large {
-  font-size: 140%;
+  font-size: 130%;
 }
 
 .font-large body {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
 }
 
 /* For now, we force a premium dark aesthetic to ensure visibility and "WOW" effect as requested */

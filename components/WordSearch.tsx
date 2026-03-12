@@ -92,12 +92,12 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
     const parseExchange = (exchange: string) => {
         if (!exchange) return [];
         const codes: Record<string, string> = {
-            p: '过去式',
-            d: '过去分词',
-            i: '现在分词',
-            '3': '第三人称单数',
-            r: '比较级',
-            t: '最高级',
+            p: t('pastTense'),
+            d: t('pastParticiple'),
+            i: t('presentParticiple'),
+            '3': t('thirdPersonSingle'),
+            r: t('comparative'),
+            t: t('superlative'),
             s: '复数',
             '0': '原型',
             '1': '变换'
@@ -255,7 +255,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     {result.exchange && (
                                         <div className="p-3 px-5 rounded-2xl bg-[var(--foreground-10)] border border-[var(--card-border)]">
                                             <p className="text-[0.625rem] font-black uppercase py-0.5 px-2 rounded-full border border-[var(--card-border)] text-[var(--foreground-40)] mb-2 w-fit">
-                                                Inflections
+                                                {t('inflections')}
                                             </p>
                                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                                                 {parseExchange(result.exchange).map((ex, idx) => (
@@ -348,7 +348,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
 
                                     {result.examples && result.examples.length > 0 && (
                                         <div className="mt-2 space-y-4">
-                                            <p className="text-[0.625rem] font-black text-[var(--indigo-text)] uppercase tracking-[0.2em] px-2">{tReview('contextualUsage')}</p>
+                                            <p className="text-[0.625rem] font-black text-[var(--indigo-text)] uppercase tracking-[0.2em] px-2">{t('usageContext')}</p>
                                             {result.examples.map((ex: any, ei: number) => (
                                                 <div key={ei} className="text-sm bg-[var(--foreground-10)] p-4 rounded-[1.5rem] border border-[var(--card-border)]">
                                                     <p className="text-[rgb(var(--foreground-rgb))] opacity-80 italic font-medium leading-relaxed">&quot;{ex.en}&quot;</p>
@@ -380,7 +380,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     ) : (
                                         <Plus size={20} />
                                     )}
-                                    {isAdded ? 'Stored in Lexicon' : adding ? 'Archiving...' : 'Add to Collection'}
+                                    {isAdded ? t('lexiconStored') : adding ? t('archiving') : t('addToCollection')}
                                 </button>
                             </div>
                         </motion.div>

@@ -29,7 +29,18 @@
         "proTipTitle": "Pro Tip",
         "proTipDesc": "When enabled, words are lemmatized automatically. For example, adding \"developing\" will store \"develop\".",
         "wordNotFound": "Sorry, we couldn't find that word in our dictionaries.",
-        "search": "Search"
+        "search": "Search",
+        "lexiconStored": "Stored in Lexicon",
+        "archiving": "Archiving...",
+        "addToCollection": "Add to Collection",
+        "inflections": "Inflections",
+        "usageContext": "Usage Context",
+        "pastTense": "Past Tense",
+        "pastParticiple": "Past Participle",
+        "presentParticiple": "Present Participle",
+        "thirdPersonSingle": "3rd Person Singular",
+        "comparative": "Comparative",
+        "superlative": "Superlative"
     },
     "review": {
         "title": "Review",
