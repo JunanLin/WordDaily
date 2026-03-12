@@ -15,7 +15,8 @@
         "dueReview": "待复习",
         "newWord": "新单词",
         "quote": "语言的边界就是世界的边界。",
-        "author": "路德维希·维特根斯坦"
+        "author": "路德维希·维特根斯坦",
+        "lookupLearnDesc": "每天积累新词汇"
     },
     "add": {
         "title": "新单词",

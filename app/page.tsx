@@ -80,7 +80,7 @@ export default async function HomePage() {
     <div className="space-y-8 pb-10">
       <div className="space-y-2">
         <h2 className="text-3xl font-black font-outfit tracking-tight">{tNav('dashboard')}</h2>
-        <p className="text-[var(--foreground-40)] text-sm font-medium tracking-wide">Lookup and learn new words every day.</p>
+        <p className="text-[var(--foreground-40)] text-sm font-medium tracking-wide">{t('lookupLearnDesc')}</p>
       </div>
 
       <WordSearch useCapitalCase={profile?.use_capital_case} />

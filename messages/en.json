@@ -15,7 +15,8 @@
         "dueReview": "Due Review",
         "newWord": "New Word",
         "quote": "The limit of my language means the limit of my world.",
-        "author": "Ludwig Wittgenstein"
+        "author": "Ludwig Wittgenstein",
+        "lookupLearnDesc": "Lookup and learn new words every day."
     },
     "add": {
         "title": "New Word",
