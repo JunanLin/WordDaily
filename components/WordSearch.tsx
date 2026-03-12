@@ -181,7 +181,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                         <div className="w-1 h-1 rounded-full bg-indigo-500" />
                                         {t('proTipTitle')}
                                     </div>
-                                    <div className="text-[var(--foreground-40)] leading-relaxed text-[11px]">
+                                    <div className="text-[var(--foreground-40)] leading-relaxed text-[0.6875rem]">
                                         {t('proTipDesc')}
                                     </div>
                                     <div className="absolute right-2 sm:right-auto sm:left-4 top-full w-2 h-2 bg-[var(--modal-bg)] border-r border-b border-[var(--card-border)] rotate-45 -translate-y-1" />
@@ -254,7 +254,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     {/* exchange info */}
                                     {result.exchange && (
                                         <div className="p-3 px-5 rounded-2xl bg-[var(--foreground-10)] border border-[var(--card-border)]">
-                                            <p className="text-[10px] font-black uppercase py-0.5 px-2 rounded-full border border-[var(--card-border)] text-[var(--foreground-40)] mb-2 w-fit">
+                                            <p className="text-[0.625rem] font-black uppercase py-0.5 px-2 rounded-full border border-[var(--card-border)] text-[var(--foreground-40)] mb-2 w-fit">
                                                 Inflections
                                             </p>
                                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
@@ -271,13 +271,13 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     {/* Stats & Metadata Section */}
                                     {(result.tags || result.posDist || result.bnc || result.frq) && (
                                         <div className="p-5 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-4">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--indigo-text)] opacity-60">
+                                            <p className="text-[0.625rem] font-black uppercase tracking-widest text-[var(--indigo-text)] opacity-60">
                                                 {tReview('wordStats')}
                                             </p>
 
                                             <div className="flex flex-wrap gap-2">
                                                 {result.tags?.split(' ').filter(Boolean).map((tag: string) => (
-                                                    <span key={tag} className="px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-[var(--indigo-text)]">
+                                                    <span key={tag} className="px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[0.625rem] font-bold text-[var(--indigo-text)]">
                                                         {tReview(`tag_${tag}`)}
                                                     </span>
                                                 ))}
@@ -286,14 +286,14 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                             <div className="grid grid-cols-2 gap-4 pt-2">
                                                 {result.posDist && (
                                                     <div className="space-y-1">
-                                                        <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase">{tReview('posDistribution')}</p>
+                                                        <p className="text-[0.625rem] text-[var(--foreground-40)] font-bold uppercase">{tReview('posDistribution')}</p>
                                                         <p className="text-xs text-[var(--indigo-text)] font-mono">{result.posDist}</p>
                                                     </div>
                                                 )}
                                                 {(result.bnc || result.frq) && (
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-1 relative">
-                                                            <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase">{tReview('frequency')}</p>
+                                                            <p className="text-[0.625rem] text-[var(--foreground-40)] font-bold uppercase">{tReview('frequency')}</p>
                                                             <button
                                                                 type="button"
                                                                 onMouseEnter={() => setShowFreqTip(true)}
@@ -309,7 +309,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                                                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                                                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                                                        className="absolute left-0 bottom-full mb-3 w-72 sm:w-80 p-4 rounded-2xl bg-[var(--modal-bg)] border border-[var(--card-border)] shadow-2xl z-[110] text-[10px] pointer-events-none"
+                                                                        className="absolute left-0 bottom-full mb-3 w-72 sm:w-80 p-4 rounded-2xl bg-[var(--modal-bg)] border border-[var(--card-border)] shadow-2xl z-[110] text-[0.625rem] pointer-events-none"
                                                                     >
                                                                         <div className="font-black text-[var(--indigo-text)] uppercase tracking-widest mb-2 flex items-center gap-2">
                                                                             <div className="w-1 h-1 rounded-full bg-indigo-500" />
@@ -338,7 +338,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
                                     {result.meanings.map((m: any, i: number) => (
                                         <div key={i} className="p-5 rounded-3xl bg-[var(--foreground-10)] border border-[var(--card-border)] space-y-3 group hover:bg-indigo-500/5 transition-colors">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black uppercase py-0.5 px-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-[var(--indigo-text)]">
+                                                <span className="text-[0.625rem] font-black uppercase py-0.5 px-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-[var(--indigo-text)]">
                                                     {m.part_of_speech || 'N/A'}
                                                 </span>
                                                 <p className="font-bold text-xl text-[rgb(var(--foreground-rgb))]">{m.chinese_meaning}</p>
@@ -348,7 +348,7 @@ export default function WordSearch({ useCapitalCase = false }: WordSearchProps) 
 
                                     {result.examples && result.examples.length > 0 && (
                                         <div className="mt-2 space-y-4">
-                                            <p className="text-[10px] font-black text-[var(--indigo-text)] uppercase tracking-[0.2em] px-2">{tReview('contextualUsage')}</p>
+                                            <p className="text-[0.625rem] font-black text-[var(--indigo-text)] uppercase tracking-[0.2em] px-2">{tReview('contextualUsage')}</p>
                                             {result.examples.map((ex: any, ei: number) => (
                                                 <div key={ei} className="text-sm bg-[var(--foreground-10)] p-4 rounded-[1.5rem] border border-[var(--card-border)]">
                                                     <p className="text-[rgb(var(--foreground-rgb))] opacity-80 italic font-medium leading-relaxed">&quot;{ex.en}&quot;</p>

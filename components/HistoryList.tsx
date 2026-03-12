@@ -59,11 +59,11 @@ interface HistoryListProps {
 
 const getPOSColor = (pos: string) => {
     const p = pos ? pos.toLowerCase() : '';
-    if (p.includes('noun') || p === 'n') return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-    if (p.includes('verb') || p === 'v') return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-    if (p.includes('adj') || p === 'a') return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-    if (p.includes('adv') || p === 'r') return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-    return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+    if (p.includes('noun') || p === 'n') return 'bg-[var(--pos-noun-bg)] text-[var(--pos-noun-text)] border-[var(--pos-noun-border)]';
+    if (p.includes('verb') || p === 'v') return 'bg-[var(--pos-verb-bg)] text-[var(--pos-verb-text)] border-[var(--pos-verb-border)]';
+    if (p.includes('adj') || p === 'a') return 'bg-[var(--pos-adj-bg)] text-[var(--pos-adj-text)] border-[var(--pos-adj-border)]';
+    if (p.includes('adv') || p === 'r') return 'bg-[var(--pos-adv-bg)] text-[var(--pos-adv-text)] border-[var(--pos-adv-border)]';
+    return 'bg-[var(--pos-other-bg)] text-[var(--pos-other-text)] border-[var(--pos-other-border)]';
 };
 
 /**
@@ -270,7 +270,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                         {/* Calendar Grid */}
                         <div className="grid grid-cols-7 gap-2">
                             {weekdays.map((day) => (
-                                <div key={day} className="text-[10px] font-black text-[var(--foreground-20)] text-center uppercase py-1">
+                                <div key={day} className="text-[0.625rem] font-black text-[var(--foreground-20)] text-center uppercase py-1">
                                     {day}
                                 </div>
                             ))}
@@ -294,7 +294,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                         {format(day, 'd')}
                                         {hasWords && (
                                             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                                <span className="bg-[var(--modal-bg)] text-[rgb(var(--foreground-rgb))] text-[8px] py-1 px-2 rounded-full border border-[var(--card-border)] uppercase font-black">
+                                                <span className="bg-[var(--modal-bg)] text-[rgb(var(--foreground-rgb))] text-[0.5rem] py-1 px-2 rounded-full border border-[var(--card-border)] uppercase font-black">
                                                     {t('wordsCount', { count: groupedHistory[dateStr].length })}
                                                 </span>
                                             </div>
@@ -385,7 +385,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                         <h3 className="text-3xl font-black font-outfit text-indigo-400">
                             {format(parseISO(selectedDate), 'MMMM do', { locale: dateLocale })}
                         </h3>
-                        <p className="text-[var(--foreground-40)] text-[10px] uppercase tracking-[0.2em] font-black">{t('vocabularyArchive')}</p>
+                        <p className="text-[var(--foreground-40)] text-[0.625rem] uppercase tracking-[0.2em] font-black">{t('vocabularyArchive')}</p>
                     </div>
 
                     <div className="space-y-3">
@@ -461,7 +461,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                     {/* Exchange / Inflections */}
                                     {selectedWord.dictionary.exchange && (
                                         <div className="p-3 rounded-xl bg-[var(--foreground-10)] border border-[var(--card-border)]">
-                                            <p className="text-[10px] font-bold text-[var(--foreground-40)] uppercase tracking-widest mb-1">Inflections</p>
+                                            <p className="text-[0.625rem] font-bold text-[var(--foreground-40)] uppercase tracking-widest mb-1">Inflections</p>
                                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
                                                 {parseExchange(selectedWord.dictionary.exchange).map((ex: any, idx: number) => (
                                                     <div key={idx} className="flex gap-2">
@@ -476,13 +476,13 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                     {/* Stats & Metadata Section */}
                                     {(selectedWord.dictionary.tag || selectedWord.dictionary.pos || selectedWord.dictionary.bnc || selectedWord.dictionary.frq) && (
                                         <div className="p-5 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-4">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400/60">
+                                            <p className="text-[0.625rem] font-black uppercase tracking-widest text-indigo-400/60">
                                                 {tReview('wordStats')}
                                             </p>
 
                                             <div className="flex flex-wrap gap-2">
                                                 {selectedWord.dictionary.tag?.split(' ').filter(Boolean).map((tag: string) => (
-                                                    <span key={tag} className="px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-300">
+                                                    <span key={tag} className="px-2 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[0.625rem] font-bold text-indigo-300">
                                                         {tReview(`tag_${tag}`)}
                                                     </span>
                                                 ))}
@@ -491,14 +491,14 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                             <div className="grid grid-cols-2 gap-4 pt-2">
                                                 {selectedWord.dictionary.pos && (
                                                     <div className="space-y-1">
-                                                        <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase">{tReview('posDistribution')}</p>
+                                                        <p className="text-[0.625rem] text-[var(--foreground-40)] font-bold uppercase">{tReview('posDistribution')}</p>
                                                         <p className="text-xs text-indigo-200/80 font-mono">{selectedWord.dictionary.pos}</p>
                                                     </div>
                                                 )}
                                                 {(selectedWord.dictionary.bnc || selectedWord.dictionary.frq) && (
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-1 relative">
-                                                            <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase">{tReview('frequency')}</p>
+                                                            <p className="text-[0.625rem] text-[var(--foreground-40)] font-bold uppercase">{tReview('frequency')}</p>
                                                             <button
                                                                 type="button"
                                                                 onMouseEnter={() => setShowFreqTip(true)}
@@ -514,7 +514,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                                                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                                                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                                                        className="absolute left-0 bottom-full mb-3 w-72 sm:w-80 p-4 rounded-2xl bg-[var(--modal-bg)] border border-[var(--card-border)] shadow-2xl z-[110] text-[10px] pointer-events-none"
+                                                                        className="absolute left-0 bottom-full mb-3 w-72 sm:w-80 p-4 rounded-2xl bg-[var(--modal-bg)] border border-[var(--card-border)] shadow-2xl z-[110] text-[0.625rem] pointer-events-none"
                                                                     >
                                                                         <p className="font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                                                                             <div className="w-1 h-1 rounded-full bg-indigo-500" />
@@ -530,7 +530,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                                                 )}
                                                             </AnimatePresence>
                                                         </div>
-                                                        <div className="flex flex-col gap-1 text-[10px] text-indigo-200/80 font-mono">
+                                                        <div className="flex flex-col gap-1 text-[0.625rem] text-indigo-200/80 font-mono">
                                                             {selectedWord.dictionary.bnc && <span>BNC #{selectedWord.dictionary.bnc}</span>}
                                                             {selectedWord.dictionary.frq && <span>FRQ #{selectedWord.dictionary.frq}</span>}
                                                         </div>
@@ -544,7 +544,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                     {parseMeanings(selectedWord.dictionary.translation || '', selectedWord.dictionary.pos).map((m: any, i: number) => (
                                         <div key={i} className="p-4 rounded-2xl bg-[var(--foreground-10)] border border-[var(--card-border)] space-y-2">
                                             <div className="flex items-center gap-2">
-                                                <span className={cn("text-[10px] font-bold uppercase py-0.5 px-1.5 rounded border leading-none", getPOSColor(m.part_of_speech))}>
+                                                <span className={cn("text-[0.625rem] font-bold uppercase py-0.5 px-1.5 rounded border leading-none", getPOSColor(m.part_of_speech))}>
                                                     {m.part_of_speech || 'N/A'}
                                                 </span>
                                                 <p className="text-xl font-bold text-[rgb(var(--foreground-rgb))]">{m.chinese_meaning?.replace(/\r?\n|\\n/g, '  ')}</p>
@@ -557,7 +557,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                         <div className="space-y-3 pt-4">
                                             <div className="flex items-center gap-2 px-1">
                                                 <Volume2 size={12} className="text-indigo-400" />
-                                                <span className="text-[10px] font-bold text-indigo-400/60 uppercase tracking-widest">Usage Context</span>
+                                                <span className="text-[0.625rem] font-bold text-indigo-400/60 uppercase tracking-widest">Usage Context</span>
                                             </div>
                                             {parseExamples(selectedWord.dictionary.detail).map((ex: any, ei: number) => (
                                                 <div key={ei} className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-1 hover:bg-indigo-500/10 transition-colors">

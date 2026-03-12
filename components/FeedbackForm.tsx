@@ -51,13 +51,13 @@ export default function FeedbackForm() {
         <section className="space-y-6 animate-in fade-in duration-500">
             <div className="flex items-center gap-3 text-[var(--foreground-20)] px-2">
                 <MessageSquare size={16} />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{t('title')}</span>
+                <span className="text-[0.625rem] font-black uppercase tracking-[0.2em]">{t('title')}</span>
             </div>
 
             <form onSubmit={handleSubmit} className="card space-y-6 border-[var(--card-border)]">
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-[var(--foreground-40)] uppercase tracking-widest px-1">
+                        <label className="text-[0.625rem] font-bold text-[var(--foreground-40)] uppercase tracking-widest px-1">
                             {t('messageLabel')}
                         </label>
                         <textarea
@@ -71,7 +71,7 @@ export default function FeedbackForm() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-[var(--foreground-40)] uppercase tracking-widest px-1">
+                        <label className="text-[0.625rem] font-bold text-[var(--foreground-40)] uppercase tracking-widest px-1">
                             {t('pageLabel')}
                         </label>
                         <div className="relative group">

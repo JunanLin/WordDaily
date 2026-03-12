@@ -31,7 +31,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                 <div className="p-8 pb-4 text-center space-y-2">
                     <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center gap-3 mb-4 mx-auto w-fit">
                         <Info className="text-amber-500 shrink-0" size={18} />
-                        <p className="text-[10px] text-amber-200/80 font-black uppercase tracking-[0.2em]">{t('pwaRecommend')}</p>
+                        <p className="text-[0.625rem] text-amber-200/80 font-black uppercase tracking-[0.2em]">{t('pwaRecommend')}</p>
                     </div>
 
                     <h2 className="text-3xl font-black font-outfit tracking-tight text-[rgb(var(--foreground-rgb))]">{t('pwaTitle')}</h2>
@@ -48,7 +48,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                             }`}
                     >
                         <Smartphone size={20} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{t('pwaPlatformSafari')}</span>
+                        <span className="text-[0.625rem] font-black uppercase tracking-widest">{t('pwaPlatformSafari')}</span>
                     </button>
                     <button
                         onClick={() => { setPlatform('chrome'); setSubPlatform('mobile'); }}
@@ -58,7 +58,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                             }`}
                     >
                         <Chrome size={20} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{t('pwaPlatformChrome')}</span>
+                        <span className="text-[0.625rem] font-black uppercase tracking-widest">{t('pwaPlatformChrome')}</span>
                     </button>
                 </div>
 
@@ -66,7 +66,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                 <div className="px-8 flex gap-2 mb-6">
                     <button
                         onClick={() => setSubPlatform('mobile')}
-                        className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${subPlatform === 'mobile'
+                        className={`flex-1 py-2 rounded-xl text-[0.5625rem] font-black uppercase tracking-widest transition-all ${subPlatform === 'mobile'
                                 ? 'bg-[var(--foreground-20)] text-[rgb(var(--foreground-rgb))] border border-[var(--card-border)]'
                                 : 'text-[var(--foreground-20)] hover:text-[var(--foreground-40)]'
                             }`}
@@ -76,7 +76,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                     {platform === 'chrome' && (
                         <button
                             onClick={() => setSubPlatform('tablet')}
-                            className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${subPlatform === 'tablet'
+                            className={`flex-1 py-2 rounded-xl text-[0.5625rem] font-black uppercase tracking-widest transition-all ${subPlatform === 'tablet'
                                     ? 'bg-[var(--foreground-20)] text-[rgb(var(--foreground-rgb))] border border-[var(--card-border)]'
                                     : 'text-[var(--foreground-20)] hover:text-[var(--foreground-40)]'
                                 }`}
@@ -86,7 +86,7 @@ export default function PWAInstallTutorial({ onClose }: PWAInstallTutorialProps)
                     )}
                     <button
                         onClick={() => setSubPlatform('desktop')}
-                        className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${subPlatform === 'desktop'
+                        className={`flex-1 py-2 rounded-xl text-[0.5625rem] font-black uppercase tracking-widest transition-all ${subPlatform === 'desktop'
                                 ? 'bg-[var(--foreground-20)] text-[rgb(var(--foreground-rgb))] border border-[var(--card-border)]'
                                 : 'text-[var(--foreground-20)] hover:text-[var(--foreground-40)]'
                             }`}

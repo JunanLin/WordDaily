@@ -92,11 +92,11 @@ export default function TodayListClient({ initialWords, useCapitalCase = false }
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                             {new Date(uw.next_review_at) > new Date() ? (
-                                <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded">
+                                <div className="flex items-center gap-1 text-[0.625rem] uppercase font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded">
                                     <CheckCircle2 size={12} /> Learned
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-indigo-400 bg-indigo-400/10 px-2 py-1 rounded">
+                                <div className="flex items-center gap-1 text-[0.625rem] uppercase font-bold text-indigo-400 bg-indigo-400/10 px-2 py-1 rounded">
                                     <Clock size={12} /> Pending
                                 </div>
                             )}

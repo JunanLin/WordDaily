@@ -14,7 +14,25 @@
   --card-bg: rgba(255, 255, 255, 0.1);
   --card-border: rgba(255, 255, 255, 0.2);
   --modal-bg: #121218;
-  --indigo-text: #818cf8; /* indigo-400 */
+  --indigo-text: #818cf8;
+  /* indigo-400 */
+
+  /* POS Tags - Dark Mode */
+  --pos-noun-bg: rgba(59, 130, 246, 0.2);
+  --pos-noun-text: #93c5fd;
+  --pos-noun-border: rgba(59, 130, 246, 0.3);
+  --pos-verb-bg: rgba(16, 185, 129, 0.2);
+  --pos-verb-text: #6ee7b7;
+  --pos-verb-border: rgba(16, 185, 129, 0.3);
+  --pos-adj-bg: rgba(245, 158, 11, 0.2);
+  --pos-adj-text: #fcd34d;
+  --pos-adj-border: rgba(245, 158, 11, 0.3);
+  --pos-adv-bg: rgba(139, 92, 246, 0.2);
+  --pos-adv-text: #c4b5fd;
+  --pos-adv-border: rgba(139, 92, 246, 0.3);
+  --pos-other-bg: rgba(107, 114, 128, 0.2);
+  --pos-other-text: #cbd5e1;
+  --pos-other-border: rgba(107, 114, 128, 0.3);
 }
 
 .light-theme {
@@ -29,15 +47,33 @@
   --card-bg: rgba(255, 255, 255, 0.8);
   --card-border: rgba(0, 0, 0, 0.1);
   --modal-bg: #ffffff;
-  --indigo-text: #4f46e5; /* indigo-600 */
+  --indigo-text: #4f46e5;
+  /* indigo-600 */
+
+  /* POS Tags - Light Mode */
+  --pos-noun-bg: #dbeafe;
+  --pos-noun-text: #1d4ed8;
+  --pos-noun-border: #bfdbfe;
+  --pos-verb-bg: #d1fae5;
+  --pos-verb-text: #047857;
+  --pos-verb-border: #a7f3d0;
+  --pos-adj-bg: #fef3c7;
+  --pos-adj-text: #b45309;
+  --pos-adj-border: #fde68a;
+  --pos-adv-bg: #ede9fe;
+  --pos-adv-text: #6d28d9;
+  --pos-adv-border: #ddd6fe;
+  --pos-other-bg: #f1f5f9;
+  --pos-other-text: #334155;
+  --pos-other-border: #e2e8f0;
 }
 
 .font-large {
-  font-size: 110%;
+  font-size: 140%;
 }
 
 .font-large body {
-  font-size: 1.15rem;
+  font-size: 1.4rem;
 }
 
 /* For now, we force a premium dark aesthetic to ensure visibility and "WOW" effect as requested */

@@ -24,7 +24,7 @@ export default async function SettingsPage() {
             <div className="space-y-1">
                 <div className="flex items-center gap-3 text-[var(--foreground-20)] mb-2">
                     <Settings size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Preferences</span>
+                    <span className="text-[0.625rem] font-black uppercase tracking-[0.2em]">Preferences</span>
                 </div>
                 <h2 className="text-4xl font-black font-outfit tracking-tight text-[rgb(var(--foreground-rgb))]">{t('settings.title')}</h2>
                 <p className="text-[var(--foreground-40)] text-sm font-medium">Personalize your learning experience</p>
@@ -78,7 +78,7 @@ export default async function SettingsPage() {
                     </div>
                     <div className="space-y-0.5">
                         <p className="font-bold text-lg tracking-tight text-[rgb(var(--foreground-rgb))]">{user.email}</p>
-                        <p className="text-[10px] text-[var(--foreground-40)] font-bold uppercase tracking-widest">
+                        <p className="text-[0.625rem] text-[var(--foreground-40)] font-bold uppercase tracking-widest">
                             {t('common.memberSince')} {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                         </p>
                     </div>
@@ -92,7 +92,7 @@ export default async function SettingsPage() {
             </div>
 
             <div className="text-center pt-8">
-                <p className="text-[10px] text-[var(--foreground-20)] uppercase font-bold tracking-[0.2em]">WordDaily v1.0.0</p>
+                <p className="text-[0.625rem] text-[var(--foreground-20)] uppercase font-bold tracking-[0.2em]">WordDaily v1.0.0</p>
             </div>
         </div>
     );

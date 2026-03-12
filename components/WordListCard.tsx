@@ -55,11 +55,11 @@ export default function WordListCard({ list }: WordListCardProps) {
                 <div>
                     <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-2">
-                            <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-[0.2em]">
+                            <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[0.625rem] font-black px-2 py-1 rounded-lg uppercase tracking-[0.2em]">
                                 {list.code}
                             </div>
                             {list.isLocked && (
-                                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-[0.2em] flex items-center gap-1">
+                                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[0.625rem] font-black px-2 py-1 rounded-lg uppercase tracking-[0.2em] flex items-center gap-1">
                                     <Lock size={10} /> Locked
                                 </div>
                             )}
@@ -85,7 +85,7 @@ export default function WordListCard({ list }: WordListCardProps) {
                 <div className="mt-auto space-y-4">
                     <div className="flex justify-between items-end">
                         <div className="space-y-0.5">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground-20)]">{t('wordsInReview')}</p>
+                            <p className="text-[0.625rem] font-black uppercase tracking-widest text-[var(--foreground-20)]">{t('wordsInReview')}</p>
                             <span className="text-sm font-bold text-[var(--foreground-60)]">
                                 {progress.current_position} <span className="text-[var(--foreground-20)]">/</span> {list.total_words}
                             </span>
@@ -102,7 +102,7 @@ export default function WordListCard({ list }: WordListCardProps) {
                         />
                     </div>
                     {progress.completed_rounds > 0 && (
-                        <div className="pt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-400/60">
+                        <div className="pt-2 flex items-center gap-2 text-[0.625rem] font-black uppercase tracking-widest text-emerald-400/60">
                             <div className="w-1 h-1 rounded-full bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.5)]" />
                             {t('completedRounds', { count: progress.completed_rounds })}
                         </div>

@@ -54,7 +54,7 @@ export default function AuthCodeErrorPage() {
 
             {error && (
                 <div className="mt-12 p-4 bg-white/5 rounded-2xl border border-white/10">
-                    <p className="text-[10px] uppercase tracking-widest text-white/20 font-bold mb-1">Error Code</p>
+                    <p className="text-[0.625rem] uppercase tracking-widest text-white/20 font-bold mb-1">Error Code</p>
                     <code className="text-xs text-red-400/60 font-mono">{error}</code>
                 </div>
             )}

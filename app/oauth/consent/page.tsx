@@ -60,12 +60,12 @@ export default function OAuthConsentPage() {
                         <p className="text-xl font-bold tracking-tight">{userEmail}</p>
                         <div className="flex items-center justify-center sm:justify-start gap-2">
                             {isGoogleUser ? (
-                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[0.625rem] font-black uppercase tracking-widest">
                                     <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />
                                     {tAuth('googleAccount')}
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-[0.625rem] font-black uppercase tracking-widest">
                                     {tAuth('emailAccount')}
                                 </div>
                             )}
@@ -78,14 +78,14 @@ export default function OAuthConsentPage() {
                 {/* Password Section */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-3 px-1 text-[var(--foreground-20)]">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">{tSettings('security')}</span>
+                        <span className="text-[0.625rem] font-black uppercase tracking-[0.2em]">{tSettings('security')}</span>
                     </div>
                     <PasswordChangeForm />
                 </div>
             </div>
 
             <footer className="pt-12 text-center">
-                <p className="text-[10px] text-[var(--foreground-20)] uppercase font-bold tracking-[0.2em]">{tAuth('securedBy')}</p>
+                <p className="text-[0.625rem] text-[var(--foreground-20)] uppercase font-bold tracking-[0.2em]">{tAuth('securedBy')}</p>
             </footer>
         </div>
     );

@@ -120,7 +120,7 @@ export default function Navigation() {
                                         </motion.div>
                                     )}
                                 </div>
-                                <span className="text-[10px] font-medium">{label}</span>
+                                <span className="text-[0.625rem] font-medium">{label}</span>
                             </Link>
                         </li>
                     );

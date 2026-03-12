@@ -99,7 +99,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-emerald-400">
                             <Globe size={20} />
-                            <span className="font-bold uppercase tracking-widest text-[10px]">{t('language')}</span>
+                            <span className="font-bold uppercase tracking-widest text-[0.625rem]">{t('language')}</span>
                         </div>
                         <LanguageSwitcher />
                     </div>
@@ -112,10 +112,10 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-amber-400">
                             < Globe size={20} />
-                            <span className="font-bold uppercase tracking-widest text-[10px]">{t('casePreference')}</span>
+                            <span className="font-bold uppercase tracking-widest text-[0.625rem]">{t('casePreference')}</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", !form.use_capital_case ? "text-[var(--indigo-text)]" : "text-[var(--foreground-very-muted)]")}>
+                            <span className={cn("text-[0.625rem] font-bold uppercase tracking-widest transition-colors", !form.use_capital_case ? "text-[var(--indigo-text)]" : "text-[var(--foreground-very-muted)]")}>
                                 {t('lowerCase')}
                             </span>
                             <button
@@ -131,7 +131,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                     form.use_capital_case ? "right-1" : "left-1"
                                 )} />
                             </button>
-                            <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", form.use_capital_case ? "text-[var(--indigo-text)]" : "text-[var(--foreground-very-muted)]")}>
+                            <span className={cn("text-[0.625rem] font-bold uppercase tracking-widest transition-colors", form.use_capital_case ? "text-[var(--indigo-text)]" : "text-[var(--foreground-very-muted)]")}>
                                 {t('capitalCase')}
                             </span>
                         </div>
@@ -145,7 +145,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                 <div className="space-y-6">
                     <div className="flex items-center gap-3 text-[var(--indigo-text)]">
                         <Type size={20} />
-                        <span className="font-bold uppercase tracking-widest text-[10px]">{t('appearance')}</span>
+                        <span className="font-bold uppercase tracking-widest text-[0.625rem]">{t('appearance')}</span>
                     </div>
 
                     {/* Theme Toggle */}
@@ -216,7 +216,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-pink-400">
                             <Bell size={20} />
-                            <span className="font-bold uppercase tracking-widest text-[10px]">{t('notifications')}</span>
+                            <span className="font-bold uppercase tracking-widest text-[0.625rem]">{t('notifications')}</span>
                         </div>
                         <button
                             type="button"
@@ -275,7 +275,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                 <div className="space-y-2 flex flex-col items-center sm:items-start text-center sm:text-left">
                                     <div className="flex items-center gap-2 text-[var(--foreground-muted)]">
                                         <Clock size={14} />
-                                        <label className="text-[10px] font-bold uppercase tracking-wider">{t('newWords')}</label>
+                                        <label className="text-[0.625rem] font-bold uppercase tracking-wider">{t('newWords')}</label>
                                     </div>
                                     <input
                                         type="time"
@@ -287,7 +287,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                                 <div className="space-y-2 flex flex-col items-center sm:items-start text-center sm:text-left">
                                     <div className="flex items-center gap-2 text-[var(--foreground-muted)]">
                                         <Clock size={14} />
-                                        <label className="text-[10px] font-bold uppercase tracking-wider">{t('reviewSession')}</label>
+                                        <label className="text-[0.625rem] font-bold uppercase tracking-wider">{t('reviewSession')}</label>
                                     </div>
                                     <input
                                         type="time"
@@ -300,7 +300,7 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
 
                             <div className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 flex items-center gap-3">
                                 < Globe size={16} className="text-[var(--indigo-text)] shrink-0" />
-                                <div className="text-[10px] text-[var(--foreground-muted)] leading-tight">
+                                <div className="text-[0.625rem] text-[var(--foreground-muted)] leading-tight">
                                     <p className="font-bold opacity-80 mb-0.5 uppercase tracking-wider text-[rgb(var(--foreground-rgb))]">{t('timezone')}</p>
                                     <p>Automatic: {profile.timezone || 'Detecting...'}</p>
                                 </div>

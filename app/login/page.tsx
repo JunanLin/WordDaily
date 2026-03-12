@@ -147,7 +147,7 @@ export default function LoginPage() {
 
             <div className="w-full flex items-center gap-4 py-2">
                 <div className="h-px flex-1 bg-[var(--card-border)]" />
-                <span className="text-[10px] text-[var(--foreground-20)] font-bold uppercase tracking-widest">or</span>
+                <span className="text-[0.625rem] text-[var(--foreground-20)] font-bold uppercase tracking-widest">or</span>
                 <div className="h-px flex-1 bg-[var(--card-border)]" />
             </div>
 
@@ -166,7 +166,7 @@ export default function LoginPage() {
             </button>
 
             <div className="pt-8 text-center">
-                <p className="text-[10px] text-[var(--foreground-20)] uppercase font-bold tracking-widest">
+                <p className="text-[0.625rem] text-[var(--foreground-20)] uppercase font-bold tracking-widest">
                     {t('securedBy')}
                 </p>
             </div>

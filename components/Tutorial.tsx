@@ -167,7 +167,7 @@ export default function Tutorial() {
                             {step.id === 'review' && (
                                 <div className="flex gap-2 justify-center">
                                     {[0, 2, 5, 8, 10].map(s => (
-                                        <div key={s} className="w-10 h-10 rounded-xl bg-[var(--foreground-10)] border border-[var(--card-border)] flex items-center justify-center text-[10px] font-black text-[var(--foreground-40)]">
+                                        <div key={s} className="w-10 h-10 rounded-xl bg-[var(--foreground-10)] border border-[var(--card-border)] flex items-center justify-center text-[0.625rem] font-black text-[var(--foreground-40)]">
                                             {s}
                                         </div>
                                     ))}

@@ -57,7 +57,7 @@ export default function PasswordChangeForm() {
                 <div className="space-y-1 text-center sm:text-left">
                     <div className="flex items-center gap-3 text-indigo-400 justify-center sm:justify-start">
                         <Lock size={20} />
-                        <span className="font-bold uppercase tracking-widest text-[10px]">{tAuth('resetPassword')}</span>
+                        <span className="font-bold uppercase tracking-widest text-[0.625rem]">{tAuth('resetPassword')}</span>
                     </div>
                     <p className="text-xs text-[var(--foreground-40)]">
                         {isGoogleUser ? tAuth('googleUserSetupPassword') : 'Set a new password for your account.'}
@@ -67,7 +67,7 @@ export default function PasswordChangeForm() {
                 {isGoogleUser && (
                     <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center gap-3">
                         <UserPlus size={16} className="text-indigo-400" />
-                        <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">
+                        <p className="text-[0.625rem] text-indigo-300 font-bold uppercase tracking-widest">
                             Enable Email Login
                         </p>
                     </div>
