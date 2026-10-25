@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useRef } from 'react';
 import {
     format,
     parseISO,
@@ -16,7 +16,7 @@ import {
 } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
 import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft, Volume2, HelpCircle } from 'lucide-react';
-import { deleteUserWord } from '@/lib/actions/delete-word';
+import { deleteUserWord, deleteRecentSearches } from '@/lib/actions/delete-word';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -35,6 +35,7 @@ interface Meaning {
 
 interface UserWord {
     id: string;
+    word_id?: string;
     created_at: string;
     next_review_at: string;
     dictionary: {
@@ -102,6 +103,72 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
     const [history, setHistory] = useState(initialHistory);
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
+
+    // Recent searches: long-press a word to enter edit mode, then remove words individually
+    const [lookups, setLookups] = useState(recentLookups);
+    const [editingLookups, setEditingLookups] = useState(false);
+    const [confirmClear, setConfirmClear] = useState(false);
+    const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const longPressStart = useRef<{ x: number; y: number } | null>(null);
+    const longPressFired = useRef(false);
+
+    useEffect(() => {
+        setLookups(recentLookups);
+    }, [recentLookups]);
+
+    // Exit edit mode once nothing is left
+    useEffect(() => {
+        if (lookups.length === 0) {
+            setEditingLookups(false);
+            setConfirmClear(false);
+        }
+    }, [lookups.length]);
+
+    const cancelLongPress = () => {
+        if (longPressTimer.current) clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+        longPressStart.current = null;
+    };
+
+    const startLongPress = (e: React.PointerEvent) => {
+        longPressFired.current = false;
+        longPressStart.current = { x: e.clientX, y: e.clientY };
+        longPressTimer.current = setTimeout(() => {
+            longPressFired.current = true;
+            setEditingLookups(true);
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate?.(15);
+        }, 500);
+    };
+
+    const moveLongPress = (e: React.PointerEvent) => {
+        const start = longPressStart.current;
+        // Cancel if the finger moves (the user is scrolling)
+        if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) cancelLongPress();
+    };
+
+    const removeLookups = async (wordIds: string[]) => {
+        const ids = Array.from(new Set(wordIds.filter(Boolean)));
+        if (ids.length === 0) return;
+        const previous = lookups;
+        setLookups(prev => prev.filter(l => !l.word_id || !ids.includes(l.word_id)));
+        try {
+            await deleteRecentSearches(ids);
+            router.refresh();
+        } catch (error) {
+            console.error('Failed to delete recent searches:', error);
+            setLookups(previous);
+            alert(t('deleteSearchFailed'));
+        }
+    };
+
+    const handleClearLookups = () => {
+        if (!confirmClear) {
+            setConfirmClear(true);
+            return;
+        }
+        setConfirmClear(false);
+        removeLookups(lookups.map(l => l.word_id || ''));
+    };
 
     const playAudio = (text: string, url?: string) => {
         if (url) {
@@ -306,29 +373,96 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                     </div>
 
                     <div className="space-y-4">
-                        <div className="px-2">
-                            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--foreground-40)]">Recent Searches</h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2 px-2">
-                            {recentLookups && recentLookups.length > 0 ? (
-                                recentLookups.map((lookup) => (
+                        <div className="px-2 flex items-center justify-between gap-2 min-h-[2rem]">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--foreground-40)]">{t('recentSearches')}</h3>
+                            {lookups.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                    {editingLookups && (
+                                        <button
+                                            type="button"
+                                            onClick={() => { setEditingLookups(false); setConfirmClear(false); }}
+                                            className="px-3 py-1 rounded-lg text-xs font-bold text-[var(--indigo-text)] hover:bg-[var(--foreground-10)] transition-colors"
+                                        >
+                                            {t('doneEditing')}
+                                        </button>
+                                    )}
                                     <button
-                                        key={lookup.id}
-                                        onClick={() => setSelectedWord({
-                                            id: lookup.id,
-                                            created_at: lookup.created_at,
-                                            next_review_at: '',
-                                            dictionary: lookup.dictionary
-                                        })}
-                                        className="px-4 py-2 bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-xl text-sm hover:bg-[var(--foreground-20)] transition-colors"
+                                        type="button"
+                                        onClick={handleClearLookups}
+                                        onBlur={() => setConfirmClear(false)}
+                                        aria-label={t('clearSearches')}
+                                        title={t('clearSearches')}
+                                        className={cn(
+                                            "flex items-center gap-1.5 rounded-lg transition-colors",
+                                            confirmClear
+                                                ? "px-3 py-1 bg-red-500/15 text-red-500 text-xs font-bold"
+                                                : "p-1.5 text-[var(--foreground-40)] hover:text-red-500 hover:bg-red-500/10"
+                                        )}
                                     >
-                                        {formatWord(lookup.dictionary.word, useCapitalCase)}
+                                        <Trash2 size={16} />
+                                        {confirmClear && <span>{t('clearSearchesConfirm')}</span>}
                                     </button>
-                                ))
-                            ) : (
-                                <p className="text-xs text-[var(--foreground-20)] italic px-2">No recent searches</p>
+                                </div>
                             )}
                         </div>
+                        <div className="flex flex-wrap gap-2 px-2">
+                            {lookups.length > 0 ? (
+                                lookups.map((lookup) => (
+                                    <div key={lookup.id} className="relative">
+                                        <button
+                                            type="button"
+                                            onPointerDown={startLongPress}
+                                            onPointerMove={moveLongPress}
+                                            onPointerUp={cancelLongPress}
+                                            onPointerLeave={cancelLongPress}
+                                            onPointerCancel={cancelLongPress}
+                                            onContextMenu={(e) => e.preventDefault()}
+                                            onClick={() => {
+                                                // A long press only enters edit mode; don't also open the word
+                                                if (longPressFired.current) {
+                                                    longPressFired.current = false;
+                                                    return;
+                                                }
+                                                if (editingLookups) {
+                                                    removeLookups([lookup.word_id || '']);
+                                                    return;
+                                                }
+                                                setSelectedWord({
+                                                    id: lookup.id,
+                                                    created_at: lookup.created_at,
+                                                    next_review_at: '',
+                                                    dictionary: lookup.dictionary
+                                                });
+                                            }}
+                                            style={{ WebkitTouchCallout: 'none' }}
+                                            className={cn(
+                                                "px-4 py-2 bg-[var(--foreground-10)] border border-[var(--card-border)] rounded-xl text-sm transition-colors select-none",
+                                                editingLookups
+                                                    ? "pr-8 border-red-500/30 hover:bg-red-500/10"
+                                                    : "hover:bg-[var(--foreground-20)]"
+                                            )}
+                                            aria-label={editingLookups ? t('removeSearch', { word: lookup.dictionary.word }) : undefined}
+                                        >
+                                            {formatWord(lookup.dictionary.word, useCapitalCase)}
+                                        </button>
+                                        {editingLookups && (
+                                            <X
+                                                size={14}
+                                                aria-hidden="true"
+                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-red-500 pointer-events-none"
+                                            />
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-xs text-[var(--foreground-20)] italic px-2">{t('noRecentSearches')}</p>
+                            )}
+                        </div>
+                        {lookups.length > 0 && (
+                            <p className="text-[0.625rem] text-[var(--foreground-20)] px-2">
+                                {editingLookups ? t('tapToRemoveHint') : t('longPressHint')}
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-0.5 px-2 pt-4">

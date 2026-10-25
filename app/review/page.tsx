@@ -42,7 +42,7 @@ export default async function ReviewPage() {
     const sortedWords = (userWords || [])
         .map(uw => ({
             ...uw,
-            priority: calculatePriority(uw.times_seen, new Date(uw.next_review_at), uw.memory_score)
+            priority: calculatePriority(uw.times_seen, new Date(uw.next_review_at), uw.memory_score, uw.last_reviewed_at)
         }))
         .sort((a, b) => b.priority - a.priority);
 

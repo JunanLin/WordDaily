@@ -17,6 +17,11 @@
   --indigo-text: #818cf8;
   /* indigo-400 */
 
+  /* Review ratings - Dark Mode (400 shades) */
+  --rating-mastered-text: #34d399;
+  --rating-review-text: #fbbf24;
+  --rating-forgot-text: #f87171;
+
   /* POS Tags - Dark Mode */
   --pos-noun-bg: rgba(59, 130, 246, 0.2);
   --pos-noun-text: #93c5fd;
@@ -49,6 +54,11 @@
   --modal-bg: #ffffff;
   --indigo-text: #4f46e5;
   /* indigo-600 */
+
+  /* Review ratings - Light Mode (700 shades for contrast on white) */
+  --rating-mastered-text: #047857;
+  --rating-review-text: #b45309;
+  --rating-forgot-text: #b91c1c;
 
   /* POS Tags - Light Mode */
   --pos-noun-bg: #dbeafe;

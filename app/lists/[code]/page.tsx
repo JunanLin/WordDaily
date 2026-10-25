@@ -34,6 +34,7 @@ export default async function WordListDetailPage({ params }: PageProps) {
             .from('user_words')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', user.id)
+            .lt('memory_score', 10)
             .lte('next_review_at', new Date().toISOString())
             .in('word_id', (
                 await supabase

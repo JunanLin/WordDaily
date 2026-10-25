@@ -4,13 +4,18 @@
 declare let self: ServiceWorkerGlobalScope;
 
 // To disable all console logs in production, you can set this to false
-const debug = true;
+const debug = false;
 
 self.addEventListener('push', (event) => {
     if (debug) console.log('[Service Worker] Push Received.');
 
+    // iOS requires every push to show a notification, or it may revoke the subscription.
     if (!event.data) {
         if (debug) console.log('[Service Worker] Push event but no data');
+        event.waitUntil(self.registration.showNotification('WordDaily', {
+            body: 'You have a new notification!',
+            icon: '/icons/icon-192x192.png',
+        }));
         return;
     }
 
@@ -44,16 +49,22 @@ self.addEventListener('notificationclick', (event) => {
 
     event.notification.close();
 
-    const urlToOpen = event.notification.data?.url || '/';
+    // client.url is absolute, so resolve the (relative) target before comparing.
+    const urlToOpen = new URL(event.notification.data?.url || '/', self.location.origin).href;
 
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            // Check if there is already a window open and focus it of not
-            for (let i = 0; i < windowClients.length; i++) {
-                const client = windowClients[i];
-                if (client.url === urlToOpen && 'focus' in client) {
-                    return client.focus();
-                }
+            // Focus a window already showing the target, else reuse any open app window
+            const exact = windowClients.find((client) => client.url === urlToOpen);
+            if (exact && 'focus' in exact) {
+                return exact.focus();
+            }
+            const anyClient = windowClients.find((client) => new URL(client.url).origin === self.location.origin);
+            if (anyClient && 'navigate' in anyClient) {
+                // navigate() rejects for windows this worker doesn't control; fall back to a new window
+                return anyClient.navigate(urlToOpen)
+                    .then((client) => (client || anyClient).focus())
+                    .catch(() => self.clients.openWindow && self.clients.openWindow(urlToOpen));
             }
             // If not, then open a new window
             if (self.clients.openWindow) {

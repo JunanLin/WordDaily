@@ -1,14 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { Volume2, ChevronRight, CheckCircle2, Loader2, RotateCcw, XCircle, Info } from 'lucide-react';
 import { submitReview } from '@/lib/actions/review';
 import confetti from 'canvas-confetti';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { formatWord } from '@/lib/utils/format';
+import type { ReviewRating } from '@/lib/services/sm2';
+
+/** Max times a forgotten word is requeued within one session. */
+const MAX_REQUEUES_PER_WORD = 2;
 
 interface Example {
     example_en: string;
@@ -73,14 +77,41 @@ const parseExamples = (detail: any) => {
 
 export default function ReviewSessionClient({ words: initialWords, useCapitalCase = false }: ReviewSessionClientProps) {
     const t = useTranslations('review');
-    const [words] = useState(initialWords);
+    // Session queue: forgotten words are appended again so they're reviewed more often.
+    const [words, setWords] = useState(initialWords);
+    const [requeueCounts, setRequeueCounts] = useState<Record<string, number>>({});
     const [currentIndex, setCurrentIndex] = useState(0);
     const [step, setStep] = useState<'STUDY' | 'REVEAL' | 'SCORE'>('STUDY');
-    const [score, setScore] = useState(10);
+    const [rating, setRating] = useState<ReviewRating | null>(null);
     const [loading, setLoading] = useState(false);
     const [finished, setFinished] = useState(false);
+    const [submitError, setSubmitError] = useState(false);
     const [isMeaningsExpanded, setIsMeaningsExpanded] = useState(false);
     const router = useRouter();
+    const submitRef = useRef<() => void>(() => {});
+
+    // Keyboard shortcuts on the rating step: 1 = mastered, 2 = needs review, 3 = forgot, Enter = continue
+    useEffect(() => {
+        if (step !== 'SCORE') return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            if (e.key === '1') setRating('mastered');
+            else if (e.key === '2') setRating('review');
+            else if (e.key === '3') setRating('forgot');
+            else if (e.key === 'Enter') {
+                // Leave Enter alone on links/other controls; only handle it when nothing
+                // specific is focused or focus is on a rating button.
+                const onBody = !target || target === document.body;
+                if (!onBody && !target.closest('[data-rating-group]')) return;
+                e.preventDefault();
+                submitRef.current();
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [step]);
 
     // Reset due count in navigation when session is empty or finished
     useEffect(() => {
@@ -116,7 +147,7 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                     <CheckCircle2 size={48} />
                 </motion.div>
                 <h2 className="text-3xl font-bold font-outfit">{t('sessionComplete')}</h2>
-                <p className="text-[var(--foreground-40)]">{t('mastered')}</p>
+                <p className="text-[var(--foreground-40)]">{t('sessionDoneDesc')}</p>
                 <button
                     onClick={() => router.push('/')}
                     className="btn-primary mt-4"
@@ -137,15 +168,32 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
     }
 
 
-    const handleSubmit = async () => {
-        setLoading(true);
-        try {
-            await submitReview(currentWord.id, score, 'EN_TO_CN');
+    // A requeued card is the same object appended later in the queue.
+    const isRetry = words.indexOf(currentWord) !== currentIndex;
+    // Only requeue when other cards remain, so the word really comes back "later" rather than immediately.
+    const willRequeue = rating === 'forgot'
+        && currentIndex + 1 < total
+        && (requeueCounts[currentWord.id] || 0) < MAX_REQUEUES_PER_WORD;
 
-            if (currentIndex + 1 < total) {
+    const handleSubmit = async () => {
+        if (!rating || loading) return;
+        setLoading(true);
+        setSubmitError(false);
+        try {
+            await submitReview(currentWord.id, rating, 'EN_TO_CN', isRetry);
+
+            // Forgot → show the word again later in this session
+            let nextTotal = total;
+            if (willRequeue) {
+                setWords(prev => [...prev, currentWord]);
+                setRequeueCounts(prev => ({ ...prev, [currentWord.id]: (prev[currentWord.id] || 0) + 1 }));
+                nextTotal += 1;
+            }
+
+            if (currentIndex + 1 < nextTotal) {
                 setCurrentIndex(currentIndex + 1);
                 setStep('STUDY');
-                setScore(10);
+                setRating(null);
                 setIsMeaningsExpanded(false);
             } else {
                 setFinished(true);
@@ -161,10 +209,51 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
             }
         } catch (error) {
             console.error(error);
+            setSubmitError(true);
         } finally {
             setLoading(false);
         }
     };
+
+    submitRef.current = handleSubmit;
+
+    const ratingOptions: {
+        value: ReviewRating;
+        label: string;
+        desc: string;
+        shortcut: string;
+        Icon: typeof CheckCircle2;
+        active: string;
+        idle: string;
+    }[] = [
+        {
+            value: 'mastered',
+            label: t('ratingMastered'),
+            desc: t('ratingMasteredDesc'),
+            shortcut: '1',
+            Icon: CheckCircle2,
+            active: 'bg-emerald-500/15 border-emerald-500/60 text-[var(--rating-mastered-text)] ring-2 ring-emerald-500/30',
+            idle: 'hover:border-emerald-500/40 hover:text-[var(--rating-mastered-text)]',
+        },
+        {
+            value: 'review',
+            label: t('ratingReview'),
+            desc: t('ratingReviewDesc'),
+            shortcut: '2',
+            Icon: RotateCcw,
+            active: 'bg-amber-500/15 border-amber-500/60 text-[var(--rating-review-text)] ring-2 ring-amber-500/30',
+            idle: 'hover:border-amber-500/40 hover:text-[var(--rating-review-text)]',
+        },
+        {
+            value: 'forgot',
+            label: t('ratingForgot'),
+            desc: t('ratingForgotDesc'),
+            shortcut: '3',
+            Icon: XCircle,
+            active: 'bg-red-500/15 border-red-500/60 text-[var(--rating-forgot-text)] ring-2 ring-red-500/30',
+            idle: 'hover:border-red-500/40 hover:text-[var(--rating-forgot-text)]',
+        },
+    ];
 
     const parseExchange = (exchange: string) => {
         if (!exchange) return [];
@@ -348,45 +437,54 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                     <div className="text-[var(--foreground-40)] text-sm">{t('howEasy')}</div>
                                 </div>
 
-                                <div className="space-y-6 pt-6 bg-[var(--foreground-10)] p-6 rounded-2xl border border-[var(--card-border)]">
-                                    <div className="flex justify-between items-end">
-                                        <div className="text-left">
-                                            <div className="text-[0.75rem] font-bold text-[var(--foreground-20)] uppercase tracking-widest mb-1">{t('forgotten')}</div>
-                                            <span className={cn("text-xl font-bold transition-colors", score < 4 ? "text-red-400" : "text-[var(--foreground-10)]")}>0</span>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-[0.75rem] font-bold text-[var(--indigo-text)] uppercase tracking-widest mb-1">{t('score')}</div>
-                                            <span className="text-4xl font-black text-[rgb(var(--foreground-rgb))]">{score}</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-[0.75rem] font-bold text-[var(--foreground-20)] uppercase tracking-widest mb-1">{t('perfect')}</div>
-                                            <span className={cn("text-xl font-bold transition-colors", score === 10 ? "text-green-400" : "text-[var(--foreground-10)]")}>10</span>
-                                        </div>
+                                <div className="space-y-4 bg-[var(--foreground-10)] p-4 sm:p-6 rounded-2xl border border-[var(--card-border)]">
+                                    <div role="group" data-rating-group aria-label={t('howEasy')} className="grid grid-cols-3 gap-2 sm:gap-3">
+                                        {ratingOptions.map(({ value, label, desc, shortcut, Icon, active, idle }) => {
+                                            const selected = rating === value;
+                                            return (
+                                                <button
+                                                    key={value}
+                                                    type="button"
+                                                    aria-pressed={selected}
+                                                    aria-keyshortcuts={shortcut}
+                                                    onClick={() => setRating(value)}
+                                                    className={cn(
+                                                        "relative flex flex-col items-center justify-center gap-1.5 px-2 py-4 rounded-2xl border transition-all active:scale-95",
+                                                        selected
+                                                            ? active
+                                                            : cn("bg-[var(--modal-bg)] border-[var(--card-border)] text-[rgb(var(--foreground-rgb))]", idle)
+                                                    )}
+                                                >
+                                                    <span aria-hidden="true" className="absolute top-1.5 right-2 text-[0.625rem] font-bold text-[var(--foreground-20)] hidden sm:block">{shortcut}</span>
+                                                    <Icon size={22} />
+                                                    <span className="text-sm font-black">{label}</span>
+                                                    <span className="text-[0.625rem] font-medium leading-tight opacity-90">{desc}</span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="10"
-                                        step="1"
-                                        value={score}
-                                        onChange={(e) => setScore(parseInt(e.target.value))}
-                                        className="w-full h-3 bg-[var(--foreground-20)] rounded-full appearance-none cursor-pointer accent-indigo-500"
-                                    />
 
-                                    <div className="h-10 flex items-center justify-center">
+                                    <div className="flex items-start gap-2 text-left text-[0.75rem] text-[var(--foreground-40)] leading-relaxed">
+                                        <Info size={14} className="shrink-0 mt-0.5 text-[var(--indigo-text)]" />
+                                        <p>{t('ratingReminder')}</p>
+                                    </div>
+
+                                    <div className="min-h-[1.25rem] flex items-center justify-center">
                                         <AnimatePresence>
-                                            {score === 10 && (
+                                            {willRequeue && (
                                                 <motion.p
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
-                                                    className="text-[0.75rem] text-green-600/90 font-medium italic leading-relaxed"
+                                                    className="text-[0.75rem] text-[var(--rating-forgot-text)] font-medium italic"
                                                 >
-                                                    {t('memoryScore10Hint')}
+                                                    {t('ratingRequeued')}
                                                 </motion.p>
                                             )}
                                         </AnimatePresence>
                                     </div>
+
+                                    <p className="text-[0.625rem] text-[var(--foreground-20)] hidden sm:block">{t('ratingShortcutHint')}</p>
                                 </div>
 
                                 {parseExamples(currentWord.dictionary.detail).length > 0 && (
@@ -429,15 +527,20 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                         <CheckCircle2 size={20} className="group-hover:scale-110 transition-transform" />
                     </button>
                 )}
+                {step === 'SCORE' && submitError && (
+                    <p role="alert" className="text-center text-[0.75rem] font-medium text-[var(--rating-forgot-text)]">
+                        {t('submitError')}
+                    </p>
+                )}
                 {step === 'SCORE' && (
                     <button
                         onClick={handleSubmit}
-                        disabled={loading}
-                        className="btn-primary w-full py-6 flex items-center justify-center gap-2 group bg-gradient-to-r from-indigo-600 to-emerald-600 border-none"
+                        disabled={loading || !rating}
+                        className="btn-primary w-full py-6 flex items-center justify-center gap-2 group bg-gradient-to-r from-indigo-600 to-emerald-600 border-none disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? <Loader2 className="animate-spin" size={24} /> : (
                             <>
-                                {t('nextWord')}
+                                {rating ? t('nextWord') : t('selectRatingFirst')}
                                 <span className="group-hover:translate-x-1 transition-transform">
                                     <ChevronRight size={24} />
                                 </span>

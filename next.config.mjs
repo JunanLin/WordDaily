@@ -8,7 +8,7 @@ const withPWA = withPWAInit({
     disable: false, // Enabled in dev to allow testing push notifications
     register: true,
     skipWaiting: true,
-    customWorkerDir: "worker",
+    customWorkerSrc: "worker",
 });
 
 /** @type {import('next').NextConfig} */

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Bell, Clock, Globe, Save, Loader2, SendHorizonal, Sun, Moon, Type } from 'lucide-react';
 import { updateUserSettings, savePushSubscription, deletePushSubscription } from '@/lib/actions/user-settings';
 import { cn } from '@/lib/utils';
-import { subscribeToPush, unsubscribeFromPush } from '@/lib/push-notifications';
+import { subscribeToPush, unsubscribeFromPush, getCurrentSubscription, isPushSupported } from '@/lib/push-notifications';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -22,6 +22,10 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
     const t = useTranslations('settings');
     const [loading, setLoading] = useState(false);
     const [testLoading, setTestLoading] = useState(false);
+    const [pushBusy, setPushBusy] = useState(false);
+    // True when notifications are on for the account but this device has no push subscription
+    // (new phone, app re-added to the Home Screen, browser data cleared, ...).
+    const [deviceMissing, setDeviceMissing] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
     const [form, setForm] = useState({
@@ -38,6 +42,80 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
         const fontSize = document.cookie.match(/(^|;)\s*NEXT_FONT_SIZE\s*=\s*([^;]+)/)?.[2] || 'standard';
         setForm(prev => ({ ...prev, theme, fontSize }));
     }, []);
+
+    // Reconcile this device with the account setting: re-upload an existing subscription
+    // (idempotent upsert) or flag that this device still needs to be enabled.
+    useEffect(() => {
+        if (!profile.notifications_enabled || !isPushSupported()) return;
+        let cancelled = false;
+        getCurrentSubscription()
+            .then(async (sub) => {
+                if (cancelled) return;
+                const subJson = sub?.toJSON();
+                if (sub && Notification.permission === 'granted' && subJson?.endpoint && subJson.keys?.p256dh && subJson.keys?.auth) {
+                    await savePushSubscription({
+                        endpoint: subJson.endpoint,
+                        keys: { p256dh: subJson.keys.p256dh, auth: subJson.keys.auth }
+                    });
+                } else {
+                    setDeviceMissing(true);
+                }
+            })
+            .catch(() => !cancelled && setDeviceMissing(true));
+        return () => { cancelled = true; };
+    }, [profile.notifications_enabled]);
+
+    const enablePush = async () => {
+        setPushBusy(true);
+        setStatus(null);
+        try {
+            const { subscription, replacedEndpoint } = await subscribeToPush(t);
+            const subJson = subscription.toJSON();
+            if (!subJson.endpoint || !subJson.keys?.p256dh || !subJson.keys?.auth) {
+                throw new Error(t('pushFailed'));
+            }
+            await savePushSubscription({
+                endpoint: subJson.endpoint,
+                keys: { p256dh: subJson.keys.p256dh, auth: subJson.keys.auth }
+            });
+            if (replacedEndpoint && replacedEndpoint !== subJson.endpoint) {
+                await deletePushSubscription(replacedEndpoint).catch(() => {});
+            }
+            // Persist immediately: the reminder cron only targets users with notifications_enabled.
+            await updateUserSettings({ notifications_enabled: true });
+            setForm(f => ({ ...f, notifications_enabled: true }));
+            setDeviceMissing(false);
+        } catch (err) {
+            console.error('Push subscription failed:', err);
+            const message = err instanceof Error ? err.message : t('pushError');
+            setStatus({ type: 'error', message });
+        } finally {
+            setPushBusy(false);
+        }
+    };
+
+    const disablePush = async () => {
+        setPushBusy(true);
+        setStatus(null);
+        try {
+            const endpoint = await unsubscribeFromPush();
+            if (endpoint) {
+                await deletePushSubscription(endpoint);
+            }
+        } catch (err) {
+            console.error('Failed to unsubscribe:', err);
+        }
+        try {
+            await updateUserSettings({ notifications_enabled: false });
+            setForm(f => ({ ...f, notifications_enabled: false }));
+            setDeviceMissing(false);
+        } catch (err) {
+            console.error('Failed to save notification setting:', err);
+            setStatus({ type: 'error', message: t('error') });
+        } finally {
+            setPushBusy(false);
+        }
+    };
 
     const updateAppearance = (key: 'theme' | 'fontSize', value: string) => {
         setForm(prev => ({ ...prev, [key]: value }));
@@ -76,10 +154,24 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
         setTestLoading(true);
         setStatus(null);
         try {
-            const res = await fetch('/api/notifications/test', { method: 'POST' });
+            // Test this device specifically, so another registered device can't mask a failure here.
+            const sub = await getCurrentSubscription().catch(() => null);
+            if (!sub) {
+                setDeviceMissing(true);
+                throw new Error(t('pushDeviceMissing'));
+            }
+            const res = await fetch('/api/notifications/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ endpoint: sub.endpoint }),
+            });
             const data = await res.json();
 
             if (!res.ok) {
+                if (data.code === 'device_not_registered') {
+                    setDeviceMissing(true);
+                    throw new Error(t('pushDeviceMissing'));
+                }
                 throw new Error(data.error || t('testNotificationError'));
             }
 
@@ -220,45 +312,13 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
                         </div>
                         <button
                             type="button"
-                            onClick={async () => {
-                                const newVal = !form.notifications_enabled;
-                                setForm({ ...form, notifications_enabled: newVal });
-                                setStatus(null);
-
-                                if (newVal) {
-                                    try {
-                                        const sub = await subscribeToPush(t);
-                                        if (sub) {
-                                            const subJson = sub.toJSON();
-                                            if (subJson.endpoint && subJson.keys?.p256dh && subJson.keys?.auth) {
-                                                await savePushSubscription({
-                                                    endpoint: subJson.endpoint,
-                                                    keys: {
-                                                        p256dh: subJson.keys.p256dh,
-                                                        auth: subJson.keys.auth
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    } catch (err) {
-                                        console.error('Push subscription failed:', err);
-                                        const message = err instanceof Error ? err.message : t('pushError');
-                                        setStatus({ type: 'error', message });
-                                        setForm(f => ({ ...f, notifications_enabled: false }));
-                                    }
-                                } else {
-                                    try {
-                                        const endpoint = await unsubscribeFromPush();
-                                        if (endpoint) {
-                                            await deletePushSubscription(endpoint);
-                                        }
-                                    } catch (err) {
-                                        console.error('Failed to unsubscribe:', err);
-                                    }
-                                }
-                            }}
+                            role="switch"
+                            aria-checked={form.notifications_enabled}
+                            aria-label={t('notifications')}
+                            disabled={pushBusy}
+                            onClick={() => (form.notifications_enabled ? disablePush() : enablePush())}
                             className={cn(
-                                "w-11 h-6 rounded-full transition-colors relative",
+                                "w-11 h-6 rounded-full transition-colors relative disabled:opacity-50",
                                 form.notifications_enabled ? "bg-emerald-500" : "bg-[var(--foreground-20)]"
                             )}
                         >
@@ -271,6 +331,20 @@ export default function SettingsForm({ profile }: SettingsFormProps) {
 
                     {form.notifications_enabled && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                            {deviceMissing && (
+                                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2">
+                                    <p className="text-xs text-[rgb(var(--foreground-rgb))]">{t('pushDeviceMissing')}</p>
+                                    <button
+                                        type="button"
+                                        onClick={enablePush}
+                                        disabled={pushBusy}
+                                        className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-amber-500/20 text-sm font-bold disabled:opacity-50"
+                                    >
+                                        {pushBusy ? <Loader2 className="animate-spin" size={16} /> : <Bell size={16} />}
+                                        {t('pushEnableOnDevice')}
+                                    </button>
+                                </div>
+                            )}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2 flex flex-col items-center sm:items-start text-center sm:text-left">
                                     <div className="flex items-center gap-2 text-[var(--foreground-muted)]">
