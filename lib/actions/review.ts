@@ -5,12 +5,7 @@ import { updateSpacedRepetition, isReviewRating, ratingToScore, type ReviewRatin
 import { revalidatePath } from 'next/cache'
 import { validateSession } from '@/lib/security'
 
-export async function submitReview(
-    userWordId: string,
-    rating: ReviewRating,
-    direction: 'EN_TO_CN' | 'CN_TO_EN',
-    isRetry = false
-) {
+export async function submitReview(userWordId: string, rating: ReviewRating, direction: 'EN_TO_CN' | 'CN_TO_EN') {
     // Server actions receive untrusted input: validate before touching the DB.
     if (!isReviewRating(rating)) throw new Error('Invalid rating')
     if (direction !== 'EN_TO_CN' && direction !== 'CN_TO_EN') throw new Error('Invalid direction')
@@ -42,8 +37,7 @@ export async function submitReview(
             ease_factor: userWord.ease_factor,
             add_count: userWord.times_seen // Using times_seen as proxy for add_count
         },
-        rating,
-        { isRetry: isRetry === true }
+        rating
     )
 
     // 3. Update user_words
@@ -55,9 +49,8 @@ export async function submitReview(
             ease_factor,
             interval_days,
             repetition_count,
-            // In-session repeats of a forgotten word are not counted as extra sightings
-            times_seen: isRetry === true ? userWord.times_seen : userWord.times_seen + 1,
-            memory_score: score // mastered=10 (excluded by memory_score < 10 filters), review=5, forgot=0
+            times_seen: userWord.times_seen + 1, // Increment times_seen
+            memory_score: score // 已掌握=10 (excluded by memory_score < 10 filters), 不太熟=5, 不认识=0
         })
         .eq('id', userWordId)
         .eq('user_id', user.id)

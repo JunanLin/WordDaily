@@ -3,8 +3,8 @@ import { differenceInDays } from 'date-fns';
 /**
  * Self-assessment ratings shown in the review session.
  * - mastered (已掌握): word is removed from the review list.
- * - review   (需复习): remembered but shaky; stays in rotation with SM-2-like growth.
- * - forgot   (忘记了): reset; reviewed again very soon (and requeued in-session).
+ * - review   (不太熟): remembered but shaky; follows REVIEW_STEPS_DAYS, then grows by ease.
+ * - forgot   (不认识): restarts the same steps, slightly sooner (FORGOT_FIRST_HOURS).
  */
 export const REVIEW_RATINGS = ['mastered', 'review', 'forgot'] as const;
 export type ReviewRating = typeof REVIEW_RATINGS[number];
@@ -34,16 +34,24 @@ export const FORGOT_SCORE_THRESHOLD = 3;
 const MIN_EASE = 1.3;
 const MAX_EASE = 3.0;
 const DEFAULT_EASE = 2.5;
-/** Cap for "needs review" words so they stay in rotation. */
-const REVIEW_MAX_INTERVAL_DAYS = 60;
-/** Ease change for "needs review" (slight penalty). */
+/**
+ * Fixed early schedule for "不太熟" (days until the next review, by repetition_count).
+ * Dense at first so new/shaky words are seen often; afterwards the gap grows by ease.
+ */
+const REVIEW_STEPS_DAYS = [1, 2, 3, 5, 8, 13];
+/** Cap for "不太熟" words so they stay in rotation. */
+const REVIEW_MAX_INTERVAL_DAYS = 30;
+/** Ease change for "不太熟" (slight penalty; only affects gaps after the fixed steps). */
 const REVIEW_EASE_DELTA = -0.05;
-/** Ease change for "forgot" (SM-2 style penalty). */
-const FORGOT_EASE_DELTA = -0.2;
+/** Ease change for "不认识" (SM-2 style penalty). */
+const FORGOT_EASE_DELTA = -0.15;
 /** Ease change for "mastered". */
 const MASTERED_EASE_DELTA = 0.1;
-/** A forgotten word becomes due again after this many hours. */
-const FORGOT_RETRY_HOURS = 4;
+/**
+ * "不认识" restarts the 不太熟 steps from the beginning, but its first review comes a bit
+ * sooner than 不太熟's first step (1 day).
+ */
+const FORGOT_FIRST_HOURS = 12;
 /** Minimum interval used for next_review_at of a mastered word (it is excluded anyway). */
 const MASTERED_MIN_INTERVAL_DAYS = 30;
 /** Upper bound for the frequently-added shortening divisor, so it never collapses intervals. */
@@ -61,13 +69,10 @@ export interface SM2Result {
  * Updates spaced repetition values based on the user's 3-option rating.
  * @param word Current word state (repetition_count, interval_days, ease_factor, add_count).
  * @param rating 'mastered' | 'review' | 'forgot'
- * @param options.isRetry True when this is an in-session repeat of a word just marked "forgot";
- *        the ease penalty was already applied, so it is not applied again.
  */
 export function updateSpacedRepetition(
     word: { repetition_count: number, interval_days: number, ease_factor: number, add_count?: number },
-    rating: ReviewRating,
-    options: { isRetry?: boolean } = {}
+    rating: ReviewRating
 ): SM2Result {
     let repetition_count = word.repetition_count || 0;
     let interval_days = word.interval_days || 0;
@@ -77,41 +82,38 @@ export function updateSpacedRepetition(
     const nextReviewAt = new Date(now);
 
     if (rating === 'forgot') {
-        // Reset learning, penalise ease, and bring the word back within a few hours.
+        // Restart the 不太熟 steps, penalise ease, and review again a little sooner than step 1.
         repetition_count = 0;
         interval_days = 0;
-        if (!options.isRetry) ease_factor = Math.max(MIN_EASE, ease_factor + FORGOT_EASE_DELTA);
-        nextReviewAt.setHours(nextReviewAt.getHours() + FORGOT_RETRY_HOURS);
-    } else {
-        if (repetition_count === 0) {
-            interval_days = 1;
-        } else if (repetition_count === 1) {
-            interval_days = 3;
-        } else {
-            interval_days = Math.round(Math.max(interval_days, 1) * ease_factor);
-        }
-        repetition_count += 1;
-
-        let dueInDays = interval_days;
-        if (rating === 'review') {
-            if (!options.isRetry) ease_factor = Math.max(MIN_EASE, ease_factor + REVIEW_EASE_DELTA);
-            interval_days = Math.min(interval_days, REVIEW_MAX_INTERVAL_DAYS);
+        ease_factor = Math.max(MIN_EASE, ease_factor + FORGOT_EASE_DELTA);
+        nextReviewAt.setHours(nextReviewAt.getHours() + FORGOT_FIRST_HOURS);
+    } else if (rating === 'review') {
+        ease_factor = Math.max(MIN_EASE, ease_factor + REVIEW_EASE_DELTA);
+        let dueInDays: number;
+        if (repetition_count < REVIEW_STEPS_DAYS.length) {
+            interval_days = REVIEW_STEPS_DAYS[repetition_count];
             dueInDays = interval_days;
-
+        } else {
+            interval_days = Math.min(
+                REVIEW_MAX_INTERVAL_DAYS,
+                Math.round(Math.max(interval_days, REVIEW_STEPS_DAYS[REVIEW_STEPS_DAYS.length - 1]) * ease_factor)
+            );
+            dueInDays = interval_days;
             // Prioritise frequently-added/looked-up words: shorten only this due date.
             // The stored interval_days stays unshortened so the shortening never compounds.
             if (word.add_count && word.add_count > 1) {
                 const divisor = Math.min(Math.log(2 + word.add_count), MAX_ADD_COUNT_DIVISOR);
                 dueInDays = Math.max(1, Math.round(interval_days / divisor));
             }
-        } else {
-            // mastered: excluded from the review list via memory_score = 10.
-            ease_factor = Math.min(MAX_EASE, ease_factor + MASTERED_EASE_DELTA);
-            interval_days = Math.max(interval_days, MASTERED_MIN_INTERVAL_DAYS);
-            dueInDays = interval_days;
         }
-
+        repetition_count += 1;
         nextReviewAt.setDate(nextReviewAt.getDate() + dueInDays);
+    } else {
+        // mastered: excluded from the review list via memory_score = 10.
+        repetition_count += 1;
+        ease_factor = Math.min(MAX_EASE, ease_factor + MASTERED_EASE_DELTA);
+        interval_days = Math.max(interval_days, MASTERED_MIN_INTERVAL_DAYS);
+        nextReviewAt.setDate(nextReviewAt.getDate() + interval_days);
     }
 
     return {

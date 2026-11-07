@@ -11,9 +11,6 @@ import { useTranslations } from 'next-intl';
 import { formatWord } from '@/lib/utils/format';
 import type { ReviewRating } from '@/lib/services/sm2';
 
-/** Max times a forgotten word is requeued within one session. */
-const MAX_REQUEUES_PER_WORD = 2;
-
 interface Example {
     example_en: string;
     example_zh: string;
@@ -77,9 +74,7 @@ const parseExamples = (detail: any) => {
 
 export default function ReviewSessionClient({ words: initialWords, useCapitalCase = false }: ReviewSessionClientProps) {
     const t = useTranslations('review');
-    // Session queue: forgotten words are appended again so they're reviewed more often.
-    const [words, setWords] = useState(initialWords);
-    const [requeueCounts, setRequeueCounts] = useState<Record<string, number>>({});
+    const words = initialWords;
     const [currentIndex, setCurrentIndex] = useState(0);
     const [step, setStep] = useState<'STUDY' | 'REVEAL' | 'SCORE'>('STUDY');
     const [rating, setRating] = useState<ReviewRating | null>(null);
@@ -168,29 +163,14 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
     }
 
 
-    // A requeued card is the same object appended later in the queue.
-    const isRetry = words.indexOf(currentWord) !== currentIndex;
-    // Only requeue when other cards remain, so the word really comes back "later" rather than immediately.
-    const willRequeue = rating === 'forgot'
-        && currentIndex + 1 < total
-        && (requeueCounts[currentWord.id] || 0) < MAX_REQUEUES_PER_WORD;
-
     const handleSubmit = async () => {
         if (!rating || loading) return;
         setLoading(true);
         setSubmitError(false);
         try {
-            await submitReview(currentWord.id, rating, 'EN_TO_CN', isRetry);
+            await submitReview(currentWord.id, rating, 'EN_TO_CN');
 
-            // Forgot → show the word again later in this session
-            let nextTotal = total;
-            if (willRequeue) {
-                setWords(prev => [...prev, currentWord]);
-                setRequeueCounts(prev => ({ ...prev, [currentWord.id]: (prev[currentWord.id] || 0) + 1 }));
-                nextTotal += 1;
-            }
-
-            if (currentIndex + 1 < nextTotal) {
+            if (currentIndex + 1 < total) {
                 setCurrentIndex(currentIndex + 1);
                 setStep('STUDY');
                 setRating(null);
@@ -467,21 +447,6 @@ export default function ReviewSessionClient({ words: initialWords, useCapitalCas
                                     <div className="flex items-start gap-2 text-left text-[0.75rem] text-[var(--foreground-40)] leading-relaxed">
                                         <Info size={14} className="shrink-0 mt-0.5 text-[var(--indigo-text)]" />
                                         <p>{t('ratingReminder')}</p>
-                                    </div>
-
-                                    <div className="min-h-[1.25rem] flex items-center justify-center">
-                                        <AnimatePresence>
-                                            {willRequeue && (
-                                                <motion.p
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    exit={{ opacity: 0 }}
-                                                    className="text-[0.75rem] text-[var(--rating-forgot-text)] font-medium italic"
-                                                >
-                                                    {t('ratingRequeued')}
-                                                </motion.p>
-                                            )}
-                                        </AnimatePresence>
                                     </div>
 
                                     <p className="text-[0.625rem] text-[var(--foreground-20)] hidden sm:block">{t('ratingShortcutHint')}</p>
