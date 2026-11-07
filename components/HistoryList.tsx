@@ -763,7 +763,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                     )}
                                     <button
                                         onClick={() => setSelectedWord(null)}
-                                        className="btn-primary flex-1 py-4 text-sm font-bold tracking-widest uppercase shadow-2xl"
+                                        className="btn-primary shrink-0 px-5 py-4 text-sm font-bold tracking-wide uppercase shadow-2xl whitespace-nowrap"
                                     >
                                         {t('closeDetail')}
                                     </button>
