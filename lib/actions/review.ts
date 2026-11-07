@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { updateSpacedRepetition, isReviewRating, ratingToScore, type ReviewRating } from '@/lib/services/sm2'
+import { updateSpacedRepetition, isReviewRating, ratingToScore, RATING_SCORE, type ReviewRating } from '@/lib/services/sm2'
 import { revalidatePath } from 'next/cache'
 import { validateSession } from '@/lib/security'
 
@@ -66,6 +66,37 @@ export async function submitReview(userWordId: string, rating: ReviewRating, dir
     if (historyError) console.error('Failed to log review history:', historyError)
 
     revalidatePath('/review')
+    revalidatePath('/')
+    return { success: true }
+}
+
+/**
+ * Puts a word marked 已掌握 back into the review list: due now, restarting the
+ * 不太熟 steps (1, 2, 3, 5... days). Ease factor is kept.
+ */
+export async function restoreToReview(wordId: string) {
+    if (typeof wordId !== 'string' || !wordId) throw new Error('Invalid word id')
+
+    const { user, supabase } = await validateSession()
+
+    const { data, error } = await supabase
+        .from('user_words')
+        .update({
+            memory_score: RATING_SCORE.review,
+            repetition_count: 0,
+            interval_days: 0,
+            next_review_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+        .eq('word_id', wordId)
+        .gte('memory_score', 10)
+        .select('id')
+
+    if (error) throw error
+    if (!data || data.length === 0) throw new Error('Word not found or not mastered')
+
+    revalidatePath('/review')
+    revalidatePath('/history')
     revalidatePath('/')
     return { success: true }
 }

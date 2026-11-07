@@ -15,8 +15,10 @@ import {
     endOfWeek
 } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
-import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft, Volume2, HelpCircle } from 'lucide-react';
+import { ChevronRight, Trash2, Calendar as CalendarIcon, Plus, X, ChevronLeft, Volume2, HelpCircle, Check, Loader2 } from 'lucide-react';
 import { deleteUserWord, deleteRecentSearches } from '@/lib/actions/delete-word';
+import { addWordToUserList } from '@/lib/actions/word-ingestion';
+import { restoreToReview } from '@/lib/actions/review';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -36,6 +38,7 @@ interface Meaning {
 interface UserWord {
     id: string;
     word_id?: string;
+    memory_score?: number;
     created_at: string;
     next_review_at: string;
     dictionary: {
@@ -91,6 +94,7 @@ const parseExamples = (detail: any) => {
 export default function HistoryList({ history: initialHistory, recentLookups, useCapitalCase = false }: HistoryListProps) {
     const t = useTranslations('history');
     const tReview = useTranslations('review');
+    const tAdd = useTranslations('add');
     const locale = useLocale();
     const dateLocale = locale === 'zh' ? zhCN : enUS;
 
@@ -111,6 +115,40 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
     const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const longPressStart = useRef<{ x: number; y: number } | null>(null);
     const longPressFired = useRef(false);
+    const [addingWordId, setAddingWordId] = useState<string | null>(null);
+    // Words added or restored in this visit, before the server data refreshes
+    const [justAdded, setJustAdded] = useState<Set<string>>(new Set());
+
+    // history holds all of the user's words; memory_score 10 (已掌握) means out of review
+    const reviewStatus = (wordId: string): 'none' | 'inReview' | 'mastered' => {
+        if (justAdded.has(wordId)) return 'inReview';
+        const userWord = history.find(w => w.word_id === wordId);
+        if (!userWord) return 'none';
+        return (userWord.memory_score ?? 0) >= 10 ? 'mastered' : 'inReview';
+    };
+
+    const handleAddLookup = async (wordId?: string) => {
+        if (!wordId || addingWordId) return;
+        const status = reviewStatus(wordId);
+        if (status === 'inReview') return;
+        setAddingWordId(wordId);
+        try {
+            if (status === 'mastered') {
+                await restoreToReview(wordId);
+            } else {
+                const res = await addWordToUserList(wordId);
+                if (!res.success) throw new Error(res.error);
+            }
+            setJustAdded(prev => new Set(prev).add(wordId));
+            window.dispatchEvent(new CustomEvent('refresh-due-count'));
+            router.refresh();
+        } catch (error) {
+            console.error('Failed to add word to review list:', error);
+            alert(t('addToReviewFailed'));
+        } finally {
+            setAddingWordId(null);
+        }
+    };
 
     useEffect(() => {
         setLookups(recentLookups);
@@ -429,6 +467,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                                 }
                                                 setSelectedWord({
                                                     id: lookup.id,
+                                                    word_id: lookup.word_id,
                                                     created_at: lookup.created_at,
                                                     next_review_at: '',
                                                     dictionary: lookup.dictionary
@@ -595,7 +634,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                     {/* Exchange / Inflections */}
                                     {selectedWord.dictionary.exchange && (
                                         <div className="p-3 rounded-xl bg-[var(--foreground-10)] border border-[var(--card-border)]">
-                                            <p className="text-[0.625rem] font-bold text-[var(--foreground-40)] uppercase tracking-widest mb-1">Inflections</p>
+                                            <p className="text-[0.625rem] font-bold text-[var(--foreground-40)] uppercase tracking-widest mb-1">{t('inflections')}</p>
                                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
                                                 {parseExchange(selectedWord.dictionary.exchange).map((ex: any, idx: number) => (
                                                     <div key={idx} className="flex gap-2">
@@ -691,7 +730,7 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                         <div className="space-y-3 pt-4">
                                             <div className="flex items-center gap-2 px-1">
                                                 <Volume2 size={12} className="text-indigo-400" />
-                                                <span className="text-[0.625rem] font-bold text-indigo-400/60 uppercase tracking-widest">Usage Context</span>
+                                                <span className="text-[0.625rem] font-bold text-indigo-400/60 uppercase tracking-widest">{tAdd('usageContext')}</span>
                                             </div>
                                             {parseExamples(selectedWord.dictionary.detail).map((ex: any, ei: number) => (
                                                 <div key={ei} className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-1 hover:bg-indigo-500/10 transition-colors">
@@ -703,12 +742,32 @@ export default function HistoryList({ history: initialHistory, recentLookups, us
                                     )}
                                 </div>
 
-                                <button
-                                    onClick={() => setSelectedWord(null)}
-                                    className="btn-primary w-full py-4 text-sm font-bold tracking-widest uppercase flex-shrink-0 mt-auto shadow-2xl"
-                                >
-                                    Close Detail
-                                </button>
+                                <div className="flex gap-3 flex-shrink-0 mt-auto">
+                                    {selectedWord.word_id && (
+                                        reviewStatus(selectedWord.word_id) === 'inReview' ? (
+                                            <div className="flex-1 py-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-[var(--rating-mastered-text)] text-sm font-bold flex items-center justify-center gap-2">
+                                                <Check size={18} />
+                                                {t('inReviewList')}
+                                            </div>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleAddLookup(selectedWord.word_id)}
+                                                disabled={addingWordId !== null}
+                                                className="flex-1 py-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 text-[var(--indigo-text)] text-sm font-bold flex items-center justify-center gap-2 hover:bg-indigo-500/20 transition-colors disabled:opacity-50"
+                                            >
+                                                {addingWordId === selectedWord.word_id ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                                                {reviewStatus(selectedWord.word_id) === 'mastered' ? t('masteredReAdd') : t('addToReview')}
+                                            </button>
+                                        )
+                                    )}
+                                    <button
+                                        onClick={() => setSelectedWord(null)}
+                                        className="btn-primary flex-1 py-4 text-sm font-bold tracking-widest uppercase shadow-2xl"
+                                    >
+                                        {t('closeDetail')}
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </div>

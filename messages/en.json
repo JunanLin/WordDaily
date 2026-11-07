@@ -112,6 +112,10 @@
         "clearSearchesConfirm": "Clear all?",
         "removeSearch": "Remove {word}",
         "deleteSearchFailed": "Failed to delete. Please try again.",
+        "addToReview": "Add to review list",
+        "inReviewList": "Already in your review list",
+        "masteredReAdd": "Mastered · Add back to review",
+        "addToReviewFailed": "Failed to add. Please try again.",
         "showMore": "Show More ({count} remaining)",
         "backToHistory": "Back to History",
         "vocabularyArchive": "Vocabulary Archive",
@@ -120,6 +124,7 @@
         "noWordsDate": "No words found for this date.",
         "addWordsDate": "+ Add words for this day",
         "closeDetail": "Close Detail",
+        "inflections": "Inflections",
         "example": "Example",
         "usageExamples": "Usage Examples",
         "wordsCount": "{count} Words"
